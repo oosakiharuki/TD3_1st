@@ -77,7 +77,7 @@ bool EnemyLoader::ParseCSVLine(const std::string& line, EnemyData& data) {
 	return true;
 }
 
-void EnemyLoader::CreateEnemies(Camera* camera, Player* player, const std::vector<std::vector<AABB>>& obstacles) {
+void EnemyLoader::CreateEnemies(Player* player, const std::vector<std::vector<AABB>>& obstacles) {
 	// 既存の敵をクリア
 	ClearResources();
 
@@ -86,7 +86,7 @@ void EnemyLoader::CreateEnemies(Camera* camera, Player* player, const std::vecto
 		switch (data.type) {
 		case EnemyType::Normal: {
 			Enemy* enemy = new Enemy();
-			enemy->Init(camera);
+			enemy->Init();
 			enemy->SetPosition(data.position);
 			enemy->SetTarget(player);
 
@@ -100,7 +100,7 @@ void EnemyLoader::CreateEnemies(Camera* camera, Player* player, const std::vecto
 		}
 		case EnemyType::Cannon: {
 			CannonEnemy* cannon = new CannonEnemy();
-			cannon->Init(camera);
+			cannon->Init();
 			cannon->SetPosition(data.position);
 			cannon->SetPlayer(player);
 
@@ -114,7 +114,7 @@ void EnemyLoader::CreateEnemies(Camera* camera, Player* player, const std::vecto
 		}
 		case EnemyType::Spring: {
 			SpringEnemy* spring = new SpringEnemy();
-			spring->Init(camera);
+			spring->Init();
 			spring->SetPosition(data.position);
 			spring->SetPlayer(player);
 

@@ -1,14 +1,19 @@
 #include "GhostBlock.h"
+#include "MyMath.h"
+
+using namespace MyMath;
 
 GhostBlock::GhostBlock() {}
 GhostBlock::~GhostBlock() { delete model_; }
 
-void GhostBlock::Init(Camera* camera_) {
-    Camera_ = camera_;
-	model_ = Model::CreateFromOBJ("cube", true);
+void GhostBlock::Init() {
+    model_ = new Object3d();
+    model_->Initialize();
+	model_->SetModelFile("cube");
+
     worldTransform.Initialize();
     worldTransform.translation_ = { 5, 2, 3 };
-	worldTransform.TransferMatrix();
+	worldTransform.UpdateMatrix();
 }
 
 void GhostBlock::Update() {
@@ -17,7 +22,7 @@ void GhostBlock::Update() {
 
 void GhostBlock::Draw() {
     if (!isActive_) return; // 非アクティブなら描画しない
-    model_->Draw(worldTransform,*Camera_);
+    model_->Draw(worldTransform);
 }
 
 AABB GhostBlock::GetAABB() const {

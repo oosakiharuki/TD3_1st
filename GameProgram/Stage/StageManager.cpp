@@ -1,5 +1,5 @@
 #include "StageManager.h"
-#include "imgui.h"
+#include "ImGuiManager.h"
 #include <algorithm>
 #include <fstream>
 
@@ -9,8 +9,8 @@ StageManager::~StageManager() {
 	// リソースの解放
 	if (stageModel_)
 		delete stageModel_;
-	if (ground_)
-		delete ground_;
+	//if (ground_)
+	//	delete ground_;
 	if (key_)
 		delete key_;
 	if (door_)
@@ -25,12 +25,13 @@ StageManager::~StageManager() {
 	enemyList_.clear();
 }
 
-void StageManager::Initialize(Camera* camera, uint32_t textureHandle) {
-	camera_ = camera;
+void StageManager::Initialize(uint32_t textureHandle) {
 	textureHandle_ = textureHandle;
 
 	// ステージモデルの読み込み
-	stageModel_ = Model::CreateFromOBJ("stage", true);
+	stageModel_ = new Object3d();
+	stageModel_->Initialize();
+	stageModel_->SetModelFile("stage");
 
 	// 第1ステージの初期化
 	InitializeStage(1);
@@ -63,7 +64,7 @@ void StageManager::InitializeStage(int stageNumber) {
 		// 第1ステージの敵配置
 		for (int i = 0; i < 5; ++i) {
 			Enemy* enemy = new Enemy();
-			enemy->Init(camera_);
+			enemy->Init();
 			for (const auto& obstacles : allObstacles_) {
 				enemy->SetObstacleList(obstacles);
 			}
@@ -85,7 +86,7 @@ void StageManager::InitializeStage(int stageNumber) {
 		// 第2ステージの敵配置（位置を変更）
 		for (int i = 0; i < 5; ++i) {
 			Enemy* enemy = new Enemy();
-			enemy->Init(camera_);
+			enemy->Init();
 			for (const auto& obstacles : allObstacles_) {
 				enemy->SetObstacleList(obstacles);
 			}
@@ -110,7 +111,7 @@ void StageManager::InitializeStage(int stageNumber) {
 		delete cannonEnemy_;
 	}
 	cannonEnemy_ = new CannonEnemy();
-	cannonEnemy_->Init(camera_);
+	cannonEnemy_->Init();
 	for (const auto& obstacles : allObstacles_) {
 		cannonEnemy_->SetObstacleList(obstacles);
 	}
@@ -127,11 +128,11 @@ void StageManager::InitializeStage(int stageNumber) {
 	}
 
 	// Groundの再初期化
-	if (ground_) {
-		delete ground_;
-	}
-	ground_ = new Ground();
-	ground_->Init(camera_);
+	//if (ground_) {
+	//	delete ground_;
+	//}
+	//ground_ = new Ground();
+	//ground_->Init(camera_);
 
 	// 鍵とドアの初期化（第1ステージのみ）
 	if (stageNumber == 1) {
@@ -140,7 +141,7 @@ void StageManager::InitializeStage(int stageNumber) {
 			delete key_;
 		}
 		key_ = new Key();
-		key_->Init(camera_);
+		key_->Init();
 		key_->SetPlayer(player_);
 
 		// ドアの初期化
@@ -148,7 +149,7 @@ void StageManager::InitializeStage(int stageNumber) {
 			delete door_;
 		}
 		door_ = new Door();
-		door_->Init(camera_);
+		door_->Init();
 		door_->SetPlayer(player_);
 		door_->SetKey(key_);
 	} else {
@@ -251,7 +252,7 @@ void StageManager::Draw() {
 	if (stageModel_) {
 		WorldTransform worldTransform;
 		worldTransform.Initialize();
-		stageModel_->Draw(worldTransform, *camera_, textureHandle_);
+		stageModel_->Draw(worldTransform,"re");
 	}
 
 	// 敵の描画
@@ -274,9 +275,9 @@ void StageManager::Draw() {
 	}
 
 	// グラウンドの描画
-	if (ground_) {
-		ground_->Draw();
-	}
+	//if (ground_) {
+	//	ground_->Draw();
+	//}
 }
 
 void StageManager::LoadStage(const std::string& objFile) {

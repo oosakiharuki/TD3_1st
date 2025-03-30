@@ -1,5 +1,6 @@
 #pragma once
-#include "3d/WorldTransform.h"
+#include "WorldTransform.h"
+#include "Object3d.h"
 #include "AABB.h"
 #include "collision.h"
 
@@ -11,7 +12,7 @@ public:
 	~Bom();
 	void Init(Vector3 position,Vector3 velocity);
 	void Update();
-	void Draw(Camera* camera);
+	void Draw();
 	bool IsDaed() { return isDead; }
 
 	AABB GetAABB();
@@ -19,7 +20,7 @@ public:
 
 private:
 	WorldTransform worldTransform_;
-	Model* model_ = nullptr;
+	Object3d* model_ = nullptr;
 	Vector3 position_;
 	bool onGround_ = true;
 

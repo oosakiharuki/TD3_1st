@@ -1,15 +1,16 @@
 #include "SpringEnemy.h"
 #include "Player.h"
+#include "ImguiManager.h"
 
 SpringEnemy::SpringEnemy() {}
 
 SpringEnemy::~SpringEnemy() { delete model_; }
 
-void SpringEnemy::Init(Camera* camera) {
-	camera_ = camera;
+void SpringEnemy::Init() {
+	model_ = new Object3d();
+	model_->Initialize();
+	model_->SetModelFile("spring");
 	worldTransform_.Initialize();
-	// "cube"モデルを読み込み、後で専用のばねモデルに置き換え可能
-	model_ = Model::CreateFromOBJ("spring", true);
 	worldTransform_.translation_ = position;
 
 	// ばね敵用の特徴的なスケール設定（高さがあり、幅が狭い）
@@ -29,7 +30,6 @@ void SpringEnemy::SetPosition(const Vector3& pos) {
 	position = pos;
 	worldTransform_.translation_ = position;
 	// 位置を設定したら必ず行列を更新する
-	worldTransform_.TransferMatrix();
 	worldTransform_.UpdateMatrix();
 }
 
@@ -99,11 +99,10 @@ void SpringEnemy::Update() {
 	ImGui::End();
 #endif
 
-	worldTransform_.TransferMatrix();
 	worldTransform_.UpdateMatrix();
 }
 
-void SpringEnemy::Draw() { model_->Draw(worldTransform_, *camera_); }
+void SpringEnemy::Draw() { model_->Draw(worldTransform_); }
 
 AABB SpringEnemy::GetAABB() const {
 	// スケールに基づいたAABBの調整

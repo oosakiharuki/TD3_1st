@@ -1,11 +1,9 @@
 #pragma once
-#include "3d/Camera.h"
-#include "3d/Model.h"
+#include "Object3d.h"
 #include "AABB.h"
 #include "CannonEnemy.h"
 #include "Door.h"
 #include "Enemy.h"
-#include "Ground.h"
 #include "Key.h"
 #include "Player.h"
 #include <sstream>
@@ -18,7 +16,7 @@ public:
 	~StageManager();
 
 	// 初期化
-	void Initialize(Camera* camera, uint32_t textureHandle);
+	void Initialize(uint32_t textureHandle);
 
 	// 更新
 	void Update();
@@ -57,15 +55,14 @@ private:
 	void ResetPlayerPosition(int stageNumber);
 
 	// リソース関連
-	Camera* camera_ = nullptr;
 	uint32_t textureHandle_ = 0;
-	Model* stageModel_ = nullptr;
+	Object3d* stageModel_ = nullptr;
 
 	// オブジェクト管理
 	Player* player_ = nullptr;
 	std::vector<Enemy*> enemyList_;
 	CannonEnemy* cannonEnemy_ = nullptr;
-	Ground* ground_ = nullptr;
+	//Ground* ground_ = nullptr;
 	Key* key_ = nullptr;
 	Door* door_ = nullptr;
 

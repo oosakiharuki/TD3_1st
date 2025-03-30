@@ -2,19 +2,26 @@
 #include "Key.h"
 
 #ifdef _DEBUG
-#include "imgui.h"
+#include "ImGuiManager.h"
 #endif
 
 Key::Key() {}
 
 Key::~Key() { delete model_; }
 
-void Key::Init(Camera* camera) {
-	camera_ = camera;
+void Key::Init() {
+
 	worldTransform_.Initialize();
-	keyGTAudio_= Audio::GetInstance();
+
+	//まだできてない
+	//keyGTAudio_= Audio::GetInstance();
+	
+	
 	// "cube" モデルを読み込み
-	model_ = Model::CreateFromOBJ("key", true);
+
+	model_ = new Object3d();
+	model_->Initialize();
+	model_->SetModelFile("key");
 
 	// 位置を設定
 	worldTransform_.translation_ = position_;
@@ -26,7 +33,7 @@ void Key::Init(Camera* camera) {
 	worldTransform_.UpdateMatrix();
 
 	// 鍵取得音の読み込み
-	KeyAudioHandle_ = keyGTAudio_->LoadWave("./sound/key_get.wav");
+	//KeyAudioHandle_ = keyGTAudio_->LoadWave("./sound/key_get.wav");
 
 }
 
@@ -46,7 +53,7 @@ void Key::Update() {
 			isObtained_ = true;
 
 			// 鍵取得音を再生
-			keyGTAudio_->playAudio(KeyGetAudio_, KeyAudioHandle_, false, 0.5);
+			//keyGTAudio_->playAudio(KeyGetAudio_, KeyAudioHandle_, false, 0.5);
 		}
 	}
 
@@ -71,7 +78,7 @@ void Key::Update() {
 void Key::Draw() {
 	// 取得されていない場合のみ描画
 	if (!isObtained_) {
-		model_->Draw(worldTransform_, *camera_);
+		model_->Draw(worldTransform_);
 	}
 }
 

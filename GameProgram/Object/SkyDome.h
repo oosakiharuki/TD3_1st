@@ -1,6 +1,5 @@
 #pragma once
-#include "3d/Model.h"
-#include "3d/Camera.h"
+#include "3d/Object3d.h"
 #include "3d/WorldTransform.h"
 #include <assert.h>
 #include <numbers>
@@ -8,7 +7,7 @@
 class Skydome {
 
 public:
-	void Initialize(Model* model, Camera* viewProjection);
+	void Initialize();
 
 	void Update();
 
@@ -17,10 +16,8 @@ public:
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;
-	Camera* camera_ = nullptr;
-
 	// モデル
-	Model* model_ = nullptr;
+	Object3d* model_ = nullptr;
 
 	// モデルの移動速度や位置を格納する変数
 	Vector3 velocity_; // 移動速度

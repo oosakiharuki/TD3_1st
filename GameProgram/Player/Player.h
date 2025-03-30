@@ -7,7 +7,7 @@
 #include "Enemy.h"
 #include "GhostBlock.h"
 #include "Goal.h"
-#include "Mymath.h"
+#include "MyMath.h"
 #include "SpringEnemy.h"
 #include <vector>
 
@@ -90,7 +90,7 @@ private:
 
 	WorldTransform worldTransform_;
 	Camera* camera_ = nullptr;
-	Model* PlayerModel_ = nullptr;
+	Object3d* PlayerModel_ = nullptr;
 	CameraController cameraController_;
 	
 	bool onGround_ = true;

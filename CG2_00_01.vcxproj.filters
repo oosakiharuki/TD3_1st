@@ -186,9 +186,6 @@
     <ClCompile Include="GameProgram\Object\Goal.cpp">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClCompile>
-    <ClCompile Include="GameProgram\Object\Ground.cpp">
-      <Filter>ソース ファイル\GameProgram\Object</Filter>
-    </ClCompile>
     <ClCompile Include="GameProgram\Object\key.cpp">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClCompile>
@@ -202,9 +199,6 @@
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
     <ClCompile Include="GameProgram\Collision.cpp">
-      <Filter>ソース ファイル\GameProgram</Filter>
-    </ClCompile>
-    <ClCompile Include="GameProgram\FBXModel.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
   </ItemGroup>
@@ -353,9 +347,6 @@
     <ClInclude Include="GameProgram\Object\Goal.h">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClInclude>
-    <ClInclude Include="GameProgram\Object\Ground.h">
-      <Filter>ソース ファイル\GameProgram\Object</Filter>
-    </ClInclude>
     <ClInclude Include="GameProgram\Object\key.h">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClInclude>
@@ -369,9 +360,6 @@
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
     <ClInclude Include="GameProgram\Collision.h">
-      <Filter>ソース ファイル\GameProgram</Filter>
-    </ClInclude>
-    <ClInclude Include="GameProgram\FBXModel.h">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
   </ItemGroup>

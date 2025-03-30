@@ -1,8 +1,7 @@
 #pragma once
-#include "3d/Camera.h"
-#include "3d/Model.h"
+#include "Object3d.h"
 #include "Player.h"
-#include "3d/WorldTransform.h"
+#include "WorldTransform.h"
 #include "AABB.h"
 #include "CameraController.h"
 #include "Collision.h"
@@ -18,7 +17,7 @@ public:
 	Enemy();
 	~Enemy();
 
-	void Init(Camera* camera);
+	void Init();
 	void Update();
 	void Draw();
 
@@ -56,8 +55,7 @@ public:
 
 private:
 	WorldTransform worldTransform_; // Fix the error by ensuring the type is defined
-	Camera* camera_ = nullptr;
-	Model* model_ = nullptr;
+	Object3d* model_ = nullptr;
 	Vector3 position = {0, 0, -20};
 	bool onGround_ = true;
 	float velocityY_ = 0.0f;

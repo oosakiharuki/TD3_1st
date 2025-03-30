@@ -144,12 +144,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GameProgram\Enemies\CannonEnemy.cpp" />
     <ClCompile Include="GameProgram\Enemies\Enemy.cpp" />
     <ClCompile Include="GameProgram\Enemies\SpringEnemy.cpp" />
-    <ClCompile Include="GameProgram\FBXModel.cpp" />
     <ClCompile Include="GameProgram\Object\Block.cpp" />
     <ClCompile Include="GameProgram\Object\Door.cpp" />
     <ClCompile Include="GameProgram\Object\GhostBlock.cpp" />
     <ClCompile Include="GameProgram\Object\Goal.cpp" />
-    <ClCompile Include="GameProgram\Object\Ground.cpp" />
     <ClCompile Include="GameProgram\Object\key.cpp" />
     <ClCompile Include="GameProgram\Object\SkyDome.cpp" />
     <ClCompile Include="GameProgram\Player\Player.cpp" />
@@ -201,12 +199,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GameProgram\Enemies\CannonEnemy.h" />
     <ClInclude Include="GameProgram\Enemies\Enemy.h" />
     <ClInclude Include="GameProgram\Enemies\SpringEnemy.h" />
-    <ClInclude Include="GameProgram\FBXModel.h" />
     <ClInclude Include="GameProgram\Object\Block.h" />
     <ClInclude Include="GameProgram\Object\Door.h" />
     <ClInclude Include="GameProgram\Object\GhostBlock.h" />
     <ClInclude Include="GameProgram\Object\Goal.h" />
-    <ClInclude Include="GameProgram\Object\Ground.h" />
     <ClInclude Include="GameProgram\Object\key.h" />
     <ClInclude Include="GameProgram\Object\SkyDome.h" />
     <ClInclude Include="GameProgram\Player\Player.h" />

@@ -1,4 +1,7 @@
 #pragma once
+#include "WorldTransform.h"
+#include "MyMath.h"
+#include "Camera.h"
 
 class CameraController {
 public:
@@ -28,4 +31,7 @@ private:
 
 	//Vector3 cameraTranslate;
 	const WorldTransform* target_ = nullptr;
+
+	Vector3 cameraTransofrm_;
+	Vector3 cameraRotate_;
 };

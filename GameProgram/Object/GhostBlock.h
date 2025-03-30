@@ -1,11 +1,13 @@
 #pragma once
 #include "AABB.h"
+#include "WorldTransform.h"
+#include "Object3d.h"
 
 class GhostBlock {
 public:
 	GhostBlock();
 	~GhostBlock();
-	void Init(Camera* camera_);
+	void Init();
 	void Update();
     void Draw();
 
@@ -16,8 +18,7 @@ public:
 
 private:
     WorldTransform worldTransform;
-    Camera* Camera_ = nullptr;
-    Model* model_ = nullptr;
+    Object3d* model_ = nullptr;
     bool isActive_ = true; // ブロックが有効かどうか
     uint32_t texturehandle_ = 0;
 };

@@ -1,18 +1,19 @@
 #include "Door.h"
 #ifdef _DEBUG
-#include "imgui.h"
+#include "ImGuiManager.h"
 #endif
 
 Door::Door() {}
 
 Door::~Door() { delete model_; }
 
-void Door::Init(Camera* camera) {
-	camera_ = camera;
+void Door::Init() {
 	worldTransform_.Initialize();
 
 	// "cube" モデルを読み込み
-	model_ = Model::CreateFromOBJ("door", true);
+	model_ = new Object3d();
+	model_->Initialize();
+	model_->SetModelFile("door");
 
 	// 行列を更新
 	worldTransform_.UpdateMatrix();
@@ -95,7 +96,7 @@ void Door::Update() {
 #endif
 }
 
-void Door::Draw() { model_->Draw(worldTransform_, *camera_); }
+void Door::Draw() { model_->Draw(worldTransform_); }
 
 AABB Door::GetAABB() const {
 	// ドアのローカル座標：

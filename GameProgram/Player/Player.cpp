@@ -1,10 +1,12 @@
 #include "Player.h"
 #ifdef _DEBUG
-#include "imgui.h"
+#include "ImGuiManager.h"
 #endif
 
 #include <algorithm>
 #include <iostream>
+
+using namespace MyMath;
 
 Player::Player() {}
 
@@ -13,8 +15,9 @@ Player::~Player() { delete PlayerModel_; }
 void Player::Init(Camera* camera) {
 	camera_ = camera;
 	worldTransform_.Initialize();
-	// "cube" モデルを読み込み
-	PlayerModel_ = Model::CreateFromOBJ("player", true);
+	PlayerModel_ = new Object3d();
+	PlayerModel_->Initialize();
+	PlayerModel_->SetModelFile("player");
 	worldTransform_.translation_ = position;
 	block_ = new Block;
 	ghostBlock_ = new GhostBlock;
@@ -306,7 +309,6 @@ void Player::Update() {
 	ImGui::End();
 #endif
 
-	worldTransform_.TransferMatrix();
 	worldTransform_.UpdateMatrix();
 
 	cameraController_.Update(camera_, position);
@@ -401,7 +403,7 @@ void Player::Draw() {
 	}
 
 	// 通常の描画（テクスチャハンドルは使わない）
-	PlayerModel_->Draw(worldTransform_, *camera_);
+	PlayerModel_->Draw(worldTransform_);
 }
 
 void Player::SetEnemyList(const std::vector<Enemy*>& enemies) { enemyList_ = enemies; }

@@ -10,7 +10,7 @@ public:
 	~Door();
 
 	// 初期化
-	void Init(Camera* camera);
+	void Init();
 
 	// 更新
 	void Update();
@@ -51,8 +51,7 @@ public:
 
 private:
 	WorldTransform worldTransform_;
-	Camera* camera_ = nullptr;
-	Model* model_ = nullptr;
+	Object3d* model_ = nullptr;
 	Vector3 position_ = {1.5f, 0.0f, 48.592f}; // デフォルト位置（CSVから上書き可能）
 
 	// 参照

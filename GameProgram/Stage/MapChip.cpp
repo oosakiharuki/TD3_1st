@@ -14,9 +14,9 @@ bool MapChip::Init(Camera* camera, const std::string& csvFile) {
 		return false;
 	}
 	// 各ブロック用のモデルを読み込み
-	blockModel_ = Model::CreateFromOBJ("block", true);
-	block2Model_ = Model::CreateFromOBJ("block", true);
-	doorModel_ = Model::CreateFromOBJ("block", true);
+	blockModel_->SetModelFile("block");
+	block2Model_->SetModelFile("block");
+	doorModel_->SetModelFile("block");
 	return true;
 }
 
@@ -58,23 +58,22 @@ void MapChip::Draw() {
 	for (const auto& block : blocks_) {
 		worldTransform_.Initialize();
 		worldTransform_.translation_ = block.position;
-		worldTransform_.TransferMatrix();
 
 		// ブロックタイプに応じたモデルを描画
 		switch (block.type) {
 		case MapChipType::kBlock:
 			if (blockModel_) {
-				blockModel_->Draw(worldTransform_, *camera_);
+				blockModel_->Draw(worldTransform_);
 			}
 			break;
 		case MapChipType::kBlock2:
 			if (block2Model_) {
-				block2Model_->Draw(worldTransform_, *camera_);
+				block2Model_->Draw(worldTransform_);
 			}
 			break;
 		case MapChipType::kDoor:
 			if (doorModel_) {
-				doorModel_->Draw(worldTransform_, *camera_);
+				doorModel_->Draw(worldTransform_);
 			}
 			break;
 		default:

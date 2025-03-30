@@ -30,7 +30,7 @@ public:
 	bool LoadEnemyData(const std::string& csvPath);
 
 	// 読み込んだデータに基づいて敵オブジェクトを生成・初期化
-	void CreateEnemies(Camera* camera, Player* player, const std::vector<std::vector<AABB>>& obstacles);
+	void CreateEnemies(Player* player, const std::vector<std::vector<AABB>>& obstacles);
 
 	// 敵の更新
 	void Update();

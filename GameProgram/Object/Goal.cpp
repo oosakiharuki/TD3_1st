@@ -1,7 +1,9 @@
 #include "Goal.h"
-#include "Mymath.h"
-#include <base/TextureManager.h>
+#include "MyMath.h"
+#include <TextureManager.h>
+#include "Input.h"
 #include <numbers>
+#include "ImGuiManager.h"
 
 Goal::Goal() {}
 Goal::~Goal() {
@@ -9,25 +11,22 @@ Goal::~Goal() {
 	delete model_;
 }
 
-void Goal::Init(Camera* camera) {
-	camera_ = camera;
+void Goal::Init() {
 	worldTransform_.Initialize();
 
 	// モデルの読み込み
-	model_ = Model::CreateFromOBJ("goal", true);
+	model_ = new Object3d();
+	model_->Initialize();
+	model_->SetModelFile("goal");
 
 	// 勝利画面用テクスチャの読み込み
-	textureHandle = TextureManager::Load("winScene.png");
+	TextureManager::GetInstance()->LoadTexture("winScene.png");
 
-	// スプライトの作成 - nullチェックを追加
-	if (textureHandle != 0) {
-		sprite = Sprite::Create(textureHandle, {0, 0});
-	} else {
-		sprite = nullptr; // 明示的にnullに設定
-	}
+	sprite = new Sprite();
+	sprite->Initialize("winScene.png");
+	sprite->SetPosition({0, 0});
 
 	// 行列を更新
-	worldTransform_.TransferMatrix();
 	worldTransform_.UpdateMatrix();
 }
 
@@ -44,11 +43,10 @@ void Goal::Update() {
 		ImGui::End();
 #endif // _DEBUG
 	}
-	worldTransform_.TransferMatrix();
 	worldTransform_.UpdateMatrix();
 }
 
-void Goal::Draw() { model_->Draw(worldTransform_, *camera_); }
+void Goal::Draw() { model_->Draw(worldTransform_); }
 
 void Goal::Text() {
 	// isClearがtrueでスプライトが正常に初期化されている場合のみ描画

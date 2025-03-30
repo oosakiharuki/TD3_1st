@@ -6,7 +6,9 @@ Bom::~Bom() { delete model_; }
 void Bom::Init(Vector3 position, Vector3 velocity) {
 	worldTransform_.Initialize();
 	// "cube" モデルを読み込み
-	model_ = Model::CreateFromOBJ("EnemyBullet", true);
+	model_ = new Object3d();
+	model_->Initialize();
+	model_->SetModelFile("EnemyBullet");
 	position_ = position;
 	worldTransform_.translation_ = position_;
 
@@ -31,9 +33,9 @@ void Bom::Update() {
 	}
 }
 
-void Bom::Draw(Camera* camera) {
+void Bom::Draw() {
 
-	model_->Draw(worldTransform_,*camera);
+	model_->Draw(worldTransform_);
 
 }
 

@@ -1,4 +1,6 @@
 #pragma once
+#include "WorldTransform.h"
+#include "Object3d.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -40,9 +42,9 @@ private:
 	Camera* camera_ = nullptr;
 
 	// 各ブロックタイプに対応するモデル
-	Model* blockModel_ = nullptr;
-	Model* block2Model_ = nullptr;
-	Model* doorModel_ = nullptr;
+	Object3d* blockModel_ = nullptr;
+	Object3d* block2Model_ = nullptr;
+	Object3d* doorModel_ = nullptr;
 
 	// CSV から読み込んだブロック配置情報
 	std::vector<BlockData> blocks_;

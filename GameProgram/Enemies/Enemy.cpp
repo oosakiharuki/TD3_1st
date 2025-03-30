@@ -1,18 +1,21 @@
 #include "Enemy.h"
 #include "AABB.h"
 #include "Collision.h"
+#include "ImGuiManager.h"
 #include <algorithm>
 #include <iostream>
+
+using namespace MyMath;
 
 Enemy::Enemy() {}
 
 Enemy::~Enemy() { delete model_; }
 
-void Enemy::Init(Camera* camera) {
-	camera_ = camera;
+void Enemy::Init() {
 	worldTransform_.Initialize();
-	// "cube" モデルを読み込み
-	model_ = Model::CreateFromOBJ("EnemyGhost", true);
+	model_ = new Object3d();
+	model_->Initialize();
+	model_->SetModelFile("EnemyGhost");
 	worldTransform_.translation_ = position;
 }
 
@@ -120,11 +123,11 @@ void Enemy::Update() {
 	ImGui::DragFloat3("translate", &position.x);
 	ImGui::End();
 #endif
-	worldTransform_.TransferMatrix();
+
 	worldTransform_.UpdateMatrix();
 }
 
-void Enemy::Draw() { model_->Draw(worldTransform_, *camera_); }
+void Enemy::Draw() { model_->Draw(worldTransform_); }
 
 // AABBを取得するメソッドを定義
 AABB Enemy::GetAABB() const {

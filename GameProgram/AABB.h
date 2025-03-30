@@ -1,8 +1,4 @@
 #pragma once
-
-struct AABB {
-	Vector3 min;
-	Vector3 max;
-};
+#include "MyMath.h"
 
 bool IsCollisionAABB(const AABB& a, const AABB& b);

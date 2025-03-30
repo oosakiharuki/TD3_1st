@@ -33,7 +33,7 @@ public:
 	bool LoadMapData(const std::string& csvPath);
 
 	// 読み込んだデータに基づいてオブジェクトを生成・初期化
-	void CreateObjects(Camera* camera, Player* player);
+	void CreateObjects(Player* player);
 
 	// オブジェクトの更新
 	void Update();
@@ -53,7 +53,7 @@ public:
 	bool IsDoorOpened() const;
 
 	// ステージ切り替え
-	void ChangeStage(int stageNumber, Camera* camera, Player* player);
+	void ChangeStage(int stageNumber, Player* player);
 
 	void GLoadStage(std::string objFile);
 

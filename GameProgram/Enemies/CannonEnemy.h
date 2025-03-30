@@ -1,11 +1,13 @@
 #pragma once
-#include "3d/WorldTransform.h"
+#include "WorldTransform.h"
+#include "Object3d.h"
 #include "AABB.h"
 #include "collision.h"
 
-#include "Mymath.h"
+#include "MyMath.h"
 
 #include "Bom.h"
+#include "Input.h"
 
 class Player;
 
@@ -15,7 +17,7 @@ public:
 
 	~CannonEnemy();
 
-	void Init(Camera* camera);
+	void Init();
 	void Update();
 	void Draw();
 
@@ -46,8 +48,7 @@ public:
 
 private:
 	WorldTransform worldTransform_; // Fix the error by ensuring the type is defined
-	Camera* camera_ = nullptr;
-	Model* model_ = nullptr;
+	Object3d* model_ = nullptr;
 	Vector3 position = {0, 5, 30};
 	bool onGround_ = true;
 	float velocityY_ = 0.0f;

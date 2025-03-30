@@ -1,5 +1,5 @@
 #include "CameraController.h"
-#include "Mymath.h"
+#include "ImGuiManager.h"
 #include "Player.h"
 
 CameraController::CameraController() : offset_{0.0f, 5.0f, -20.0f}, pitchDeg_(10.0f) {}
@@ -16,13 +16,6 @@ void CameraController::Update(Camera* camera, const Vector3& playerPosition) {
 	if (camera == nullptr) {
 		return;
 	}
-#ifdef _DEBUG
-	ImGui::Begin("camera");
-	ImGui::DragFloat3("cameraTranslate", &camera->translation_.x);
-	ImGui::DragFloat3("cameraRotate", &camera->rotation_.x);
-	ImGui::DragFloat3("offset", &offset_.x);
-	ImGui::End();
-#endif
 
 	// 回転角をラジアンに変換
 	float pitchRad = pitchDeg_ * (3.14159265f / 180.0f);
@@ -38,16 +31,28 @@ void CameraController::Update(Camera* camera, const Vector3& playerPosition) {
 	float verticalOffset = distance * std::sin(pitchRad);
 
 	// プレイヤーを中心としたカメラ位置を計算
-	camera->translation_.x = playerPosition.x - horizontalDistance * std::sin(yawRad);
-	camera->translation_.y = playerPosition.y + 5.0f + verticalOffset;
-	camera->translation_.z = playerPosition.z - horizontalDistance * std::cos(yawRad);
+	cameraTransofrm_.x = playerPosition.x - horizontalDistance * std::sin(yawRad);
+	cameraTransofrm_.y = playerPosition.y + 5.0f + verticalOffset;
+	cameraTransofrm_.z = playerPosition.z - horizontalDistance * std::cos(yawRad);
 
 	// プレイヤーを見るようにカメラの回転を設定
-	camera->rotation_.x = pitchRad;
-	camera->rotation_.y = yawRad;
-	camera->rotation_.z = 0.0f;
+	cameraRotate_.x = pitchRad;
+	cameraRotate_.y = yawRad;
+	cameraRotate_.z = 0.0f;
+
+#ifdef _DEBUG
+	ImGui::Begin("camera");
+	ImGui::DragFloat3("cameraTranslate",  &cameraTransofrm_.x);
+	ImGui::DragFloat3("cameraRotate", &cameraRotate_.x);
+	ImGui::DragFloat3("offset", &offset_.x);
+	ImGui::End();
+#endif
 
 	// カメラ行列の更新と転送
-	camera->UpdateViewMatrix();
-	camera->TransferMatrix();
+
+	camera->SetRotate(cameraRotate_);
+	camera->SetTranslate(cameraTransofrm_);
+
+	//camera->UpdateViewMatrix();
+	//camera->TransferMatrix();
 }

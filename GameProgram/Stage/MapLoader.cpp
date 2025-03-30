@@ -88,7 +88,7 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 	return true;
 }
 
-void MapLoader::CreateObjects(Camera* camera, Player* player) {
+void MapLoader::CreateObjects(Player* player) {
 	// 既存のオブジェクトをクリア
 	ClearResources();
 
@@ -102,7 +102,7 @@ void MapLoader::CreateObjects(Camera* camera, Player* player) {
 	for (const auto& objectData : mapObjectsData_) {
 		if (objectData.type == MapObjectType::Key) {
 			Key* key = new Key();
-			key->Init(camera);
+			key->Init();
 			key->SetPosition(objectData.position);
 			key->SetPlayer(player);
 
@@ -116,13 +116,13 @@ void MapLoader::CreateObjects(Camera* camera, Player* player) {
 			keys_.push_back(key);
 		} else if (objectData.type == MapObjectType::Door) {
 			Door* door = new Door();
-			door->Init(camera);
+			door->Init();
 			door->SetPosition(objectData.position);
 			door->SetPlayer(player);
 			doors_.push_back(door);
 		} else if (objectData.type == MapObjectType::Block) {
 			Block* block = new Block();
-			block->Init(camera);
+			block->Init();
 			block->SetPosition(objectData.position);
 			blocks_.push_back(block);
 		} else if (objectData.type == MapObjectType::Goal) {
@@ -132,7 +132,7 @@ void MapLoader::CreateObjects(Camera* camera, Player* player) {
 				goal_ = nullptr;
 			}
 			goal_ = new Goal();
-			goal_->Init(camera);
+			goal_->Init();
 			goal_->SetPosition(objectData.position);
 			foundGoal = true;
 		}
@@ -242,7 +242,7 @@ void MapLoader::ClearResources() {
 	}
 }
 
-void MapLoader::ChangeStage(int stageNumber, Camera* camera, Player* player) {
+void MapLoader::ChangeStage(int stageNumber, Player* player) {
 	// 既存のオブジェクトを削除
 	ClearResources();
 
@@ -252,7 +252,7 @@ void MapLoader::ChangeStage(int stageNumber, Camera* camera, Player* player) {
 	// マップデータを読み込み
 	if (LoadMapData(csvPath)) {
 		// 新しいオブジェクトを作成
-		CreateObjects(camera, player);
+		CreateObjects(player);
 	} else {
 		std::cerr << "Failed to load map data: " << csvPath << std::endl;
 	}

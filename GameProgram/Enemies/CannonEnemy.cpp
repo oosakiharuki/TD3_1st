@@ -1,8 +1,11 @@
 #include "CannonEnemy.h"
 #include "Bom.h"
 #include "Player.h"
+#include "ImGuiManager.h"
 #include <algorithm>
 #include <iostream>
+
+using namespace MyMath;
 
 CannonEnemy::CannonEnemy() {}
 
@@ -13,11 +16,13 @@ CannonEnemy::~CannonEnemy() {
 	}
 }
 
-void CannonEnemy::Init(Camera* camera) {
-	camera_ = camera;
+void CannonEnemy::Init() {
 	worldTransform_.Initialize();
-	// "cube" モデルを読み込み
-	model_ = Model::CreateFromOBJ("cannon", true);
+
+	model_ = new Object3d();
+	model_->Initialize();
+	model_->SetModelFile("cannon");
+
 	worldTransform_.translation_ = position;
 }
 
@@ -140,16 +145,15 @@ void CannonEnemy::Update() {
 		return false;
 	});
 
-	worldTransform_.TransferMatrix();
 	worldTransform_.UpdateMatrix();
 }
 
 void CannonEnemy::Draw() {
 
-	model_->Draw(worldTransform_, *camera_);
+	model_->Draw(worldTransform_);
 
 	for (Bom* bom : bullets_) {
-		bom->Draw(camera_);
+		bom->Draw();
 	}
 }
 
