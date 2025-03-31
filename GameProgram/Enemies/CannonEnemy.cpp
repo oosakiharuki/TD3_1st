@@ -123,7 +123,7 @@ void CannonEnemy::Update() {
 			Vector3 direction = playerPosition - position;
 
 			// atan2を使ってY軸の回転角度を計算
-			worldTransform_.rotation_.y = atan2(direction.x, -direction.z);
+			worldTransform_.rotation_.y = atan2(direction.x, direction.z);
 		}
 
 		worldTransform_.translation_ = position;

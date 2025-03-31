@@ -131,7 +131,7 @@ void Player::Update() {
 
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
-	worldTransform_.rotation_.y = -(cameraYaw * (3.14159265f / 180.0f));
+	worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
 
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 

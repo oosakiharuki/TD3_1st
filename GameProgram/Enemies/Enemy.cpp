@@ -99,7 +99,7 @@ void Enemy::Update() {
 			direction = Normalize(direction);
 
 			// Y軸の回転角度を計算
-			worldTransform_.rotation_.y = atan2(direction.x, -direction.z);
+			worldTransform_.rotation_.y = atan2(direction.x, direction.z);
 
 			// 一定速度でプレイヤーに向かうベクトルで設定
 			velocity = toPlayer * kChaseSpeed;

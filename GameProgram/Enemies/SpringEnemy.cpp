@@ -9,7 +9,7 @@ SpringEnemy::~SpringEnemy() { delete model_; }
 void SpringEnemy::Init() {
 	model_ = new Object3d();
 	model_->Initialize();
-	model_->SetModelFile("spring");
+	model_->SetModelFile("Spring");
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 

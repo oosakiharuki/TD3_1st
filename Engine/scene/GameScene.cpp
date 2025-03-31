@@ -241,6 +241,8 @@ void GameScene::Draw() {
 	//モデル描画処理
 	Object3dCommon::GetInstance()->Command();
 
+	skydome_->Draw();
+
 	stage->Draw(worldTransform_);
 
 	player_->Draw();
@@ -258,7 +260,6 @@ void GameScene::Draw() {
 	block_->Draw();
 	ghostBlock_->Draw();
 
-	skydome_->Draw();
 
 	//パーティクル描画処理
 	ParticleCommon::GetInstance()->Command();
