@@ -7,6 +7,10 @@
 class Skydome {
 
 public:
+
+	Skydome();
+	~Skydome();
+
 	void Initialize();
 
 	void Update();

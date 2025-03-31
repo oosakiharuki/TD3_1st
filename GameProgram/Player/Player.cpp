@@ -10,7 +10,11 @@ using namespace MyMath;
 
 Player::Player() {}
 
-Player::~Player() { delete PlayerModel_; }
+Player::~Player() { 
+	delete PlayerModel_; 
+	delete block_;
+	delete ghostBlock_;
+}
 
 void Player::Init(Camera* camera) {
 	camera_ = camera;

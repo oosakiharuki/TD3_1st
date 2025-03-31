@@ -44,7 +44,7 @@ private:
 	void UpdateStageAABB();
 
 	WorldTransform worldTransform_;
-	Camera* camera_ = nullptr;;
+	Camera* camera_ = nullptr;
 	Vector3 cameraRotate = { 0.0f,0.0f,0.0f };
 	Vector3 cameraTranslate = { 0.0f,0.0f,-15.0f };
 	Player* player_ = nullptr;

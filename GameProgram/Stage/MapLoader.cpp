@@ -198,6 +198,12 @@ void MapLoader::Draw() {
 	}
 }
 
+void MapLoader::Draw2D() {
+	if (goal_) {
+		goal_->Text();
+	}
+}
+
 // スプライトの描画
 void MapLoader::DrawSprites([[maybe_unused]] ID3D12GraphicsCommandList* commandList) {
 	// Goalのスプライト描画（ゴールクリア表示）

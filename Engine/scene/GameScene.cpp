@@ -2,7 +2,7 @@
 
 GameScene::GameScene() {}
 
-GameScene::~GameScene() { Finalize(); }
+GameScene::~GameScene() {}
 
 void GameScene::Finalize() {
 	delete camera_;
@@ -13,17 +13,34 @@ void GameScene::Finalize() {
 	delete block_;
 	delete ghostBlock_;
 	delete skydome_;
+
+	allObstacles_.clear();
 }
 
 void GameScene::Initialize() {
 
+	ModelManager::GetInstance()->LoadModel("cannon");
+	ModelManager::GetInstance()->LoadModel("cube");
+	ModelManager::GetInstance()->LoadModel("door");
+	ModelManager::GetInstance()->LoadModel("EnemyBullet");
+	ModelManager::GetInstance()->LoadModel("EnemyGhost");
+	ModelManager::GetInstance()->LoadModel("goal");
+	ModelManager::GetInstance()->LoadModel("key");
+	ModelManager::GetInstance()->LoadModel("player");
+	ModelManager::GetInstance()->LoadModel("space");
+	ModelManager::GetInstance()->LoadModel("Spring");
+	ModelManager::GetInstance()->LoadModel("stage1");
+	//ModelManager::GetInstance()->LoadModel("stage2");
+	ModelManager::GetInstance()->LoadModel("stage3");
+
+
 	camera_ = new Camera();
-	cameraRotate = { 1.4f,0.0f,0.0f };
-	cameraTranslate = { 0.0f,30.0f,-8.0f };
-	cameraRotate = { 0.0f,0.0f,0.0f };
-	cameraTranslate = { 0.0f,0.0f,-15.0f };
-	camera_->SetRotate(cameraRotate);
-	camera_->SetTranslate(cameraTranslate);
+	//cameraRotate = { 1.4f,0.0f,0.0f };
+	//cameraTranslate = { 0.0f,30.0f,-8.0f };
+	//cameraRotate = { 0.0f,0.0f,0.0f };
+	//cameraTranslate = { 0.0f,0.0f,-15.0f };
+	//camera_->SetRotate(cameraRotate);
+	//camera_->SetTranslate(cameraTranslate);
 	
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
 	ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
@@ -51,7 +68,7 @@ void GameScene::Initialize() {
 
 	// MapLoaderの初期化
 	mapLoader_ = new MapLoader();
-	std::string objectsFile = "Resources/objects" + std::to_string(currentStage_) + ".csv";
+	std::string objectsFile = "resource/objects" + std::to_string(currentStage_) + ".csv";
 	if (mapLoader_->LoadMapData(objectsFile)) {
 		mapLoader_->CreateObjects(player_);
 	}
@@ -74,11 +91,11 @@ void GameScene::Initialize() {
 	player_->SetPosition(StartPosition);
 
 	// 障害物情報の読み込み
-	LoadStage("Resources/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj");
+	LoadStage("resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj");
 
 	// EnemyLoaderの生成と初期化
 	enemyLoader_ = new EnemyLoader();
-	std::string enemiesFile = "Resources/enemies" + std::to_string(currentStage_) + ".csv";
+	std::string enemiesFile = "resource/enemies" + std::to_string(currentStage_) + ".csv";
 	// CSVから敵の情報を読み込み
 	if (enemyLoader_->LoadEnemyData(enemiesFile)) {
 		// 敵を生成
@@ -155,9 +172,9 @@ void GameScene::Update() {
 		mapLoader_->Update();
 	}
 
-	for (auto& springEnemy : enemyLoader_->GetSpringEnemyList()) {
-		springEnemy->Update();
-	}
+	//for (auto& springEnemy : enemyLoader_->GetSpringEnemyList()) {
+	//	springEnemy->Update();
+	//}
 
 	block_->Update();
 	ghostBlock_->Update();
@@ -194,24 +211,24 @@ void GameScene::Update() {
 
 #ifdef  USE_IMGUI
 
-	//ここにテキストを入れられる
+	////ここにテキストを入れられる
 
-	//開発用UIの処理
-	//ImGui::ShowDemoWindow();
+	////開発用UIの処理
+	////ImGui::ShowDemoWindow();
 
-	ImGui::Begin("camera");
-	ImGui::Text("ImGuiText");
+	//ImGui::Begin("camera");
+	//ImGui::Text("ImGuiText");
 
-	//カメラ
-	ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
+	////カメラ
+	//ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
 
-	ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
-	ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
-	ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
-	camera_->SetRotate(cameraRotate);
-	camera_->SetTranslate(cameraTranslate);
+	//ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
+	//ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
+	//ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
+	////camera_->SetRotate(cameraRotate);
+	////camera_->SetTranslate(cameraTranslate);
 
-	ImGui::End();
+	//ImGui::End();
 #endif //  USE_IMGUI
 }
 
@@ -248,7 +265,9 @@ void GameScene::Draw() {
 
 	//スプライト描画処理(UI用)
 	SpriteCommon::GetInstance()->Command();
-
+	if (mapLoader_) {
+		mapLoader_->Draw2D();
+	}
 }
 
 
@@ -276,7 +295,7 @@ void GameScene::ChangeStage(int nextStage) {
 
 	// 新しいオブジェクトデータをロード
 	if (mapLoader_) {
-		std::string objectsFile = "Resources/objects" + std::to_string(currentStage_) + ".csv";
+		std::string objectsFile = "resource/objects" + std::to_string(currentStage_) + ".csv";
 		mapLoader_->ChangeStage(currentStage_, player_);
 		if (mapLoader_->LoadMapData(objectsFile)) {
 			mapLoader_->CreateObjects(player_);
@@ -284,7 +303,7 @@ void GameScene::ChangeStage(int nextStage) {
 	}
 
 	// **新しい障害物データをロード**
-	std::string stageFile = "Resources/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj";
+	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + ".obj";
 	LoadStage(stageFile);
 
 	// バネ
@@ -303,7 +322,7 @@ void GameScene::ChangeStage(int nextStage) {
 	}
 	enemyLoader_ = new EnemyLoader();
 
-	std::string enemiesFile = "Resources/enemies" + std::to_string(currentStage_) + ".csv";
+	std::string enemiesFile = "resource/" + std::to_string(currentStage_) + ".csv";
 	if (enemyLoader_->LoadEnemyData(enemiesFile)) {
 		enemyLoader_->CreateEnemies(player_, allObstacles_);
 	}

@@ -41,6 +41,9 @@ public:
 	// オブジェクトの描画
 	void Draw();
 
+	//オブジェクトのテクスチャ描画
+	void Draw2D();
+
 	void DrawSprites(ID3D12GraphicsCommandList* commandList);
 
 	// 鍵とドアの相互参照を設定

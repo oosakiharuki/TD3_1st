@@ -20,7 +20,7 @@ void Goal::Init() {
 	model_->SetModelFile("goal");
 
 	// 勝利画面用テクスチャの読み込み
-	TextureManager::GetInstance()->LoadTexture("winScene.png");
+	//TextureManager::GetInstance()->LoadTexture("resource/Sprite/winScene.png");
 
 	sprite = new Sprite();
 	sprite->Initialize("winScene.png");
@@ -43,6 +43,7 @@ void Goal::Update() {
 		ImGui::End();
 #endif // _DEBUG
 	}
+	sprite->Update();
 	worldTransform_.UpdateMatrix();
 }
 

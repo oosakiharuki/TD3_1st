@@ -1,5 +1,8 @@
 #include "Skydome.h"
 
+Skydome::Skydome(){}
+Skydome::~Skydome() { delete model_; }
+
 void Skydome::Initialize() {
 
 	model_ = new Object3d();
