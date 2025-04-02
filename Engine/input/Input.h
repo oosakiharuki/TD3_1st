@@ -22,7 +22,7 @@ public:
 	bool PushKey(BYTE keyNumber);
 	bool TriggerKey(BYTE keyNumber);
 
-	bool GetJoyStickState(uint32_t num,XINPUT_STATE& state);
+	bool GetJoystickState(uint32_t num,XINPUT_STATE& state);
 	bool GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state);
 
 

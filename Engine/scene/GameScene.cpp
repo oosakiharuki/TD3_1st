@@ -1,55 +1,234 @@
 #include "GameScene.h"
 
+GameScene::GameScene() {}
+
+GameScene::~GameScene() {}
+
+void GameScene::Finalize() {
+	delete camera_;
+	delete player_;
+	delete mapLoader_;
+	delete enemyLoader_;
+	delete stage;
+	delete block_;
+	delete ghostBlock_;
+	delete skydome_;
+
+	allObstacles_.clear();
+}
+
 void GameScene::Initialize() {
 
-	camera = new Camera();
-	cameraRotate = { 1.4f,0.0f,0.0f };
-	cameraTranslate = { 0.0f,30.0f,-8.0f };
-	cameraRotate = { 0.0f,0.0f,0.0f };
-	cameraTranslate = { 0.0f,0.0f,-15.0f };
-	camera->SetRotate(cameraRotate);
-	camera->SetTranslate(cameraTranslate);
+	ModelManager::GetInstance()->LoadModel("cannon");
+	ModelManager::GetInstance()->LoadModel("cube");
+	ModelManager::GetInstance()->LoadModel("door");
+	ModelManager::GetInstance()->LoadModel("EnemyBullet");
+	ModelManager::GetInstance()->LoadModel("EnemyGhost");
+	ModelManager::GetInstance()->LoadModel("goal");
+	ModelManager::GetInstance()->LoadModel("key");
+	ModelManager::GetInstance()->LoadModel("player");
+	ModelManager::GetInstance()->LoadModel("space");
+	ModelManager::GetInstance()->LoadModel("Spring");
+	ModelManager::GetInstance()->LoadModel("stage1");
+	//ModelManager::GetInstance()->LoadModel("stage2");
+	ModelManager::GetInstance()->LoadModel("stage3");
+
+
+	camera_ = new Camera();
+	//cameraRotate = { 1.4f,0.0f,0.0f };
+	//cameraTranslate = { 0.0f,30.0f,-8.0f };
+	//cameraRotate = { 0.0f,0.0f,0.0f };
+	//cameraTranslate = { 0.0f,0.0f,-15.0f };
+	//camera_->SetRotate(cameraRotate);
+	//camera_->SetTranslate(cameraTranslate);
 	
-	Object3dCommon::GetInstance()->SetDefaultCamera(camera);
-	ParticleCommon::GetInstance()->SetDefaultCamera(camera);
+	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
+	ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
+
+	worldTransform_.Initialize();
+
+	block_ = new Block();
+	block_->Init();
+
+	ghostBlock_ = new GhostBlock();
+	ghostBlock_->Init();
+
+	// Playerの生成と初期化
+	player_ = new Player();
+	player_->Init(camera_);
+
+	stage = new Object3d();
+	stage->Initialize();
+	stage->SetModelFile("stage" + std::to_string(currentStage_));
+
+	// 天球の生成
+	skydome_ = new Skydome();
+	// 天球の初期化
+	skydome_->Initialize();
+
+	// MapLoaderの初期化
+	mapLoader_ = new MapLoader();
+	std::string objectsFile = "resource/objects" + std::to_string(currentStage_) + ".csv";
+	if (mapLoader_->LoadMapData(objectsFile)) {
+		mapLoader_->CreateObjects(player_);
+	}
+
+	Vector3 StartPosition;
+	//各ステージのプレイヤー初期位置
+	if (currentStage_ == 1) {
+		// Stage 2への移行時の座標
+		StartPosition = { 0, 10, -10 };
+	}
+	else if (currentStage_ == 2) {
+		// Stage 2への移行時の座標
+		StartPosition = { -55.070f, 1.649f, -68.019f };
+	}
+	else if (currentStage_ == 3) {
+		// Stage 3への移行時の座標
+		StartPosition = { -37.0f, -18.512f, -51.500f };
+	}
+
+	player_->SetPosition(StartPosition);
+
+	// 障害物情報の読み込み
+	LoadStage("resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj");
+
+	// EnemyLoaderの生成と初期化
+	enemyLoader_ = new EnemyLoader();
+	std::string enemiesFile = "resource/enemies" + std::to_string(currentStage_) + ".csv";
+	// CSVから敵の情報を読み込み
+	if (enemyLoader_->LoadEnemyData(enemiesFile)) {
+		// 敵を生成
+		enemyLoader_->CreateEnemies(player_, allObstacles_);
+	}
+
+	// 各種敵リストをプレイヤーに設定
+	player_->SetEnemyList(enemyLoader_->GetEnemyList());
+
+	// キャノン敵への参照をプレイヤーに設定
+	if (!enemyLoader_->GetCannonEnemyList().empty()) {
+		player_->SetCannon(enemyLoader_->GetCannonEnemyList()[0]); // 一番最初のキャノン敵を設定
+	}
+
+	// バネ敵への参照をプレイヤーに設定
+	player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());
+
+	// プレイヤーにブロックリストを設定（更新: 単一ブロックではなくリスト全体を渡す）
+	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
+	player_->SetBlocks(blocks);
+
+	// 障害物リストを Player にセット
+	for (const auto& obstacles : allObstacles_) {
+		player_->SetObstacleList(obstacles);
+	}
+
+	// プレイヤーにGoalへの参照を設定
+	if (mapLoader_ && mapLoader_->GetGoal()) {
+		player_->SetGoal(mapLoader_->GetGoal());
+	}
+
 }
 
 void GameScene::Update() {
 
-	if (Input::GetInstance()->PushKey(DIK_0)) {
-		OutputDebugStringA("Hit 0\n");
-	}
-
-	if (Input::GetInstance()->TriggerKey(DIK_1)) {
-		OutputDebugStringA("Hit 1\n");
-	}
-
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
 		sceneNo = Title;
 	}
 
-	camera->Update();
+	camera_->Update();
+
+
+
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
+	// リスタート処理
+	if (Input::GetInstance()->PushKey(DIK_R) || ((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) && (preState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
+		longPress -= 1.0f / 60.0f;
+	}
+	else {
+		longPress = RestartTimer;
+	}
+	// 0になった時リスタート / 押しなおさないと更新されなくする
+	if (longPress < 0 && longPress > -0.017f) {
+		Finalize();
+		Initialize();
+	}
+
+	// MapLoaderが管理するGoalの状態をチェック
+	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear()) {
+		return; // ゴールクリア状態なら更新処理をスキップ
+	}
+
+	player_->Update();
+
+	// EnemyLoaderの更新
+	if (enemyLoader_) {
+		enemyLoader_->Update();
+	}
+
+	// MapLoaderの更新
+	if (mapLoader_) {
+		mapLoader_->Update();
+	}
+
+	//for (auto& springEnemy : enemyLoader_->GetSpringEnemyList()) {
+	//	springEnemy->Update();
+	//}
+
+	block_->Update();
+	ghostBlock_->Update();
+
+	player_->DrawUI();
+	skydome_->Update();
+
+	// 　↓　ゴールしたら1と2ステージループするようになってる、切り替え処理2を消すとステージ3に進む
+
+	if (mapLoader_ && mapLoader_->IsDoorOpened()) {
+		// 次のステージ番号を計算
+		int nextStage = currentStage_ + 1;
+
+		// 次のステージに応じてプレイヤーの座標を設定
+		Vector3 newPosition;
+		if (nextStage == 2) {
+			// Stage 2への移行時の座標
+			newPosition = { -55.070f, 1.649f, -68.019f };
+		}
+		else if (nextStage == 3) {
+			// Stage 3への移行時の座標
+			newPosition = { -37.0f, -18.512f, -51.500f };
+		}
+
+		// プレイヤーの座標を変更
+		player_->SetPosition(newPosition);
+
+		// ステージを切り替え
+		ChangeStage(nextStage);
+	}
+
+
+
 
 #ifdef  USE_IMGUI
 
-	//ここにテキストを入れられる
+	////ここにテキストを入れられる
 
-	//開発用UIの処理
-	//ImGui::ShowDemoWindow();
+	////開発用UIの処理
+	////ImGui::ShowDemoWindow();
 
-	ImGui::Begin("camera");
-	ImGui::Text("ImGuiText");
+	//ImGui::Begin("camera");
+	//ImGui::Text("ImGuiText");
 
-	//カメラ
-	ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
+	////カメラ
+	//ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
 
-	ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
-	ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
-	ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
-	camera->SetRotate(cameraRotate);
-	camera->SetTranslate(cameraTranslate);
+	//ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
+	//ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
+	//ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
+	////camera_->SetRotate(cameraRotate);
+	////camera_->SetTranslate(cameraTranslate);
 
-	ImGui::End();
+	//ImGui::End();
 #endif //  USE_IMGUI
 }
 
@@ -62,13 +241,254 @@ void GameScene::Draw() {
 	//モデル描画処理
 	Object3dCommon::GetInstance()->Command();
 
+	skydome_->Draw();
+
+	stage->Draw(worldTransform_);
+
+	player_->Draw();
+
+	// EnemyLoaderで読み込んだ敵の描画
+	if (enemyLoader_) {
+		enemyLoader_->Draw();
+	}
+
+	// MapLoaderで読み込んだオブジェクト（鍵、ドア、ブロック、ゴール）の描画
+	if (mapLoader_) {
+		mapLoader_->Draw();
+	}
+
+
+
 	//パーティクル描画処理
 	ParticleCommon::GetInstance()->Command();
 
 	//スプライト描画処理(UI用)
 	SpriteCommon::GetInstance()->Command();
-
+	if (mapLoader_) {
+		mapLoader_->Draw2D();
+	}
 }
-void GameScene::Finalize() {
-	delete camera;
+
+
+void GameScene::ChangeStage(int nextStage) {
+	allObstacles_.clear();
+	Command.str("");
+	Command.clear();
+
+	currentStage_ = nextStage;
+
+	//前ステージの削除
+	delete stage;
+	stage = nullptr;
+	stage = new Object3d();
+	stage->Initialize();
+	stage->SetModelFile("stage" + std::to_string(currentStage_));
+
+	// **プレイヤーと敵の障害物リストをクリア**
+	player_->ClearObstacleList();
+	if (enemyLoader_) {
+		for (auto& enemy : enemyLoader_->GetEnemyList()) {
+			enemy->ClearObstacleList();
+		}
+	}
+
+	// 新しいオブジェクトデータをロード
+	if (mapLoader_) {
+		std::string objectsFile = "resource/objects" + std::to_string(currentStage_) + ".csv";
+		mapLoader_->ChangeStage(currentStage_, player_);
+		if (mapLoader_->LoadMapData(objectsFile)) {
+			mapLoader_->CreateObjects(player_);
+		}
+	}
+	 
+	// **新しい障害物データをロード**
+	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + ".obj";
+	LoadStage(stageFile);
+
+	// バネ
+	for (auto& springEnemy : enemyLoader_->GetSpringEnemyList()) {
+		springEnemy->ClearObstacleList();
+	}
+
+	// **プレイヤーに新しい障害物リストを設定**
+	for (const auto& obstacles : allObstacles_) {
+		player_->SetObstacleList(obstacles);
+	}
+
+	// **敵の当たり判定も再設定**
+	if (enemyLoader_) {
+		delete enemyLoader_;
+	}
+	enemyLoader_ = new EnemyLoader();
+
+	std::string enemiesFile = "resource/" + std::to_string(currentStage_) + ".csv";
+	if (enemyLoader_->LoadEnemyData(enemiesFile)) {
+		enemyLoader_->CreateEnemies(player_, allObstacles_);
+	}
+
+	// 敵の当たり判定リストを再設定
+	for (auto& enemy : enemyLoader_->GetEnemyList()) {
+		for (const auto& obstacles : allObstacles_) {
+			enemy->SetObstacleList(obstacles);
+		}
+	}
+
+	// プレイヤーに敵リストを設定
+	player_->SetEnemyList(enemyLoader_->GetEnemyList());
+	player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());
+
+	// キャノン敵への参照をプレイヤーに設定
+	if (!enemyLoader_->GetCannonEnemyList().empty()) {
+		player_->SetCannon(enemyLoader_->GetCannonEnemyList()[0]);
+	}
+
+	// プレイヤーにブロックリストを設定（更新：単一ブロックではなくリスト全体を渡す）
+	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
+	player_->SetBlocks(blocks);
+
+	// プレイヤーにGoalへの参照を再設定
+	if (mapLoader_ && mapLoader_->GetGoal()) {
+		player_->SetGoal(mapLoader_->GetGoal());
+	}
+}
+
+// AddObstacle、LoadStage、UpdateStageAABBメソッドはそのまま以前の実装を使用
+void GameScene::AddObstacle(std::vector<std::vector<AABB>>& allObstacles, const Vector3& min, const Vector3& max) {
+	AABB obstacle;
+	obstacle.min = min;
+	obstacle.max = max;
+	if (allObstacles.empty() || allObstacles.back().size() >= 500) { // 100個の障害物を追加
+		allObstacles.emplace_back();
+	}
+	allObstacles.back().push_back(obstacle);
+}
+
+void GameScene::LoadStage(std::string objFile) {
+	// ステージデータの読み込み
+	std::ifstream file;
+	file.open(objFile);
+	assert(file.is_open());
+
+	// Commandをリセット
+	Command.str("");
+	Command.clear();
+
+	Command << file.rdbuf();
+	file.close();
+
+	// 障害物データをクリア
+	allObstacles_.clear();
+
+	UpdateStageAABB();
+
+	player_->ClearObstacleList(); // 古い障害物リストを削除
+	// 新しい障害物リスト
+	for (const auto& obstacles : allObstacles_) {
+		player_->SetObstacleList(obstacles);
+	}
+
+	if (enemyLoader_) {
+		for (auto& enemy : enemyLoader_->GetEnemyList()) {
+			enemy->ClearObstacleList();
+			for (const auto& obstacles : allObstacles_) {
+				enemy->SetObstacleList(obstacles);
+			}
+		}
+	}
+}
+
+void GameScene::UpdateStageAABB() {
+	std::string line;
+	uint32_t cornerNumber = 0;
+
+	Vector3 max;
+	Vector3 min;
+
+	// AABB stageAABB;
+	bool start = false;
+	bool reverse = false;
+
+	while (getline(Command, line)) {
+		std::istringstream line_stream(line);
+
+		std::string word;
+
+		getline(line_stream, word, ' ');
+
+		if (word.find("v") == 0) {
+			cornerNumber++;
+		}
+		else if (word.find("vn") == 0) {
+			break;
+		}
+		else {
+			continue;
+		}
+
+		if (cornerNumber > 0) {
+
+			getline(line_stream, word, ' ');
+			float x = (float)std::atof(word.c_str());
+
+			getline(line_stream, word, ' ');
+			float y = (float)std::atof(word.c_str());
+
+			getline(line_stream, word, ' ');
+			float z = (float)std::atof(word.c_str());
+
+			if (!start) {
+				max = { x, y, z };
+				min = { x, y, z };
+				start = true;
+			}
+			else {
+
+				// 前よりも大きいとき
+				if (max.x <= x) {
+					max.x = x;
+				}
+				// 前よりも小さいとき
+				if (min.x > x) {
+					min.x = x;
+				}
+
+				if (max.y <= y) {
+					max.y = y;
+				}
+
+				if (min.y > y) {
+					min.y = y;
+				}
+
+				if (max.z <= z) {
+					max.z = z;
+				}
+
+				if (min.z > z) {
+					min.z = z;
+				}
+			}
+		}
+
+		if (cornerNumber == 8) {
+			if (!reverse) {
+				AddObstacle(allObstacles_, min, max); // 結合した基盤となるobj
+			}
+			else {
+
+				float minX;
+				float maxX;
+				maxX = -(max.x);
+				minX = -(min.x);
+
+				min.x = maxX;
+				max.x = minX;
+				AddObstacle(allObstacles_, { min.x, min.y, min.z }, { max.x, max.y, max.z }); // それ以外のすべてobj
+			}
+
+			cornerNumber = 0;
+			start = false;
+			reverse = true;
+		}
+	}
 }

@@ -37,6 +37,21 @@
     <Filter Include="ソース ファイル\Engine\scene">
       <UniqueIdentifier>{73845869-d02a-4959-b656-d88b792ecf40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\GameProgram">
+      <UniqueIdentifier>{41bb487f-b72b-49e9-85fc-e818c2afb51e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\GameProgram\Enemies">
+      <UniqueIdentifier>{eba01668-6ed1-4683-86f1-7b243344ef47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\GameProgram\Object">
+      <UniqueIdentifier>{5839e9ad-1220-4891-9de6-53fafa5e1498}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\GameProgram\Player">
+      <UniqueIdentifier>{32c3d946-26a0-4ba2-a33a-ddca3d9f4ce8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\GameProgram\Stage">
+      <UniqueIdentifier>{f384b063-6dd2-4c77-9073-acbd095512d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\2d\Sprite.cpp">
@@ -131,6 +146,60 @@
     </ClCompile>
     <ClCompile Include="Engine\MyGame.cpp">
       <Filter>ソース ファイル\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Enemies\Bom.cpp">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Enemies\CannonEnemy.cpp">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Enemies\Enemy.cpp">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Enemies\SpringEnemy.cpp">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Stage\EnemyLoader.cpp">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Stage\MapChip.cpp">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Stage\MapLoader.cpp">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Stage\StageManager.cpp">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Player\Player.cpp">
+      <Filter>ソース ファイル\GameProgram\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Object\Block.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Object\Door.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Object\GhostBlock.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Object\Goal.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Object\key.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Object\SkyDome.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\AABB.cpp">
+      <Filter>ソース ファイル\GameProgram</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\CameraController.cpp">
+      <Filter>ソース ファイル\GameProgram</Filter>
+    </ClCompile>
+    <ClCompile Include="GameProgram\Collision.cpp">
+      <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -238,6 +307,60 @@
     </ClInclude>
     <ClInclude Include="Engine\MyGame.h">
       <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Enemies\Bom.h">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Enemies\CannonEnemy.h">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Enemies\Enemy.h">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Enemies\SpringEnemy.h">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Stage\EnemyLoader.h">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Stage\MapChip.h">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Stage\MapLoader.h">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Stage\StageManager.h">
+      <Filter>ソース ファイル\GameProgram\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Player\Player.h">
+      <Filter>ソース ファイル\GameProgram\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Object\Block.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Object\Door.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Object\GhostBlock.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Object\Goal.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Object\key.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Object\SkyDome.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\AABB.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\CameraController.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Collision.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
