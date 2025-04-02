@@ -257,8 +257,6 @@ void GameScene::Draw() {
 		mapLoader_->Draw();
 	}
 
-	block_->Draw();
-	ghostBlock_->Draw();
 
 
 	//パーティクル描画処理
