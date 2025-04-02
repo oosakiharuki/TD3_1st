@@ -107,7 +107,7 @@ private:
 	float cameraPitch = 5.0f;
 	float cameraYaw = 0.0f;
 	const float speed = 0.2f;
-	XINPUT_STATE state, preState;
+	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 	AABB playerAABB;
 	AABB enemyAABB;
 	AABB doorAABB;
