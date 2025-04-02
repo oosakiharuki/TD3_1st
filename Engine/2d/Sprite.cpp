@@ -26,7 +26,7 @@ void Sprite::Initialize(std::string textureFilePath) {
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 
-	
+
 	float left = 0.0f - anchorPoint.x;
 	float right = 1.0f - anchorPoint.x;
 	float top = 0.0f - anchorPoint.y;
@@ -68,7 +68,7 @@ void Sprite::Initialize(std::string textureFilePath) {
 	vertexData[3].position = { right,top,0.0f,1.0f };//4
 	vertexData[3].texcoord = { tex_right,tex_top };
 	vertexData[3].normal = { 0.0f,0.0f,-1.0f };
-	
+
 	//Index
 	indexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
 
@@ -103,14 +103,13 @@ void Sprite::Initialize(std::string textureFilePath) {
 
 
 	//座標変換行列	
-	
+
 	transformationMatrixResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(TransformationMatrix));
-	
+
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
-	
+
 	transformationMatrixData->WVP = MakeIdentity4x4();
 	transformationMatrixData->World = MakeIdentity4x4();
-
 }
 
 void Sprite::AdjustTextureSize() {

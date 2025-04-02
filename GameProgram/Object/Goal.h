@@ -26,7 +26,7 @@ public:
 		worldTransform_.translation_ = position;
 		worldTransform_.UpdateMatrix();
 	}
-
+	Vector3 GetPosition() const { return worldTransform_.translation_; }
 private:
 
 	WorldTransform worldTransform_;

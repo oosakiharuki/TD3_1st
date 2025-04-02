@@ -49,6 +49,8 @@ public:
 		worldTransform_.translation_ = position;
 	}
 
+	Vector3 GetPosition() const { return worldTransform_.translation_; }
+
 private:
 	WorldTransform worldTransform_;
 	Object3d* model_ = nullptr;

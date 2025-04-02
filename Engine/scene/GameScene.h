@@ -21,6 +21,7 @@
 #include "Player.h"
 #include "Skydome.h"
 #include "SpringEnemy.h"
+#include "Minimap.h"
 
 class GameScene : public IScene {
 public:
@@ -82,4 +83,6 @@ private:
 
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;
+
+	Minimap* minimap_ = nullptr;
 };

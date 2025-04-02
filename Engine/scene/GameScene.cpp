@@ -13,6 +13,11 @@ void GameScene::Finalize() {
 	delete block_;
 	delete ghostBlock_;
 	delete skydome_;
+	// ミニマップの解放
+	if (minimap_) {
+		delete minimap_;
+		minimap_ = nullptr;
+	}
 
 	allObstacles_.clear();
 }
@@ -127,6 +132,17 @@ void GameScene::Initialize() {
 		player_->SetGoal(mapLoader_->GetGoal());
 	}
 
+	minimap_ = new Minimap();
+	minimap_->Initialize();
+	minimap_->SetPlayer(player_);
+
+	if (mapLoader_) {
+		minimap_->SetKeys(mapLoader_->GetKeys());
+		minimap_->SetDoors(mapLoader_->GetDoors());
+		minimap_->SetGoal(mapLoader_->GetGoal());
+	}
+
+
 }
 
 void GameScene::Update() {
@@ -205,6 +221,9 @@ void GameScene::Update() {
 
 	camera_->Update();
 
+	if (minimap_) {
+		minimap_->Update();
+	}
 
 
 #ifdef  USE_IMGUI
@@ -265,6 +284,10 @@ void GameScene::Draw() {
 	if (mapLoader_) {
 		mapLoader_->Draw2D();
 	}
+	if (minimap_) {
+		minimap_->Draw();
+	}
+
 }
 
 
@@ -347,6 +370,12 @@ void GameScene::ChangeStage(int nextStage) {
 	// プレイヤーにGoalへの参照を再設定
 	if (mapLoader_ && mapLoader_->GetGoal()) {
 		player_->SetGoal(mapLoader_->GetGoal());
+	}
+
+	if (minimap_) {
+		minimap_->SetKeys(mapLoader_->GetKeys());
+		minimap_->SetDoors(mapLoader_->GetDoors());
+		minimap_->SetGoal(mapLoader_->GetGoal());
 	}
 }
 

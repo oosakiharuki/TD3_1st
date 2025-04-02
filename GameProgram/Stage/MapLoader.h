@@ -66,6 +66,12 @@ public:
 	// Goalへのアクセス（追加）
 	Goal* GetGoal() const { return goal_ ? goal_ : nullptr; }
 
+	// キーリストへのアクセサ
+	const std::vector<Key*>& GetKeys() const { return keys_; }
+
+	// ドアリストへのアクセサ
+	const std::vector<Door*>& GetDoors() const { return doors_; }
+
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 
