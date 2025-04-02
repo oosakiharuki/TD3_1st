@@ -300,7 +300,7 @@ void GameScene::ChangeStage(int nextStage) {
 			mapLoader_->CreateObjects(player_);
 		}
 	}
-
+	 
 	// **新しい障害物データをロード**
 	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + ".obj";
 	LoadStage(stageFile);
