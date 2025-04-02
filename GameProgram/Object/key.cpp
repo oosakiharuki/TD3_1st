@@ -33,6 +33,8 @@ void Key::Init() {
 	worldTransform_.UpdateMatrix();
 
 	// 鍵取得音の読み込み
+	keyGTAudio_ = new Audio();
+	keyGTAudio_->Initialize("sound/key_get.wav");
 	//KeyAudioHandle_ = keyGTAudio_->LoadWave("./sound/key_get.wav");
 
 }
@@ -53,8 +55,13 @@ void Key::Update() {
 			isObtained_ = true;
 
 			// 鍵取得音を再生
-			//keyGTAudio_->playAudio(KeyGetAudio_, KeyAudioHandle_, false, 0.5);
+			KeyGetAudio_ = -1;
 		}
+	}
+
+	if (KeyGetAudio_ < 0) {
+		keyGTAudio_->SoundPlayWave(0.5);
+		KeyGetAudio_++;
 	}
 
 	// 回転アニメーション

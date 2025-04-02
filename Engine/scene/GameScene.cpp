@@ -30,7 +30,7 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("space");
 	ModelManager::GetInstance()->LoadModel("Spring");
 	ModelManager::GetInstance()->LoadModel("stage1");
-	//ModelManager::GetInstance()->LoadModel("stage2");
+	ModelManager::GetInstance()->LoadModel("stage2");
 	ModelManager::GetInstance()->LoadModel("stage3");
 
 
@@ -131,16 +131,12 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
 	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
 		sceneNo = Title;
 	}
-
-	camera_->Update();
-
-
-
-	Input::GetInstance()->GetJoystickState(0, state);
-	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
 	// リスタート処理
 	if (Input::GetInstance()->PushKey(DIK_R) || ((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) && (preState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
@@ -154,6 +150,7 @@ void GameScene::Update() {
 		Finalize();
 		Initialize();
 	}
+
 
 	// MapLoaderが管理するGoalの状態をチェック
 	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear()) {
@@ -206,6 +203,7 @@ void GameScene::Update() {
 		ChangeStage(nextStage);
 	}
 
+	camera_->Update();
 
 
 
@@ -304,7 +302,7 @@ void GameScene::ChangeStage(int nextStage) {
 	}
 
 	// **新しい障害物データをロード**
-	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + ".obj";
+	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj";
 	LoadStage(stageFile);
 
 	// バネ
@@ -323,7 +321,7 @@ void GameScene::ChangeStage(int nextStage) {
 	}
 	enemyLoader_ = new EnemyLoader();
 
-	std::string enemiesFile = "resource/" + std::to_string(currentStage_) + ".csv";
+	std::string enemiesFile = "resource/enemies" + std::to_string(currentStage_) + ".csv";
 	if (enemyLoader_->LoadEnemyData(enemiesFile)) {
 		enemyLoader_->CreateEnemies(player_, allObstacles_);
 	}
@@ -389,14 +387,15 @@ void GameScene::LoadStage(std::string objFile) {
 		player_->SetObstacleList(obstacles);
 	}
 
-	if (enemyLoader_) {
-		for (auto& enemy : enemyLoader_->GetEnemyList()) {
-			enemy->ClearObstacleList();
-			for (const auto& obstacles : allObstacles_) {
-				enemy->SetObstacleList(obstacles);
-			}
-		}
-	}
+	//たまにバグる
+	//if (enemyLoader_) {
+	//	for (auto& enemy : enemyLoader_->GetEnemyList()) {
+	//		enemy->ClearObstacleList();
+	//		for (const auto& obstacles : allObstacles_) {
+	//			enemy->SetObstacleList(obstacles);
+	//		}
+	//	}
+	//}
 }
 
 void GameScene::UpdateStageAABB() {

@@ -11,7 +11,11 @@ void TitleScene::Initialize() {
 void TitleScene::Update() {
 	sprite->Update();
 
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) || 
+		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		sceneNo = Game;
 	}
 

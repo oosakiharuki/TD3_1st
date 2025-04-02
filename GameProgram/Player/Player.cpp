@@ -32,6 +32,10 @@ void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_
 void Player::AddObstacle(const AABB& obstacle) { obstacleList_.push_back(obstacle); }
 
 void Player::Update() {
+
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
 	// キーボードとGamePad左スティックの入力を合算して移動処理する
 	float keyboardSpeed = 0.55f;
 	Vector3 inputVec = {0.0f, 0.0f, 0.0f};
@@ -132,8 +136,6 @@ void Player::Update() {
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
 	worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
-
-	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
 	// ジャンプ・移動時の各種処理
 	if (!onGround_) {
@@ -312,6 +314,9 @@ void Player::Update() {
 	ImGui::DragFloat3("aabbMin", &playerAABB.min.x);
 	ImGui::End();
 #endif
+
+	//速すぎてものが貫通しないようにする
+	velocityY_ = std::clamp(velocityY_, -20.0f, 20.0f);
 
 	worldTransform_.UpdateMatrix();
 
