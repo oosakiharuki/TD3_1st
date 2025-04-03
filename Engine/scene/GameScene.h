@@ -63,10 +63,10 @@ private:
 	// EnemyLoaderのインスタンス
 	EnemyLoader* enemyLoader_ = nullptr;
 
-	Block* block_ = nullptr;
+	//Block* block_ = nullptr;
 	//Model* modelBlock_ = nullptr;
 
-	GhostBlock* ghostBlock_ = nullptr;
+	//GhostBlock* ghostBlock_ = nullptr;
 	//Model* modelGhostBlock_ = nullptr;
 
 	// 天球

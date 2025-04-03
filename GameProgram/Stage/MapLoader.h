@@ -14,6 +14,7 @@ enum class MapObjectType {
 	Key,
 	Door,
 	Block,
+	ColorWall,
 	Goal // Goalタイプを追加
 };
 
@@ -21,6 +22,7 @@ enum class MapObjectType {
 struct MapObjectData {
 	Vector3 position;
 	MapObjectType type;
+	ColorType color;
 	int id = 0;
 };
 
@@ -63,6 +65,9 @@ public:
 	// ブロックリストへのアクセス
 	const std::vector<Block*>& GetBlockList() const { return blocks_; }
 
+	// ゴーストブロックリストへのアクセス
+	const std::vector<GhostBlock*>& GetGhostBlockList() const { return ghostBlocks_; }
+
 	// Goalへのアクセス（追加）
 	Goal* GetGoal() const { return goal_ ? goal_ : nullptr; }
 
@@ -80,6 +85,9 @@ private:
 
 	// 生成されたブロックのリスト
 	std::vector<Block*> blocks_;
+
+	// 生成されたブロックのリスト
+	std::vector<GhostBlock*> ghostBlocks_;
 
 	// Goal（追加）
 	Goal* goal_ = nullptr;

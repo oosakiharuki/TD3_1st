@@ -61,8 +61,8 @@ bool EnemyLoader::ParseCSVLine(const std::string& line, EnemyData& data) {
 
 	// 敵タイプを読み込む
 	if (std::getline(iss, token, ',')) {
-		if (token == "enemy") {
-			data.type = EnemyType::Normal;
+		if (token == "ghost") {
+			data.type = EnemyType::Ghost;
 		} else if (token == "cannon") {
 			data.type = EnemyType::Cannon;
 		} else if (token == "spring") {
@@ -74,6 +74,26 @@ bool EnemyLoader::ParseCSVLine(const std::string& line, EnemyData& data) {
 		return false;
 	}
 
+	if (data.type == EnemyType::Ghost) {
+		// 敵タイプを読み込む
+		if (std::getline(iss, token, ',')) {
+			if (token == "Blue") {
+				data.colorType = ColorType::Blue;
+			}
+			else if (token == "Green") {
+				data.colorType = ColorType::Green;
+			}
+			else if (token == "Red") {
+				data.colorType = ColorType::Red;
+			}
+			else {
+				return false; // 未知の敵タイプ
+			}
+		}
+		else {
+			return false;
+		}
+	}
 	return true;
 }
 
@@ -84,18 +104,19 @@ void EnemyLoader::CreateEnemies(Player* player, const std::vector<std::vector<AA
 	// 読み込んだデータに基づいて敵を生成
 	for (const auto& data : enemyData_) {
 		switch (data.type) {
-		case EnemyType::Normal: {
-			Enemy* enemy = new Enemy();
-			enemy->Init();
-			enemy->SetPosition(data.position);
-			enemy->SetTarget(player);
+		case EnemyType::Ghost: {
+			GhostEnemy* ghost = new GhostEnemy();
+			ghost->Init();
+			ghost->SetPosition(data.position);
+			ghost->SetTarget(player);
+			ghost->SetColor(data.colorType);
 
 			// 障害物リストを設定
 			for (const auto& obstacleList : obstacles) {
-				enemy->SetObstacleList(obstacleList);
+				ghost->SetObstacleList(obstacleList);
 			}
 
-			enemies_.push_back(enemy);
+			ghostEnemies_.push_back(ghost);
 			break;
 		}
 		case EnemyType::Cannon: {
@@ -132,15 +153,8 @@ void EnemyLoader::CreateEnemies(Player* player, const std::vector<std::vector<AA
 
 void EnemyLoader::Update() {
 	// 通常の敵の更新
-	for (auto it = enemies_.begin(); it != enemies_.end();) {
-		(*it)->Update();
-		// IsDestroyedメソッドがない場合は、下記の条件を適宜修正してください
-		if (false) { // 仮の条件
-			delete *it;
-			it = enemies_.erase(it);
-		} else {
-			++it;
-		}
+	for (auto* ghost : ghostEnemies_) {
+		ghost->Update();
 	}
 
 	// 大砲敵の更新
@@ -156,8 +170,8 @@ void EnemyLoader::Update() {
 
 void EnemyLoader::Draw() {
 	// 通常の敵の描画
-	for (auto* enemy : enemies_) {
-		enemy->Draw();
+	for (auto* ghost : ghostEnemies_) {
+		ghost->Draw();
 	}
 
 	// 大砲敵の描画
@@ -173,10 +187,10 @@ void EnemyLoader::Draw() {
 
 void EnemyLoader::ClearResources() {
 	// 通常の敵のリソースを解放
-	for (auto* enemy : enemies_) {
-		delete enemy;
+	for (auto* ghost : ghostEnemies_) {
+		delete ghost;
 	}
-	enemies_.clear();
+	ghostEnemies_.clear();
 
 	// 大砲敵のリソースを解放
 	for (auto* cannon : cannonEnemies_) {

@@ -10,8 +10,6 @@ void GameScene::Finalize() {
 	delete mapLoader_;
 	delete enemyLoader_;
 	delete stage;
-	delete block_;
-	delete ghostBlock_;
 	delete skydome_;
 
 	allObstacles_.clear();
@@ -31,7 +29,8 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("Spring");
 	ModelManager::GetInstance()->LoadModel("stage1");
 	ModelManager::GetInstance()->LoadModel("stage2");
-	ModelManager::GetInstance()->LoadModel("stage3");
+	ModelManager::GetInstance()->LoadModel("stage3"); 
+	ModelManager::GetInstance()->LoadModel("BlueGhost");
 
 
 	camera_ = new Camera();
@@ -46,12 +45,6 @@ void GameScene::Initialize() {
 	ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
 
 	worldTransform_.Initialize();
-
-	block_ = new Block();
-	block_->Init();
-
-	ghostBlock_ = new GhostBlock();
-	ghostBlock_->Init();
 
 	// Playerの生成と初期化
 	player_ = new Player();
@@ -103,7 +96,7 @@ void GameScene::Initialize() {
 	}
 
 	// 各種敵リストをプレイヤーに設定
-	player_->SetEnemyList(enemyLoader_->GetEnemyList());
+	player_->SetGhostEnemies(enemyLoader_->GetGhostList());
 
 	// キャノン敵への参照をプレイヤーに設定
 	if (!enemyLoader_->GetCannonEnemyList().empty()) {
@@ -116,6 +109,10 @@ void GameScene::Initialize() {
 	// プレイヤーにブロックリストを設定（更新: 単一ブロックではなくリスト全体を渡す）
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
+
+	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
+	player_->SetGhostBlocks(ghostBlocks);
+
 
 	// 障害物リストを Player にセット
 	for (const auto& obstacles : allObstacles_) {
@@ -172,9 +169,6 @@ void GameScene::Update() {
 	//for (auto& springEnemy : enemyLoader_->GetSpringEnemyList()) {
 	//	springEnemy->Update();
 	//}
-
-	block_->Update();
-	ghostBlock_->Update();
 
 	player_->DrawUI();
 	skydome_->Update();
@@ -285,7 +279,7 @@ void GameScene::ChangeStage(int nextStage) {
 	// **プレイヤーと敵の障害物リストをクリア**
 	player_->ClearObstacleList();
 	if (enemyLoader_) {
-		for (auto& enemy : enemyLoader_->GetEnemyList()) {
+		for (auto& enemy : enemyLoader_->GetGhostList()) {
 			enemy->ClearObstacleList();
 		}
 	}
@@ -325,14 +319,14 @@ void GameScene::ChangeStage(int nextStage) {
 	}
 
 	// 敵の当たり判定リストを再設定
-	for (auto& enemy : enemyLoader_->GetEnemyList()) {
+	for (auto& enemy : enemyLoader_->GetGhostList()) {
 		for (const auto& obstacles : allObstacles_) {
 			enemy->SetObstacleList(obstacles);
 		}
 	}
 
 	// プレイヤーに敵リストを設定
-	player_->SetEnemyList(enemyLoader_->GetEnemyList());
+	player_->SetGhostEnemies(enemyLoader_->GetGhostList());
 	player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());
 
 	// キャノン敵への参照をプレイヤーに設定
@@ -343,6 +337,10 @@ void GameScene::ChangeStage(int nextStage) {
 	// プレイヤーにブロックリストを設定（更新：単一ブロックではなくリスト全体を渡す）
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
+
+	// プレイヤーにゴーストブロックの追加
+	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
+	player_->SetGhostBlocks(ghostBlocks);
 
 	// プレイヤーにGoalへの参照を再設定
 	if (mapLoader_ && mapLoader_->GetGoal()) {
