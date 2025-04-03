@@ -4,14 +4,17 @@
 #include "CameraController.h"
 #include "CannonEnemy.h"
 #include "Collision.h"
-#include "Enemy.h"
+//#include "Enemy.h"
+//#include "GhostEnemy.h"
 #include "GhostBlock.h"
 #include "Goal.h"
 #include "MyMath.h"
 #include "SpringEnemy.h"
 #include <vector>
 
-class Enemy;
+class GhostEnemy;
+
+//class Enemy;
 
 class Player {
 public:
@@ -41,9 +44,9 @@ public:
 	void SetObstacleList(const std::vector<AABB>& obstacles);
 	void AddObstacle(const AABB& obstacle);
 
-	void SetEnemyList(const std::vector<Enemy*>& enemies);
+	void SetGhostEnemies(const std::vector<GhostEnemy*>& enemies);
 
-	std::vector<Enemy*> enemyList_;
+	std::vector<GhostEnemy*> ghostEnemies_;
 
 	void EnemyHead() { onEnemy = true; }
 
@@ -62,6 +65,8 @@ public:
 	void CheckCollisionWithSprings();
 	void SetBlocks(const std::vector<Block*> blocks) { blocks_ = blocks; }
 
+	void SetGhostBlocks(const std::vector<GhostBlock*> blocks) { ghostBlocks_ = blocks; }
+
 	void SetGoal(Goal* goal) { goal_ = goal; }
 	void CheckCollisionWithGoal();
 
@@ -72,10 +77,6 @@ public:
 	};
 
 	void DrawUI();
-	void SetBlock(Block* block, GhostBlock* ghostBlock) {
-		block_ = block;
-		ghostBlock_ = ghostBlock;
-	}
 
 	void CheckCollision();
 	void SetState(State newState);
@@ -114,16 +115,15 @@ private:
 	
 	
 	uint32_t textureHandle = 0;
-	Enemy* enemy = nullptr;
-	Block* block_ = nullptr;
+	//GhostEnemy* ghostEnemy = nullptr;//乗っ取ったゴースト
 	State currentState = State::Normal;
 	CannonEnemy* cannonEnemy = nullptr;
-	GhostBlock* ghostBlock_ = nullptr;
 	Goal* goal_ = nullptr;
 
 	std::vector<AABB> obstacleList_;
 	std::vector<SpringEnemy*> springEnemies_;
 	std::vector<Block*> blocks_;
+	std::vector<GhostBlock*> ghostBlocks_;
 
 	 // 点滅関連の追加変数
 	bool isFlashing = false;          // 点滅中かどうか

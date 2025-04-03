@@ -201,6 +201,9 @@
     <ClCompile Include="GameProgram\Collision.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
+    <ClCompile Include="GameProgram\Enemies\GhostEnemy.cpp">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\2d\Sprite.h">
@@ -361,6 +364,12 @@
     </ClInclude>
     <ClInclude Include="GameProgram\Collision.h">
       <Filter>ソース ファイル\GameProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Enemies\GhostColor.h">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\Enemies\GhostEnemy.h">
+      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
