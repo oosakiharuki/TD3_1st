@@ -2,10 +2,9 @@
 
 void TitleScene::Initialize() {
 	sprite = new Sprite();
-	sprite->Initialize("monsterBall.png");
+	sprite->Initialize("TitleName.png");
 
-	sprite->SetPosition({ 64,64 });
-	sprite->SetSize({ 128,128 });
+	sprite->SetPosition({ 0,-200 });
 }
 
 void TitleScene::Update() {

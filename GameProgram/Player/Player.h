@@ -83,6 +83,8 @@ public:
 	void ClearObstacleList();
 	void CheckDamage();
 
+	void TakeDamage();
+
 private:
 	Vector3 position = {0, 10, -10};
 	Vector3 velocity;

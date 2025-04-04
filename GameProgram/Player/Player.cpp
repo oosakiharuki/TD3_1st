@@ -128,7 +128,7 @@ void Player::Update() {
 		cameraPitch += zCamera * 2.5f;
 	}
 
-	cameraPitch = std::clamp(cameraPitch, 10.0f, 80.0f);
+	cameraPitch = std::clamp(cameraPitch, 0.0f, 80.0f);
 
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
@@ -495,6 +495,10 @@ void Player::SetCannon(CannonEnemy* cannon) { cannonEnemy = cannon; }
 //	position.z = (currentAABB.min.z + currentAABB.max.z) * 0.5f;
 //	worldTransform_.translation_ = position;
 // }
+
+void Player::TakeDamage() {
+	isDamage = true;
+}
 
 void Player::CheckCollisionWithSprings() {
 	for (auto* springEnemy : springEnemies_) {
