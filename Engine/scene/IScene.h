@@ -3,7 +3,7 @@
 
 enum SCENE {
 	Title,
-	Loading, // ロード画面を追加
+	Loading, 
 	Game,
 	Clear,
 	GameOver,

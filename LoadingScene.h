@@ -40,7 +40,7 @@ private:
     LoadState loadState;
 
     // ロード中のゲームシーン
-    GameScene* gameScene;
+    GameScene* gameScene=nullptr;
 
     // ロード完了後の待機時間
     float waitTimer;

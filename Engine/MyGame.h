@@ -2,6 +2,7 @@
 #include "Framework.h"
 #include "GameManager.h"
 
+
 class MyGame : public Framework{
 public:
 	void Initialize() override;

@@ -54,3 +54,15 @@ void GameManager::Update() {
 void GameManager::Draw() {
 	sceneArr_[currentSceneNo_]->Draw();
 }
+void GameManager::Finalize() {
+	sceneArr_[currentSceneNo_]->Finalize();
+	delete sceneArr_[currentSceneNo_];
+	sceneArr_[currentSceneNo_] = nullptr;
+	for (int i = 0; i < SceneNum; i++) {
+		if (sceneArr_[i]) {
+			sceneArr_[i]->Finalize();
+			delete sceneArr_[i];
+			sceneArr_[i] = nullptr;
+		}
+	}
+}

@@ -14,7 +14,7 @@ public:
 	void Initialize();
 	void Update();
 	void Draw();
-	//void Finalize();
+	void Finalize();
 
 private:
 
@@ -27,5 +27,12 @@ private:
 
 	int currentSceneNo_;//現在シーン
 	int prevSceneNo_;//前シーン
+
+	 Player* player_ = nullptr;
+
+    // 敵いろいろ
+    std::vector<Enemy*> enemies_;
+    std::vector<CannonEnemy*> cannonEnemies_;
+    std::vector<SpringEnemy*> springEnemies_;
 
 };

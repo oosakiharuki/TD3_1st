@@ -1,53 +1,48 @@
 #include "MyGame.h"
 
 void MyGame::Initialize() {
+    Framework::Initialize();
 
-	Framework::Initialize();
-
-	gameScene = new GameManager();
-	gameScene->Initialize();
+    gameScene = new GameManager();
+    gameScene->Initialize();
 }
 
 void MyGame::Update() {
-
-	Framework::Update();
-
-#ifdef  USE_IMGUI
-	ImGuiManager::GetInstance()->Begin();
-#endif //  USE_IMGUI
-
-	gameScene->Update();
+    Framework::Update();
 
 #ifdef  USE_IMGUI
-	ImGuiManager::GetInstance()->End();
-#endif //  USE_IMGUI
+    ImGuiManager::GetInstance()->Begin();
+#endif
 
+    gameScene->Update();
+
+#ifdef  USE_IMGUI
+    ImGuiManager::GetInstance()->End();
+#endif
 }
 
 void MyGame::Draw() {
-	//描画開始
-	DirectXCommon::GetInstance()->PreDraw();
+    DirectXCommon::GetInstance()->PreDraw();
 
-	gameScene->Draw();
+    gameScene->Draw();
 
 #ifdef  USE_IMGUI
-	//ImGui描画処理
-	ImGuiManager::GetInstance()->Draw();
-#endif //  USE_IMGUI
+    ImGuiManager::GetInstance()->Draw();
+#endif
 
-	//描画終了
-	DirectXCommon::GetInstance()->PostDraw();
-
+    DirectXCommon::GetInstance()->PostDraw();
 }
 
-
 void MyGame::Finalize() {
-	//gameScene->Finalize();
-	delete gameScene;
+    // シーン側の終了処理
+    if (gameScene) {
+        gameScene->Finalize();
+        delete gameScene;
+        gameScene = nullptr;
+    }
 
-#ifdef  USE_IMGUI
-	ImGuiManager::GetInstance()->Finalize();
-#endif //  USE_IMGUI
+    // ImGuiのFinalizeはFrameworkでやるように変更
 
-	Framework::Finalize();
+    // 最後にFrameworkのFinalize
+    Framework::Finalize();
 }
