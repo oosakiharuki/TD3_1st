@@ -201,10 +201,10 @@
     <ClCompile Include="GameProgram\Collision.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
-    <ClCompile Include="Minimap.cpp">
+    <ClCompile Include="Engine\LoadingScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="LoadingScene.cpp">
+    <ClCompile Include="GameProgram\Minimap.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -368,11 +368,11 @@
     <ClInclude Include="GameProgram\Collision.h">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
-    <ClInclude Include="Minimap.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Engine\LoadingScene.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
-    <ClInclude Include="LoadingScene.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="GameProgram\Minimap.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
