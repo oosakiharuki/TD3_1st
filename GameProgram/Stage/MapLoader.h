@@ -15,7 +15,7 @@ enum class MapObjectType {
 	Key,
 	Door,
 	Block,
-	Tile
+	Tile,
 	ColorWall,
 	Goal // Goalタイプを追加
 };

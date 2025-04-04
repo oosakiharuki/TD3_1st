@@ -212,6 +212,7 @@ void MapLoader::Update() {
 	// すべてのタイルを更新
 	for (auto* tile : tiles_) {
 		tile->Update();
+	}
 
 	//全てのゴーストブロックの更新
 	for (auto* ghostBlock : ghostBlocks_) {
@@ -316,6 +317,7 @@ void MapLoader::ClearResources() {
 	for (auto* tile : tiles_) {
 		delete tile;
 	}
+	tiles_.clear();
 }
 
 void MapLoader::ChangeStage(int stageNumber, Player* player) {
