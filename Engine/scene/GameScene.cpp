@@ -27,6 +27,7 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("player");
 	ModelManager::GetInstance()->LoadModel("space");
 	ModelManager::GetInstance()->LoadModel("Spring");
+	ModelManager::GetInstance()->LoadModel("stage0");//チュートリアル用
 	ModelManager::GetInstance()->LoadModel("stage1");
 	ModelManager::GetInstance()->LoadModel("stage2");
 	ModelManager::GetInstance()->LoadModel("stage3"); 
@@ -68,7 +69,11 @@ void GameScene::Initialize() {
 
 	Vector3 StartPosition;
 	//各ステージのプレイヤー初期位置
-	if (currentStage_ == 1) {
+	if (currentStage_ == 0) {
+		// Stage 2への移行時の座標
+		StartPosition = { 0, 10, 0 };
+	}
+	else if (currentStage_ == 1) {
 		// Stage 2への移行時の座標
 		StartPosition = { 0, 10, -10 };
 	}
@@ -181,7 +186,11 @@ void GameScene::Update() {
 
 		// 次のステージに応じてプレイヤーの座標を設定
 		Vector3 newPosition;
-		if (nextStage == 2) {
+		if (nextStage == 1) {
+			// Stage 2への移行時の座標		
+			newPosition = { 0, 10, -10 };
+		}
+		else if (nextStage == 2) {
 			// Stage 2への移行時の座標
 			newPosition = { -55.070f, 1.649f, -68.019f };
 		}
@@ -411,12 +420,13 @@ void GameScene::UpdateStageAABB() {
 		std::string word;
 
 		getline(line_stream, word, ' ');
+		
+		if (word.find("vn") == 0) {
+			break; //vを読み取ったら終了
+		}
 
 		if (word.find("v") == 0) {
 			cornerNumber++;
-		}
-		else if (word.find("vn") == 0) {
-			break;
 		}
 		else {
 			continue;
