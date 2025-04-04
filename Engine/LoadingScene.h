@@ -23,9 +23,9 @@ public:
 
 private:
     // ロード画面用スプライト
-    Sprite* backgroundSprite;
-    Sprite* loadingBarBgSprite;
-    Sprite* loadingBarFgSprite;
+    Sprite* backgroundSprite = nullptr;
+    Sprite* loadingBarBgSprite = nullptr;
+    Sprite* loadingBarFgSprite = nullptr;
 
     // 実際のロード進行度 (0.0f〜1.0f)
     float loadProgress;
@@ -40,7 +40,7 @@ private:
     LoadState loadState;
 
     // ロード中のゲームシーン
-    GameScene* gameScene=nullptr;
+    GameScene* gameScene;
 
     // ロード完了後の待機時間
     float waitTimer;

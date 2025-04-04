@@ -641,7 +641,66 @@ void DirectXCommon::UpdateFixFPS() {
 }
 
 void DirectXCommon::Finalize() {
-	CloseHandle(fenceEvent);
+	// コマンドリストを完全にフラッシュします
+	if (commandList && commandAllocator && fence) {
+		// 保留中のすべてのコマンドを確実に実行する
+		HRESULT hr = commandList->Close();
+		if (SUCCEEDED(hr)) {
+			ID3D12CommandList* ppCommandLists[] = { commandList.Get() };
+			commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+			// GPU処理の完了を待つ
+			fenceValue++;
+			commandQueue->Signal(fence.Get(), fenceValue);
+
+			if (fence->GetCompletedValue() < fenceValue) {
+				fence->SetEventOnCompletion(fenceValue, fenceEvent);
+				WaitForSingleObject(fenceEvent, INFINITE);
+			}
+		}
+	}
+
+	// ハンドルを安全に閉じる
+	if (fenceEvent) {
+		CloseHandle(fenceEvent);
+		fenceEvent = nullptr;
+	}
+
+	// COMポインタはReleaseによって自動的に解放されます
+	// 明示的なnullptrをセットすることで、順序を制御し
+	// さらにメモリリークをなくします
+	swapChainResources[0].Reset();
+	swapChainResources[1].Reset();
+
+	// スワップチェーンを先に解放
+	swapChain.Reset();
+
+	// ディスクリプタヒープの解放
+	rtvDescriptorHeap.Reset();
+	srvDescriptorHeap.Reset();
+	dsvDescriptorHeap.Reset();
+
+	// デプスバッファリソースの解放
+	resource.Reset();
+
+	// コマンドリソースの解放
+	commandList.Reset();
+	commandAllocator.Reset();
+	commandQueue.Reset();
+
+	// フェンスの解放
+	fence.Reset();
+
+	// DXGIリソースの解放
+	device.Reset();
+	dxgiFactory.Reset();
+
+	// シェーダーコンパイラの解放
+	dxcUtils.Reset();
+	dxcCompiler.Reset();
+	includeHandler.Reset();
+
+	// シングルトンなのでインスタンスポインタを初期化
 	delete instance;
 	instance = nullptr;
 }

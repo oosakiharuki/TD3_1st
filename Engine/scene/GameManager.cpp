@@ -3,24 +3,26 @@
 GameManager::GameManager() {
 	sceneArr_[Title] = new TitleScene();
 	sceneArr_[Loading] = nullptr; // ロードシーンは必要時に作成
+	sceneArr_[Game] = nullptr;
 
 	prevSceneNo_ = 0;
 	currentSceneNo_ = Title;
 }
 
 GameManager::~GameManager() {
-	sceneArr_[currentSceneNo_]->Finalize();
-	delete sceneArr_[currentSceneNo_];
+	// デストラクタでは単にFinalize()を呼び出す
+	Finalize();
 }
 
 void GameManager::SceneChange(int prev, int current) {
+	// 前のシーンの解放
+	if (sceneArr_[prev]) {
+		sceneArr_[prev]->Finalize();
+		delete sceneArr_[prev];
+		sceneArr_[prev] = nullptr;
+	}
 
-	//前のシーンの解放
-	sceneArr_[prev]->Finalize();
-	delete sceneArr_[prev];
-	sceneArr_[prev] = nullptr;
-
-	//scene_ = current;
+	// 新しいシーンの作成
 	switch (current)
 	{
 	case Title:
@@ -34,12 +36,12 @@ void GameManager::SceneChange(int prev, int current) {
 		break;
 	}
 }
+
 void GameManager::Initialize() {
 	sceneArr_[currentSceneNo_]->Initialize();
 }
 
 void GameManager::Update() {
-
 	prevSceneNo_ = currentSceneNo_;
 	currentSceneNo_ = sceneArr_[currentSceneNo_]->GetSceneNo();
 
@@ -54,10 +56,10 @@ void GameManager::Update() {
 void GameManager::Draw() {
 	sceneArr_[currentSceneNo_]->Draw();
 }
+
 void GameManager::Finalize() {
-	sceneArr_[currentSceneNo_]->Finalize();
-	delete sceneArr_[currentSceneNo_];
-	sceneArr_[currentSceneNo_] = nullptr;
+	// ダブルデリートを避けるための修正
+	// 各シーンは一度だけ解放する
 	for (int i = 0; i < SceneNum; i++) {
 		if (sceneArr_[i]) {
 			sceneArr_[i]->Finalize();

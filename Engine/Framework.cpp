@@ -45,31 +45,38 @@ void Framework::Update() {
 
 // Finalizeの順番を整理してみる
 void Framework::Finalize() {
-    // リソースリークチェック
-    D3DResourceLeakChecker leakCheck;
+    // リソースリークチェックを最後に実行するように変更
+    // まずすべてのリソースを解放する
 
     // 1) まずImGuiを解放
-    ImGuiManager::GetInstance()->Finalize();
+    if (ImGuiManager::GetInstance()) {
+        ImGuiManager::GetInstance()->Finalize();
+    }
 
-    // 2) Input解放 (必要ならDeleteも)
+    // 2) Input解放
     if (input_) {
         input_->Finalize();
-        //delete input_; // Singletonならやらない方がいい
-        //input_ = nullptr;
     }
 
     // 3) 各ManagerやCommonを解放
-    TextureManager::GetInstance()->Finalize();
-    ModelManager::GetInstance()->Finalize();
-    ParticleManager::GetInstance()->Finalize();
+    if (TextureManager::GetInstance()) {
+        TextureManager::GetInstance()->Finalize();
+    }
+
+    if (ModelManager::GetInstance()) {
+        ModelManager::GetInstance()->Finalize();
+    }
+
+    if (ParticleManager::GetInstance()) {
+        ParticleManager::GetInstance()->Finalize();
+    }
 
     if (spriteCommon) {
         spriteCommon->Finalize();
-        // spriteCommon = nullptr; // 気になるならこれも
     }
+
     if (object3dCommon) {
         object3dCommon->Finalize();
-        // object3dCommon = nullptr;
     }
 
     // newしたやつはdelete
@@ -77,21 +84,15 @@ void Framework::Finalize() {
         delete modelCommon;
         modelCommon = nullptr;
     }
-    if (particleCommon) {
-        particleCommon->Finalize();
-        // particleCommon = nullptr; // シングルトンじゃないなら
-    }
 
     // 4) SRVマネージャ解放
     if (srvManager) {
         srvManager->Finalize();
-        // srvManager = nullptr; // シングルトンなら削除はしない
     }
 
-    // 5) 最後にdxCommon解放
+    // 5) dxCommon解放
     if (dxCommon) {
         dxCommon->Finalize();
-        // dxCommon = nullptr; // シングルトンでなければdelete
     }
 
     // 6) WinApp解放
@@ -100,6 +101,10 @@ void Framework::Finalize() {
         delete winApp_;
         winApp_ = nullptr;
     }
+
+    // 最後にリソースリークチェックを実行
+    // ここでどのようなリソースがリークしているかログに出力されます
+    D3DResourceLeakChecker leakCheck;
 }
 
 void Framework::Run() {

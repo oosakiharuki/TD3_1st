@@ -201,11 +201,11 @@
     <ClCompile Include="GameProgram\Collision.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\LoadingScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="GameProgram\Minimap.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\LoadingScene.cpp">
+      <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
