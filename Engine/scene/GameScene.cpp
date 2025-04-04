@@ -10,8 +10,6 @@ void GameScene::Finalize() {
 	delete mapLoader_;
 	delete enemyLoader_;
 	delete stage;
-	delete block_;
-	delete ghostBlock_;
 	delete skydome_;
 
 	allObstacles_.clear();
@@ -30,10 +28,17 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("player");
 	ModelManager::GetInstance()->LoadModel("space");
 	ModelManager::GetInstance()->LoadModel("Spring");
+	ModelManager::GetInstance()->LoadModel("stage0");//チュートリアル用
 	ModelManager::GetInstance()->LoadModel("stage1");
+
 //	ModelManager::GetInstance()->LoadModel("stage2");
 	ModelManager::GetInstance()->LoadModel("stage3");
 	ModelManager::GetInstance()->LoadModel("stage4");
+
+	ModelManager::GetInstance()->LoadModel("stage2");
+	ModelManager::GetInstance()->LoadModel("stage3"); 
+	ModelManager::GetInstance()->LoadModel("BlueGhost");
+
 
 
 	camera_ = new Camera();
@@ -48,12 +53,6 @@ void GameScene::Initialize() {
 	ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
 
 	worldTransform_.Initialize();
-
-	block_ = new Block();
-	block_->Init();
-
-	ghostBlock_ = new GhostBlock();
-	ghostBlock_->Init();
 
 	// Playerの生成と初期化
 	player_ = new Player();
@@ -77,7 +76,11 @@ void GameScene::Initialize() {
 
 	Vector3 StartPosition;
 	//各ステージのプレイヤー初期位置
-	if (currentStage_ == 1) {
+	if (currentStage_ == 0) {
+		// Stage 2への移行時の座標
+		StartPosition = { 0, 10, 0 };
+	}
+	else if (currentStage_ == 1) {
 		// Stage 2への移行時の座標
 		StartPosition = { 0, 10, -10 };
 	}
@@ -109,7 +112,7 @@ void GameScene::Initialize() {
 	}
 
 	// 各種敵リストをプレイヤーに設定
-	player_->SetEnemyList(enemyLoader_->GetEnemyList());
+	player_->SetGhostEnemies(enemyLoader_->GetGhostList());
 
 	// キャノン敵への参照をプレイヤーに設定
 	if (!enemyLoader_->GetCannonEnemyList().empty()) {
@@ -122,6 +125,10 @@ void GameScene::Initialize() {
 	// プレイヤーにブロックリストを設定（更新: 単一ブロックではなくリスト全体を渡す）
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
+
+	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
+	player_->SetGhostBlocks(ghostBlocks);
+
 
 	// 障害物リストを Player にセット
 	for (const auto& obstacles : allObstacles_) {
@@ -137,16 +144,12 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
 	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
 		sceneNo = Title;
 	}
-
-	camera_->Update();
-
-
-
-	Input::GetInstance()->GetJoystickState(0, state);
-	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
 	// リスタート処理
 	if (Input::GetInstance()->PushKey(DIK_R) || ((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) && (preState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
@@ -160,6 +163,7 @@ void GameScene::Update() {
 		Finalize();
 		Initialize();
 	}
+
 
 	// MapLoaderが管理するGoalの状態をチェック
 	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear()) {
@@ -182,9 +186,6 @@ void GameScene::Update() {
 	//	springEnemy->Update();
 	//}
 
-	block_->Update();
-	ghostBlock_->Update();
-
 	player_->DrawUI();
 	skydome_->Update();
 
@@ -196,7 +197,11 @@ void GameScene::Update() {
 
 		// 次のステージに応じてプレイヤーの座標を設定
 		Vector3 newPosition;
-		if (nextStage == 2) {
+		if (nextStage == 1) {
+			// Stage 2への移行時の座標		
+			newPosition = { 0, 10, -10 };
+		}
+		else if (nextStage == 2) {
 			// Stage 2への移行時の座標
 			newPosition = { -55.070f, 1.649f, -68.019f };
 		}
@@ -216,6 +221,7 @@ void GameScene::Update() {
 		ChangeStage(nextStage);
 	}
 
+	camera_->Update();
 
 
 
@@ -297,7 +303,7 @@ void GameScene::ChangeStage(int nextStage) {
 	// **プレイヤーと敵の障害物リストをクリア**
 	player_->ClearObstacleList();
 	if (enemyLoader_) {
-		for (auto& enemy : enemyLoader_->GetEnemyList()) {
+		for (auto& enemy : enemyLoader_->GetGhostList()) {
 			enemy->ClearObstacleList();
 		}
 	}
@@ -312,7 +318,7 @@ void GameScene::ChangeStage(int nextStage) {
 	}
 	 
 	// **新しい障害物データをロード**
-	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + ".obj";
+	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj";
 	LoadStage(stageFile);
 
 	// バネ
@@ -331,20 +337,20 @@ void GameScene::ChangeStage(int nextStage) {
 	}
 	enemyLoader_ = new EnemyLoader();
 
-	std::string enemiesFile = "resource/" + std::to_string(currentStage_) + ".csv";
+	std::string enemiesFile = "resource/enemies" + std::to_string(currentStage_) + ".csv";
 	if (enemyLoader_->LoadEnemyData(enemiesFile)) {
 		enemyLoader_->CreateEnemies(player_, allObstacles_);
 	}
 
 	// 敵の当たり判定リストを再設定
-	for (auto& enemy : enemyLoader_->GetEnemyList()) {
+	for (auto& enemy : enemyLoader_->GetGhostList()) {
 		for (const auto& obstacles : allObstacles_) {
 			enemy->SetObstacleList(obstacles);
 		}
 	}
 
 	// プレイヤーに敵リストを設定
-	player_->SetEnemyList(enemyLoader_->GetEnemyList());
+	player_->SetGhostEnemies(enemyLoader_->GetGhostList());
 	player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());
 
 	// キャノン敵への参照をプレイヤーに設定
@@ -355,6 +361,10 @@ void GameScene::ChangeStage(int nextStage) {
 	// プレイヤーにブロックリストを設定（更新：単一ブロックではなくリスト全体を渡す）
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
+
+	// プレイヤーにゴーストブロックの追加
+	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
+	player_->SetGhostBlocks(ghostBlocks);
 
 	// プレイヤーにGoalへの参照を再設定
 	if (mapLoader_ && mapLoader_->GetGoal()) {
@@ -397,14 +407,15 @@ void GameScene::LoadStage(std::string objFile) {
 		player_->SetObstacleList(obstacles);
 	}
 
-	if (enemyLoader_) {
-		for (auto& enemy : enemyLoader_->GetEnemyList()) {
-			enemy->ClearObstacleList();
-			for (const auto& obstacles : allObstacles_) {
-				enemy->SetObstacleList(obstacles);
-			}
-		}
-	}
+	//たまにバグる
+	//if (enemyLoader_) {
+	//	for (auto& enemy : enemyLoader_->GetEnemyList()) {
+	//		enemy->ClearObstacleList();
+	//		for (const auto& obstacles : allObstacles_) {
+	//			enemy->SetObstacleList(obstacles);
+	//		}
+	//	}
+	//}
 }
 
 void GameScene::UpdateStageAABB() {
@@ -424,12 +435,13 @@ void GameScene::UpdateStageAABB() {
 		std::string word;
 
 		getline(line_stream, word, ' ');
+		
+		if (word.find("vn") == 0) {
+			break; //vを読み取ったら終了
+		}
 
 		if (word.find("v") == 0) {
 			cornerNumber++;
-		}
-		else if (word.find("vn") == 0) {
-			break;
 		}
 		else {
 			continue;

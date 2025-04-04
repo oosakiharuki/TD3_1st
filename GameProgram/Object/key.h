@@ -50,8 +50,8 @@ private:
 	// 鍵のID（複数の鍵を区別するため）
 	int keyID_ = 0;
 	Audio* keyGTAudio_ = nullptr;
-	int KeyAudioHandle_ = 0;
-	int KeyGetAudio_ = -1;
+	//int KeyAudioHandle_ = 0;
+	int KeyGetAudio_ = 0;
 
 	// 回転アニメーション用
 	float rotationY_ = 0.0f;

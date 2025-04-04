@@ -2,6 +2,7 @@
 #include "AABB.h"
 #include "WorldTransform.h"
 #include "Object3d.h"
+#include "GhostColor.h"
 
 class GhostBlock {
 public:
@@ -16,9 +17,15 @@ public:
 
     AABB GetAABB() const; // AABBの取得
 
+    void SetPosition(Vector3 position) { worldTransform_.translation_ = position; }
+    
+    ColorType GetColor() { return colorType; }
+    void SetColor(ColorType color) { colorType = color; }
 private:
-    WorldTransform worldTransform;
+    WorldTransform worldTransform_;
     Object3d* model_ = nullptr;
     bool isActive_ = true; // ブロックが有効かどうか
     uint32_t texturehandle_ = 0;
+
+    ColorType colorType = ColorType::Blue;
 };

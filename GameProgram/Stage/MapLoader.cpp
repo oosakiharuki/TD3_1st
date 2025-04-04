@@ -67,7 +67,9 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 			data.type = MapObjectType::Door;
 		} else if (token == "block") {
 			data.type = MapObjectType::Block;
-		} else if (token == "goal") {
+		} else if (token == "colorWall") { 
+			data.type = MapObjectType::ColorWall;
+		} else if (token == "goal") { // goalタイプを追加
 			data.type = MapObjectType::Goal;
 		} else if (token == "tile") {
 			data.type = MapObjectType::Tile;
@@ -79,7 +81,26 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 	}
 
 	// オプションのIDフィールドを読み込む
-	if (std::getline(iss, token, ',')) {
+	if (data.type == MapObjectType::ColorWall) {
+		// 敵タイプを読み込む
+		if (std::getline(iss, token, ',')) {
+			if (token == "Blue") {
+				data.color = ColorType::Blue;
+			}
+			else if (token == "Green") {
+				data.color = ColorType::Green;
+			}
+			else if (token == "Red") {
+				data.color = ColorType::Red;
+			}
+			else {
+				return false; // 未知の敵タイプ
+			}
+		}
+		else {
+			return false;
+		}
+	} else if (std::getline(iss, token, ',')) {
 		// ID値が存在する場合、読み込む
 		data.id = std::stoi(token);
 	} else {
@@ -130,8 +151,13 @@ void MapLoader::CreateObjects(Player* player) {
 			block->Init();
 			block->SetPosition(objectData.position);
 			blocks_.push_back(block);
-		}
-		else if (objectData.type == MapObjectType::Goal) {
+		} else if (objectData.type == MapObjectType::ColorWall) {
+			GhostBlock* ghostBlock = new GhostBlock();
+			ghostBlock->Init();
+			ghostBlock->SetPosition(objectData.position);
+			ghostBlock->SetColor(objectData.color);
+			ghostBlocks_.push_back(ghostBlock);
+		} else if (objectData.type == MapObjectType::Goal) {
 			// Goalの生成
 			if (goal_) {
 				delete goal_;
@@ -183,10 +209,13 @@ void MapLoader::Update() {
 		block->Update();
 	}
 
-
 	// すべてのタイルを更新
 	for (auto* tile : tiles_) {
 		tile->Update();
+
+	//全てのゴーストブロックの更新
+	for (auto* ghostBlock : ghostBlocks_) {
+		ghostBlock->Update();
 	}
 
 	// Goalの更新
@@ -209,6 +238,11 @@ void MapLoader::Draw() {
 	// すべてのブロックを描画
 	for (auto* block : blocks_) {
 		block->Draw();
+	}
+
+	//全てのゴーストブロックの更新
+	for (auto* ghostBlock : ghostBlocks_) {
+		ghostBlock->Draw();
 	}
 
 	// Goalを描画（存在する場合のみ）
@@ -265,6 +299,12 @@ void MapLoader::ClearResources() {
 		delete block;
 	}
 	blocks_.clear();
+
+	//全てのゴーストブロックの更新
+	for (auto* ghostBlock : ghostBlocks_) {
+		delete ghostBlock;
+	}
+	ghostBlocks_.clear();
 
 	// Goalのリソースを解放
 	if (goal_) {

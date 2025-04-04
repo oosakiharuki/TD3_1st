@@ -143,6 +143,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GameProgram\Enemies\Bom.cpp" />
     <ClCompile Include="GameProgram\Enemies\CannonEnemy.cpp" />
     <ClCompile Include="GameProgram\Enemies\Enemy.cpp" />
+    <ClCompile Include="GameProgram\Enemies\GhostEnemy.cpp" />
     <ClCompile Include="GameProgram\Enemies\SpringEnemy.cpp" />
     <ClCompile Include="GameProgram\Object\Block.cpp" />
     <ClCompile Include="GameProgram\Object\Door.cpp" />
@@ -199,6 +200,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GameProgram\Enemies\Bom.h" />
     <ClInclude Include="GameProgram\Enemies\CannonEnemy.h" />
     <ClInclude Include="GameProgram\Enemies\Enemy.h" />
+    <ClInclude Include="GameProgram\Enemies\GhostEnemy.h" />
+    <ClInclude Include="GameProgram\Enemies\GhostColor.h" />
     <ClInclude Include="GameProgram\Enemies\SpringEnemy.h" />
     <ClInclude Include="GameProgram\Object\Block.h" />
     <ClInclude Include="GameProgram\Object\Door.h" />

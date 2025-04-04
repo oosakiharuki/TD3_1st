@@ -11,4 +11,5 @@ public:
 	void Finalize() override;
 private:
 	Sprite* sprite;
+	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 };

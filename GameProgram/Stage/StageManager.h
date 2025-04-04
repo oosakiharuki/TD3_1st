@@ -3,7 +3,7 @@
 #include "AABB.h"
 #include "CannonEnemy.h"
 #include "Door.h"
-#include "Enemy.h"
+#include "GhostEnemy.h"
 #include "Key.h"
 #include "Player.h"
 #include "MoveTile.h"
@@ -37,7 +37,7 @@ public:
 	Player* GetPlayer() const { return player_; }
 
 	// 敵リストへのアクセス
-	const std::vector<Enemy*>& GetEnemyList() const { return enemyList_; }
+	const std::vector<GhostEnemy*>& GetEnemyList() const { return ghostEnemyList_; }
 
 	// 障害物リストへのアクセス
 	const std::vector<std::vector<AABB>>& GetObstacleList() const { return allObstacles_; }
@@ -61,7 +61,7 @@ private:
 
 	// オブジェクト管理
 	Player* player_ = nullptr;
-	std::vector<Enemy*> enemyList_;
+	std::vector<GhostEnemy*> ghostEnemyList_;
 	CannonEnemy* cannonEnemy_ = nullptr;
 	//Ground* ground_ = nullptr;
 	Key* key_ = nullptr;

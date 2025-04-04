@@ -2,6 +2,7 @@
 #ifdef _DEBUG
 #include "ImGuiManager.h"
 #endif
+#include "GhostEnemy.h"
 
 #include <algorithm>
 #include <iostream>
@@ -12,8 +13,6 @@ Player::Player() {}
 
 Player::~Player() { 
 	delete PlayerModel_; 
-	delete block_;
-	delete ghostBlock_;
 }
 
 void Player::Init(Camera* camera) {
@@ -23,8 +22,6 @@ void Player::Init(Camera* camera) {
 	PlayerModel_->Initialize();
 	PlayerModel_->SetModelFile("player");
 	worldTransform_.translation_ = position;
-	block_ = new Block;
-	ghostBlock_ = new GhostBlock;
 }
 
 void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -32,6 +29,10 @@ void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_
 void Player::AddObstacle(const AABB& obstacle) { obstacleList_.push_back(obstacle); }
 
 void Player::Update() {
+
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
 	// キーボードとGamePad左スティックの入力を合算して移動処理する
 	float keyboardSpeed = 0.55f;
 	Vector3 inputVec = {0.0f, 0.0f, 0.0f};
@@ -127,13 +128,20 @@ void Player::Update() {
 		cameraPitch += zCamera * 2.5f;
 	}
 
-	cameraPitch = std::clamp(cameraPitch, 10.0f, 60.0f);
+	cameraPitch = std::clamp(cameraPitch, 0.0f, 80.0f);
 
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
 	worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
 
-	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
+	//if (velocityY_ == 0.0f) {
+	//	onGround_ = true;
+	//}
+	//else {
+	//	onGround_ = false;
+	//}
+
 
 	// ジャンプ・移動時の各種処理
 	if (!onGround_) {
@@ -148,19 +156,19 @@ void Player::Update() {
 		isTransfar = false;
 	}
 
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && onGround_) {
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && velocityY_ == 0.0f) {
 		velocityY_ = 0.3f;
 		onGround_ = false;
-	} else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && onGround_) {
+	} else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && velocityY_ == 0.0f) {
 		velocityY_ = 0.3f;
 		onGround_ = false;
 	}
 
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B) && onGround_ && EnemyContral) {
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B) && velocityY_ == 0.0f && EnemyContral) {
 		velocityY_ = 0.0f;
 		EnemyContral = false;
 		onEnemy = true;
-	} else if (Input::GetInstance()->TriggerKey(DIK_K) && onGround_ && EnemyContral) {
+	} else if (Input::GetInstance()->TriggerKey(DIK_K) && velocityY_ == 0.0f && EnemyContral) {
 		velocityY_ = 0.0f;
 		EnemyContral = false;
 		onEnemy = true;
@@ -248,7 +256,7 @@ void Player::Update() {
 	}
 
 	// 敵との衝突処理
-	for (auto it = enemyList_.begin(); it != enemyList_.end();) {
+	for (auto it = ghostEnemies_.begin(); it != ghostEnemies_.end();) {
 		enemyAABB = (*it)->GetAABB();
 		if (IsCollisionAABB(playerAABB, enemyAABB)) {
 
@@ -318,65 +326,127 @@ void Player::Update() {
 	ImGui::End();
 #endif
 
+	//速すぎてものが貫通しないようにする
+	velocityY_ = std::clamp(velocityY_, -20.0f, 20.0f);
+
 	worldTransform_.UpdateMatrix();
 
 	cameraController_.Update(camera_, position);
 }
 
 void Player::CheckCollision() {
-	// ブロックリストが空の場合は処理を行わない
-	if (blocks_.empty()) {
-		return;
-	}
+	//if (!block_->IsActive() && !ghostBlock_->IsActive()) {
+	//	return;
+	//}
 
-	// 重複宣言を避けるため、1回だけ宣言する
-	AABB mainBlockAABB = block_->GetAABB();
-	AABB ghostBlockAABB = ghostBlock_->GetAABB();
-
-	// 現在の状態に応じて各ブロックとの衝突判定を行う
-	switch (currentState) {
-	case State::Normal:
-		// 通常状態：すべてのブロックと衝突判定
-		for (Block* block : blocks_) {
-			if (block && block->IsActive()) {
-				// 変数名を変えて、重複を回避
-				AABB currentBlockAABB = block->GetAABB();
-				if (IsCollisionAABB(playerAABB, currentBlockAABB)) {
-					ResolveAABBCollision(playerAABB, currentBlockAABB, velocityY_, onGround_);
+	for (auto* block_ : blocks_) {
+		AABB blockAABB = block_->GetAABB();
+		switch (currentState) {
+		case State::Bomb:
+			for (Bom* bom : cannonEnemy->GetBom()) {
+				AABB bomAABB = bom->GetAABB();
+				if (block_->IsActive() && IsCollisionAABB(bomAABB, blockAABB) && cannonEnemy->GetPlayerCtrl()) {
+					block_->SetActive(false);
 				}
 			}
+			break;
 		}
-		if (ghostBlock_->IsActive() && IsCollisionAABB(playerAABB, ghostBlockAABB)) {
-			ResolveAABBCollision(playerAABB, ghostBlockAABB, velocityY_, onGround_);
+		if (block_->IsActive() && IsCollisionAABB(playerAABB, blockAABB)) {
+			ResolveAABBCollision(playerAABB, blockAABB, velocityY_, onGround_);
 		}
-		break;
+	}
 
-	case State::Bomb:
-		// 爆弾状態：衝突判定とブロック破壊
-		for (Block* block : blocks_) {
-			if (block && block->IsActive()) {
-				// 変数名を変えて、重複を回避
-				AABB currentBlockAABB = block->GetAABB();
-				if (IsCollisionAABB(playerAABB, currentBlockAABB)) {
-					ResolveAABBCollision(playerAABB, currentBlockAABB, velocityY_, onGround_);
-				}
+	for (auto* ghostBlock_ : ghostBlocks_) {
+		AABB ghostBlockAABB = ghostBlock_->GetAABB();
 
-				// キャノン敵の弾との衝突判定
-				for (Bom* bom : cannonEnemy->GetBom()) {
-					AABB bomAABB = bom->GetAABB();
-					if (IsCollisionAABB(bomAABB, currentBlockAABB) && cannonEnemy->GetPlayerCtrl()) {
-						block->SetActive(false);
+
+		switch (currentState) {
+		case State::Normal:
+			if (ghostBlock_->IsActive() && IsCollisionAABB(playerAABB, ghostBlockAABB)) {
+				ResolveAABBCollision(playerAABB, ghostBlockAABB, velocityY_, onGround_);
+			}
+			break;
+
+		case State::Bomb:
+			if (ghostBlock_->IsActive() && IsCollisionAABB(playerAABB, ghostBlockAABB)) {
+				ResolveAABBCollision(playerAABB, ghostBlockAABB, velocityY_, onGround_);
+			}
+
+			break;
+
+		case State::Ghost:
+			for (auto* it : ghostEnemies_) {
+				if (ghostBlock_->IsActive() && IsCollisionAABB(playerAABB, ghostBlockAABB) && it->GetPlayerCtrl()) {
+					if (ghostBlock_->GetColor() == it->GetColor()) {
+						velocity.x = 0;
 					}
+					else {
+						ResolveAABBCollision(playerAABB, ghostBlockAABB, velocityY_, onGround_);
+					}
+
 				}
 			}
+			break;
 		}
-		break;
-
-	case State::Ghost:
-		// ゴースト状態：衝突判定なし
-		break;
 	}
+
 }
+
+//
+//void Player::CheckCollision() {
+//	// ブロックリストが空の場合は処理を行わない
+//	if (blocks_.empty()) {
+//		return;
+//	}
+//
+//	// 重複宣言を避けるため、1回だけ宣言する
+//	AABB mainBlockAABB = block_->GetAABB();
+//	AABB ghostBlockAABB = ghostBlock_->GetAABB();
+//
+//	// 現在の状態に応じて各ブロックとの衝突判定を行う
+//	switch (currentState) {
+//	case State::Normal:
+//		// 通常状態：すべてのブロックと衝突判定
+//		for (Block* block : blocks_) {
+//			if (block && block->IsActive()) {
+//				// 変数名を変えて、重複を回避
+//				AABB currentBlockAABB = block->GetAABB();
+//				if (IsCollisionAABB(playerAABB, currentBlockAABB)) {
+//					ResolveAABBCollision(playerAABB, currentBlockAABB, velocityY_, onGround_);
+//				}
+//			}
+//		}
+//		if (ghostBlock_->IsActive() && IsCollisionAABB(playerAABB, ghostBlockAABB)) {
+//			ResolveAABBCollision(playerAABB, ghostBlockAABB, velocityY_, onGround_);
+//		}
+//		break;
+//
+//	case State::Bomb:
+//		// 爆弾状態：衝突判定とブロック破壊
+//		for (Block* block : blocks_) {
+//			if (block && block->IsActive()) {
+//				// 変数名を変えて、重複を回避
+//				AABB currentBlockAABB = block->GetAABB();
+//				if (IsCollisionAABB(playerAABB, currentBlockAABB)) {
+//					ResolveAABBCollision(playerAABB, currentBlockAABB, velocityY_, onGround_);
+//				}
+//
+//				// キャノン敵の弾との衝突判定
+//				for (Bom* bom : cannonEnemy->GetBom()) {
+//					AABB bomAABB = bom->GetAABB();
+//					if (IsCollisionAABB(bomAABB, currentBlockAABB) && cannonEnemy->GetPlayerCtrl()) {
+//						block->SetActive(false);
+//					}
+//				}
+//			}
+//		}
+//		break;
+//
+//	case State::Ghost:
+//		// ゴースト状態：衝突判定なし
+//		break;
+//	}
+//}
 
 void Player::DrawUI() {
 
@@ -415,7 +485,7 @@ void Player::Draw() {
 	PlayerModel_->Draw(worldTransform_);
 }
 
-void Player::SetEnemyList(const std::vector<Enemy*>& enemies) { enemyList_ = enemies; }
+void Player::SetGhostEnemies(const std::vector<GhostEnemy*>& enemies) { ghostEnemies_ = enemies; }
 
 void Player::SetSpringEnemies(const std::vector<SpringEnemy*>& springEnemies) { springEnemies_ = springEnemies; }
 
@@ -430,6 +500,10 @@ void Player::SetCannon(CannonEnemy* cannon) { cannonEnemy = cannon; }
 //	position.z = (currentAABB.min.z + currentAABB.max.z) * 0.5f;
 //	worldTransform_.translation_ = position;
 // }
+
+void Player::TakeDamage() {
+	isDamage = true;
+}
 
 void Player::CheckCollisionWithSprings() {
 	for (auto* springEnemy : springEnemies_) {

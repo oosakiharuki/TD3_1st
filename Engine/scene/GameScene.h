@@ -63,10 +63,10 @@ private:
 	// EnemyLoaderのインスタンス
 	EnemyLoader* enemyLoader_ = nullptr;
 
-	Block* block_ = nullptr;
+	//Block* block_ = nullptr;
 	//Model* modelBlock_ = nullptr;
 
-	GhostBlock* ghostBlock_ = nullptr;
+	//GhostBlock* ghostBlock_ = nullptr;
 	//Model* modelGhostBlock_ = nullptr;
 
 	// 天球
@@ -74,7 +74,7 @@ private:
 	//Model* modelSkydome_ = nullptr;
 
 	// 現在のステージ番号
-	int currentStage_ = 4;
+	int currentStage_ = 0;
 
 	float longPress = 1.0f;
 	const float RestartTimer = 1.0f;

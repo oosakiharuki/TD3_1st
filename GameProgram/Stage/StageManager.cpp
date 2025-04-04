@@ -19,10 +19,10 @@ StageManager::~StageManager() {
 		delete cannonEnemy_;
 
 	// 敵の解放
-	for (auto enemy : enemyList_) {
+	for (auto enemy : ghostEnemyList_) {
 		delete enemy;
 	}
-	enemyList_.clear();
+	ghostEnemyList_.clear();
 }
 
 void StageManager::Initialize(uint32_t textureHandle) {
@@ -54,56 +54,56 @@ void StageManager::InitializeStage(int stageNumber) {
 	ResetPlayerPosition(stageNumber);
 
 	// 既存の敵を削除
-	for (auto enemy : enemyList_) {
+	for (auto enemy : ghostEnemyList_) {
 		delete enemy;
 	}
-	enemyList_.clear();
+	ghostEnemyList_.clear();
 
 	// ステージごとの敵配置
 	if (stageNumber == 1) {
 		// 第1ステージの敵配置
 		for (int i = 0; i < 5; ++i) {
-			Enemy* enemy = new Enemy();
+			GhostEnemy* enemy = new GhostEnemy();
 			enemy->Init();
 			for (const auto& obstacles : allObstacles_) {
 				enemy->SetObstacleList(obstacles);
 			}
-			enemyList_.push_back(enemy);
+			ghostEnemyList_.push_back(enemy);
 		}
 
 		// 各Enemyの初期位置を設定
-		if (enemyList_.size() > 0)
-			enemyList_[0]->SetPosition({-20.0f, 10.0f, -10.0f});
-		if (enemyList_.size() > 1)
-			enemyList_[1]->SetPosition({-10.0f, 10.0f, -10.0f});
-		if (enemyList_.size() > 2)
-			enemyList_[2]->SetPosition({20.0f, 10.0f, -20.0f});
-		if (enemyList_.size() > 3)
-			enemyList_[3]->SetPosition({-40.0f, 10.0f, -10.0f});
-		if (enemyList_.size() > 4)
-			enemyList_[4]->SetPosition({50.0f, 10.0f, -20.0f});
+		if (ghostEnemyList_.size() > 0)
+			ghostEnemyList_[0]->SetPosition({-20.0f, 10.0f, -10.0f});
+		if (ghostEnemyList_.size() > 1)
+			ghostEnemyList_[1]->SetPosition({-10.0f, 10.0f, -10.0f});
+		if (ghostEnemyList_.size() > 2)
+			ghostEnemyList_[2]->SetPosition({20.0f, 10.0f, -20.0f});
+		if (ghostEnemyList_.size() > 3)
+			ghostEnemyList_[3]->SetPosition({-40.0f, 10.0f, -10.0f});
+		if (ghostEnemyList_.size() > 4)
+			ghostEnemyList_[4]->SetPosition({50.0f, 10.0f, -20.0f});
 	} else if (stageNumber == 2) {
 		// 第2ステージの敵配置（位置を変更）
 		for (int i = 0; i < 5; ++i) {
-			Enemy* enemy = new Enemy();
+			GhostEnemy* enemy = new GhostEnemy();
 			enemy->Init();
 			for (const auto& obstacles : allObstacles_) {
 				enemy->SetObstacleList(obstacles);
 			}
-			enemyList_.push_back(enemy);
+			ghostEnemyList_.push_back(enemy);
 		}
 
 		// 第2ステージでは敵の位置を変更
-		if (enemyList_.size() > 0)
-			enemyList_[0]->SetPosition({15.0f, 10.0f, -15.0f});
-		if (enemyList_.size() > 1)
-			enemyList_[1]->SetPosition({-25.0f, 10.0f, -15.0f});
-		if (enemyList_.size() > 2)
-			enemyList_[2]->SetPosition({0.0f, 10.0f, -30.0f});
-		if (enemyList_.size() > 3)
-			enemyList_[3]->SetPosition({-20.0f, 10.0f, -40.0f});
-		if (enemyList_.size() > 4)
-			enemyList_[4]->SetPosition({20.0f, 10.0f, -40.0f});
+		if (ghostEnemyList_.size() > 0)
+			ghostEnemyList_[0]->SetPosition({15.0f, 10.0f, -15.0f});
+		if (ghostEnemyList_.size() > 1)
+			ghostEnemyList_[1]->SetPosition({-25.0f, 10.0f, -15.0f});
+		if (ghostEnemyList_.size() > 2)
+			ghostEnemyList_[2]->SetPosition({0.0f, 10.0f, -30.0f});
+		if (ghostEnemyList_.size() > 3)
+			ghostEnemyList_[3]->SetPosition({-20.0f, 10.0f, -40.0f});
+		if (ghostEnemyList_.size() > 4)
+			ghostEnemyList_[4]->SetPosition({20.0f, 10.0f, -40.0f});
 	}
 
 	// CannonEnemyの再初期化
@@ -123,7 +123,7 @@ void StageManager::InitializeStage(int stageNumber) {
 		for (const auto& obstacles : allObstacles_) {
 			player_->SetObstacleList(obstacles);
 		}
-		player_->SetEnemyList(enemyList_);
+		player_->SetGhostEnemies(ghostEnemyList_);
 		player_->SetCannon(cannonEnemy_);
 	}
 
@@ -204,11 +204,11 @@ void StageManager::Update() {
 	}
 
 	// 敵の更新
-	for (auto it = enemyList_.begin(); it != enemyList_.end();) {
+	for (auto it = ghostEnemyList_.begin(); it != ghostEnemyList_.end();) {
 		(*it)->Update();
-		if (player_ && std::find(player_->enemyList_.begin(), player_->enemyList_.end(), *it) == player_->enemyList_.end()) {
+		if (player_ && std::find(player_->ghostEnemies_.begin(), player_->ghostEnemies_.end(), *it) == player_->ghostEnemies_.end()) {
 			delete *it;
-			it = enemyList_.erase(it);
+			it = ghostEnemyList_.erase(it);
 		} else {
 			++it;
 		}
@@ -256,7 +256,7 @@ void StageManager::Draw() {
 	}
 
 	// 敵の描画
-	for (auto enemy : enemyList_) {
+	for (auto enemy : ghostEnemyList_) {
 		enemy->Draw();
 	}
 

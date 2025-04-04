@@ -1,6 +1,7 @@
 #pragma once
 #include "CannonEnemy.h"
-#include "Enemy.h"
+//#include "Enemy.h"
+#include "GhostEnemy.h"
 #include "Player.h"
 #include "SpringEnemy.h"
 #include <fstream>
@@ -10,7 +11,7 @@
 
 // 敵オブジェクトの種類を表す列挙型
 enum class EnemyType {
-	Normal, // 通常の敵
+	Ghost, // イロオバケ敵
 	Cannon, // 大砲敵
 	Spring  // バネ敵
 };
@@ -19,6 +20,7 @@ enum class EnemyType {
 struct EnemyData {
 	Vector3 position;
 	EnemyType type;
+	ColorType colorType;
 };
 
 class EnemyLoader {
@@ -39,7 +41,8 @@ public:
 	void Draw();
 
 	// 各種敵リストへのアクセッサ
-	const std::vector<Enemy*>& GetEnemyList() const { return enemies_; }
+	//const std::vector<Enemy*>& GetEnemyList() const { return enemies_; }
+	const std::vector<GhostEnemy*>& GetGhostList() const { return ghostEnemies_; }
 	const std::vector<CannonEnemy*>& GetCannonEnemyList() const { return cannonEnemies_; }
 	const std::vector<SpringEnemy*>& GetSpringEnemyList() const { return springEnemies_; }
 
@@ -48,7 +51,8 @@ private:
 	std::vector<EnemyData> enemyData_;
 
 	// 生成された各種敵のリスト
-	std::vector<Enemy*> enemies_;
+	//std::vector<Enemy*> enemies_;
+	std::vector<GhostEnemy*> ghostEnemies_;
 	std::vector<CannonEnemy*> cannonEnemies_;
 	std::vector<SpringEnemy*> springEnemies_;
 
