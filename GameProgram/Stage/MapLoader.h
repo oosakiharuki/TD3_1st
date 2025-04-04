@@ -2,6 +2,7 @@
 #include "Block.h"
 #include "Door.h"
 #include "Goal.h" 
+#include "MoveTile.h"
 #include "Key.h"
 #include "Player.h"
 #include <fstream>
@@ -14,7 +15,8 @@ enum class MapObjectType {
 	Key,
 	Door,
 	Block,
-	Goal // Goalタイプを追加
+	Goal,
+	Tile
 };
 
 // CSVから読み込んだオブジェクトデータの構造体
@@ -80,6 +82,9 @@ private:
 
 	// 生成されたブロックのリスト
 	std::vector<Block*> blocks_;
+
+	// 生成されたタイルのリスト
+	std::vector<MoveTile*> tiles_;
 
 	// Goal（追加）
 	Goal* goal_ = nullptr;

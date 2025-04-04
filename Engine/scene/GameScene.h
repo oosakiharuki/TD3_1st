@@ -74,7 +74,7 @@ private:
 	//Model* modelSkydome_ = nullptr;
 
 	// 現在のステージ番号
-	int currentStage_ = 1;
+	int currentStage_ = 4;
 
 	float longPress = 1.0f;
 	const float RestartTimer = 1.0f;

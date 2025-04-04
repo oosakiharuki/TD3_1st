@@ -22,6 +22,7 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("cannon");
 	ModelManager::GetInstance()->LoadModel("cube");
 	ModelManager::GetInstance()->LoadModel("door");
+	ModelManager::GetInstance()->LoadModel("tile");
 	ModelManager::GetInstance()->LoadModel("EnemyBullet");
 	ModelManager::GetInstance()->LoadModel("EnemyGhost");
 	ModelManager::GetInstance()->LoadModel("goal");
@@ -30,8 +31,9 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("space");
 	ModelManager::GetInstance()->LoadModel("Spring");
 	ModelManager::GetInstance()->LoadModel("stage1");
-	//ModelManager::GetInstance()->LoadModel("stage2");
+//	ModelManager::GetInstance()->LoadModel("stage2");
 	ModelManager::GetInstance()->LoadModel("stage3");
+	ModelManager::GetInstance()->LoadModel("stage4");
 
 
 	camera_ = new Camera();
@@ -86,6 +88,10 @@ void GameScene::Initialize() {
 	else if (currentStage_ == 3) {
 		// Stage 3への移行時の座標
 		StartPosition = { -37.0f, -18.512f, -51.500f };
+	}
+	else if (currentStage_ == 4) {
+		// Stage 3への移行時の座標
+		StartPosition = { 27.256f, 100.018f, 25.295f };
 	}
 
 	player_->SetPosition(StartPosition);
@@ -197,6 +203,10 @@ void GameScene::Update() {
 		else if (nextStage == 3) {
 			// Stage 3への移行時の座標
 			newPosition = { -37.0f, -18.512f, -51.500f };
+		}
+		else if (currentStage_ == 4) {
+			// Stage 3への移行時の座標
+			newPosition = { 42.096f, 69.548f, 3.163f };
 		}
 
 		// プレイヤーの座標を変更

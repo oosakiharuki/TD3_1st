@@ -155,6 +155,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GameProgram\Stage\MapChip.cpp" />
     <ClCompile Include="GameProgram\Stage\MapLoader.cpp" />
     <ClCompile Include="GameProgram\Stage\StageManager.cpp" />
+    <ClCompile Include="MoveTile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\2d\ImGuiManager.h" />
@@ -210,6 +211,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GameProgram\Stage\MapChip.h" />
     <ClInclude Include="GameProgram\Stage\MapLoader.h" />
     <ClInclude Include="GameProgram\Stage\StageManager.h" />
+    <ClInclude Include="MoveTile.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

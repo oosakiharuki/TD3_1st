@@ -201,6 +201,9 @@
     <ClCompile Include="GameProgram\Collision.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
+    <ClCompile Include="MoveTile.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\2d\Sprite.h">
@@ -361,6 +364,9 @@
     </ClInclude>
     <ClInclude Include="GameProgram\Collision.h">
       <Filter>ソース ファイル\GameProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveTile.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
