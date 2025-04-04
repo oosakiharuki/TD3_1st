@@ -1,15 +1,16 @@
 #pragma once
 #include <cstdint>
 
-enum SCENE{
+enum SCENE {
 	Title,
+	Loading, // ロード画面を追加
 	Game,
 	Clear,
 	GameOver,
 };
 
 
-class IScene{
+class IScene {
 protected:
 	static int sceneNo;
 

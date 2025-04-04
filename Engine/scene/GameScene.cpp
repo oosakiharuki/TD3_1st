@@ -23,126 +23,136 @@ void GameScene::Finalize() {
 }
 
 void GameScene::Initialize() {
+	// 段階的な初期化を呼び出す
+	InitializeLoadingStep1();
+	InitializeLoadingStep2();
+	InitializeLoadingStep3();
+}
 
-	ModelManager::GetInstance()->LoadModel("cannon");
-	ModelManager::GetInstance()->LoadModel("cube");
-	ModelManager::GetInstance()->LoadModel("door");
-	ModelManager::GetInstance()->LoadModel("EnemyBullet");
-	ModelManager::GetInstance()->LoadModel("EnemyGhost");
-	ModelManager::GetInstance()->LoadModel("goal");
-	ModelManager::GetInstance()->LoadModel("key");
-	ModelManager::GetInstance()->LoadModel("player");
-	ModelManager::GetInstance()->LoadModel("space");
-	ModelManager::GetInstance()->LoadModel("Spring");
-	ModelManager::GetInstance()->LoadModel("stage1");
-	ModelManager::GetInstance()->LoadModel("stage2");
-	ModelManager::GetInstance()->LoadModel("stage3");
+// ステップ1: カメラと基本オブジェクトの初期化
+bool GameScene::InitializeLoadingStep1() {
+	try {
+		camera_ = new Camera();
+		Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
+		ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
 
+		worldTransform_.Initialize();
 
-	camera_ = new Camera();
-	//cameraRotate = { 1.4f,0.0f,0.0f };
-	//cameraTranslate = { 0.0f,30.0f,-8.0f };
-	//cameraRotate = { 0.0f,0.0f,0.0f };
-	//cameraTranslate = { 0.0f,0.0f,-15.0f };
-	//camera_->SetRotate(cameraRotate);
-	//camera_->SetTranslate(cameraTranslate);
-	
-	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
-	ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
+		block_ = new Block();
+		block_->Init();
 
-	worldTransform_.Initialize();
+		ghostBlock_ = new GhostBlock();
+		ghostBlock_->Init();
 
-	block_ = new Block();
-	block_->Init();
+		// 天球の生成
+		skydome_ = new Skydome();
+		// 天球の初期化
+		skydome_->Initialize();
 
-	ghostBlock_ = new GhostBlock();
-	ghostBlock_->Init();
-
-	// Playerの生成と初期化
-	player_ = new Player();
-	player_->Init(camera_);
-
-	stage = new Object3d();
-	stage->Initialize();
-	stage->SetModelFile("stage" + std::to_string(currentStage_));
-
-	// 天球の生成
-	skydome_ = new Skydome();
-	// 天球の初期化
-	skydome_->Initialize();
-
-	// MapLoaderの初期化
-	mapLoader_ = new MapLoader();
-	std::string objectsFile = "resource/objects" + std::to_string(currentStage_) + ".csv";
-	if (mapLoader_->LoadMapData(objectsFile)) {
-		mapLoader_->CreateObjects(player_);
+		return true;
 	}
-
-	Vector3 StartPosition;
-	//各ステージのプレイヤー初期位置
-	if (currentStage_ == 1) {
-		// Stage 2への移行時の座標
-		StartPosition = { 0, 10, -10 };
+	catch (...) {
+		return false;
 	}
-	else if (currentStage_ == 2) {
-		// Stage 2への移行時の座標
-		StartPosition = { -55.070f, 1.649f, -68.019f };
+}
+
+// ステップ2: マップとプレイヤーの初期化
+bool GameScene::InitializeLoadingStep2() {
+	try {
+		// Playerの生成と初期化
+		player_ = new Player();
+		player_->Init(camera_);
+
+		stage = new Object3d();
+		stage->Initialize();
+		stage->SetModelFile("stage" + std::to_string(currentStage_));
+
+		// MapLoaderの初期化
+		mapLoader_ = new MapLoader();
+		std::string objectsFile = "resource/objects" + std::to_string(currentStage_) + ".csv";
+		if (mapLoader_->LoadMapData(objectsFile)) {
+			mapLoader_->CreateObjects(player_);
+		}
+
+		Vector3 StartPosition;
+		//各ステージのプレイヤー初期位置
+		if (currentStage_ == 1) {
+			// Stage 2への移行時の座標
+			StartPosition = { 0, 10, -10 };
+		}
+		else if (currentStage_ == 2) {
+			// Stage 2への移行時の座標
+			StartPosition = { -55.070f, 1.649f, -68.019f };
+		}
+		else if (currentStage_ == 3) {
+			// Stage 3への移行時の座標
+			StartPosition = { -37.0f, -18.512f, -51.500f };
+		}
+
+		player_->SetPosition(StartPosition);
+
+		// 障害物情報の読み込み
+		LoadStage("resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj");
+
+		return true;
 	}
-	else if (currentStage_ == 3) {
-		// Stage 3への移行時の座標
-		StartPosition = { -37.0f, -18.512f, -51.500f };
+	catch (...) {
+		return false;
 	}
+}
 
-	player_->SetPosition(StartPosition);
+// ステップ3: 敵と当たり判定の初期化
+bool GameScene::InitializeLoadingStep3() {
+	try {
+		// EnemyLoaderの生成と初期化
+		enemyLoader_ = new EnemyLoader();
+		std::string enemiesFile = "resource/enemies" + std::to_string(currentStage_) + ".csv";
+		// CSVから敵の情報を読み込み
+		if (enemyLoader_->LoadEnemyData(enemiesFile)) {
+			// 敵を生成
+			enemyLoader_->CreateEnemies(player_, allObstacles_);
+		}
 
-	// 障害物情報の読み込み
-	LoadStage("resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj");
+		// 各種敵リストをプレイヤーに設定
+		player_->SetEnemyList(enemyLoader_->GetEnemyList());
 
-	// EnemyLoaderの生成と初期化
-	enemyLoader_ = new EnemyLoader();
-	std::string enemiesFile = "resource/enemies" + std::to_string(currentStage_) + ".csv";
-	// CSVから敵の情報を読み込み
-	if (enemyLoader_->LoadEnemyData(enemiesFile)) {
-		// 敵を生成
-		enemyLoader_->CreateEnemies(player_, allObstacles_);
+		// キャノン敵への参照をプレイヤーに設定
+		if (!enemyLoader_->GetCannonEnemyList().empty()) {
+			player_->SetCannon(enemyLoader_->GetCannonEnemyList()[0]); // 一番最初のキャノン敵を設定
+		}
+
+		// バネ敵への参照をプレイヤーに設定
+		player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());
+
+		// プレイヤーにブロックリストを設定（更新: 単一ブロックではなくリスト全体を渡す）
+		const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
+		player_->SetBlocks(blocks);
+
+		// 障害物リストを Player にセット
+		for (const auto& obstacles : allObstacles_) {
+			player_->SetObstacleList(obstacles);
+		}
+
+		// プレイヤーにGoalへの参照を設定
+		if (mapLoader_ && mapLoader_->GetGoal()) {
+			player_->SetGoal(mapLoader_->GetGoal());
+		}
+
+		minimap_ = new Minimap();
+		minimap_->Initialize();
+		minimap_->SetPlayer(player_);
+
+		if (mapLoader_) {
+			minimap_->SetKeys(mapLoader_->GetKeys());
+			minimap_->SetDoors(mapLoader_->GetDoors());
+			minimap_->SetGoal(mapLoader_->GetGoal());
+		}
+
+		return true;
 	}
-
-	// 各種敵リストをプレイヤーに設定
-	player_->SetEnemyList(enemyLoader_->GetEnemyList());
-
-	// キャノン敵への参照をプレイヤーに設定
-	if (!enemyLoader_->GetCannonEnemyList().empty()) {
-		player_->SetCannon(enemyLoader_->GetCannonEnemyList()[0]); // 一番最初のキャノン敵を設定
+	catch (...) {
+		return false;
 	}
-
-	// バネ敵への参照をプレイヤーに設定
-	player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());
-
-	// プレイヤーにブロックリストを設定（更新: 単一ブロックではなくリスト全体を渡す）
-	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
-	player_->SetBlocks(blocks);
-
-	// 障害物リストを Player にセット
-	for (const auto& obstacles : allObstacles_) {
-		player_->SetObstacleList(obstacles);
-	}
-
-	// プレイヤーにGoalへの参照を設定
-	if (mapLoader_ && mapLoader_->GetGoal()) {
-		player_->SetGoal(mapLoader_->GetGoal());
-	}
-
-	minimap_ = new Minimap();
-	minimap_->Initialize();
-	minimap_->SetPlayer(player_);
-
-	if (mapLoader_) {
-		minimap_->SetKeys(mapLoader_->GetKeys());
-		minimap_->SetDoors(mapLoader_->GetDoors());
-		minimap_->SetGoal(mapLoader_->GetGoal());
-	}
-
-
 }
 
 void GameScene::Update() {
@@ -321,7 +331,7 @@ void GameScene::ChangeStage(int nextStage) {
 			mapLoader_->CreateObjects(player_);
 		}
 	}
-	 
+
 	// **新しい障害物データをロード**
 	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj";
 	LoadStage(stageFile);

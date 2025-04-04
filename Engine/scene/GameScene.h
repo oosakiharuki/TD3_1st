@@ -32,6 +32,12 @@ public:
 	~GameScene();
 
 	void Initialize() override;
+
+	// 段階的な初期化メソッド（ロード画面用）
+	bool InitializeLoadingStep1(); // カメラと基本オブジェクト初期化
+	bool InitializeLoadingStep2(); // マップとプレイヤー初期化
+	bool InitializeLoadingStep3(); // 敵と当たり判定の初期化
+
 	void Update() override;
 	void Draw() override;
 	void Finalize() override;

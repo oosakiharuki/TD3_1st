@@ -2,8 +2,9 @@
 
 #include <memory>
 #include "IScene.h"
-#include "GameScene.h"//geme
-#include "TitleScene.h"//title
+#include "GameScene.h"     // ゲーム
+#include "TitleScene.h"    // タイトル
+#include "LoadingScene.h"  // ロード画面
 
 class GameManager {
 public:
@@ -16,11 +17,11 @@ public:
 	//void Finalize();
 
 private:
-	
-	void SceneChange(int prev,int current);//シーン入れ替え
+
+	void SceneChange(int prev, int current);//シーン入れ替え
 
 	//ステージの最大数
-	static const uint32_t SceneNum = 2;
+	static const uint32_t SceneNum = 3; // ロード画面を追加したので3に増やす
 
 	IScene* sceneArr_[SceneNum];
 

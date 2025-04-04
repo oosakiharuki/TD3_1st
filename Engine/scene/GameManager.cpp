@@ -2,6 +2,7 @@
 
 GameManager::GameManager() {
 	sceneArr_[Title] = new TitleScene();
+	sceneArr_[Loading] = nullptr; // ロードシーンは必要時に作成
 
 	prevSceneNo_ = 0;
 	currentSceneNo_ = Title;
@@ -25,6 +26,9 @@ void GameManager::SceneChange(int prev, int current) {
 	case Title:
 		sceneArr_[current] = new TitleScene();
 		break;
+	case Loading:
+		sceneArr_[current] = new LoadingScene();
+		break;
 	case Game:
 		sceneArr_[current] = new GameScene();
 		break;
@@ -40,7 +44,7 @@ void GameManager::Update() {
 	currentSceneNo_ = sceneArr_[currentSceneNo_]->GetSceneNo();
 
 	if (prevSceneNo_ != currentSceneNo_) {
-		SceneChange(prevSceneNo_,currentSceneNo_);
+		SceneChange(prevSceneNo_, currentSceneNo_);
 		sceneArr_[currentSceneNo_]->Initialize();
 	}
 
