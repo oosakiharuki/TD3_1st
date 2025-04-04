@@ -46,8 +46,10 @@ void SpringEnemy::Update() {
 	}
 
 	if (!isPlayer) {
-		// 重力処理を無効化し、位置を固定
-		velocityY_ = 0.0f;
+		// 重力処理
+		float gravity = 0.01f;
+		velocityY_ -= gravity;
+		position.y += velocityY_;
 
 		// コリジョン用AABB
 		float halfW = 0.7f, halfH = 1.2f, halfD = 0.7f;
@@ -63,33 +65,45 @@ void SpringEnemy::Update() {
 					position.y = obstacleAABB.max.y + halfH;
 					onGround_ = true;
 				}
+				else {
+					onGround_ = false;
+				}
+				ResolveAABBCollision(enemyAABB, obstacleAABB, velocityY_, onGround_);
 			}
 		}
 
-		// 圧縮アニメーション処理
-		if (isCompressed) {
-			compressionTimer += deltaTime;
-
-			// 視覚的フィードバック：Y軸スケールを変更して圧縮を表現
-			float compressionProgress = compressionTimer / 0.3f; // アニメーション時間は0.3秒
-			if (compressionProgress < 0.5f) {
-				// 前半：圧縮
-				worldTransform_.scale_.y = originalScaleY * (1.0f - 0.5f * (compressionProgress / 0.5f));
-			} else {
-				// 後半：元に戻る
-				worldTransform_.scale_.y = originalScaleY * (0.5f + 0.5f * ((compressionProgress - 0.5f) / 0.5f));
-			}
-
-			// アニメーション終了処理
-			if (compressionTimer >= 0.3f) {
-				isCompressed = false;
-				compressionTimer = 0.0f;
-				worldTransform_.scale_.y = originalScaleY; // スケールをリセット
-			}
-		}
+		// 衝突解決後のAABB中心をプレイヤー座標に反映
+		position.x = (enemyAABB.min.x + enemyAABB.max.x) * 0.5f;
+		position.y = (enemyAABB.min.y + enemyAABB.max.y) * 0.5f;
+		position.z = (enemyAABB.min.z + enemyAABB.max.z) * 0.5f;
 
 		worldTransform_.translation_ = position;
+	}	
+
+
+	// 圧縮アニメーション処理
+	if (isCompressed) {
+		compressionTimer += deltaTime;
+
+		// 視覚的フィードバック：Y軸スケールを変更して圧縮を表現
+		float compressionProgress = compressionTimer / 0.3f; // アニメーション時間は0.3秒
+		if (compressionProgress < 0.5f) {
+			// 前半：圧縮
+			worldTransform_.scale_.y = originalScaleY * (1.0f - 0.5f * (compressionProgress / 0.5f));
+		}
+		else {
+			// 後半：元に戻る
+			worldTransform_.scale_.y = originalScaleY * (0.5f + 0.5f * ((compressionProgress - 0.5f) / 0.5f));
+		}
+
+		// アニメーション終了処理
+		if (compressionTimer >= 0.3f) {
+			isCompressed = false;
+			compressionTimer = 0.0f;
+			worldTransform_.scale_.y = originalScaleY; // スケールをリセット
+		}
 	}
+
 #ifdef _DEBUG
 	// デバッグUI
 	ImGui::Begin("SpringEnemy");

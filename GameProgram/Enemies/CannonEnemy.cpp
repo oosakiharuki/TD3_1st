@@ -46,6 +46,18 @@ void CannonEnemy::Update() {
 		}
 	}
 
+
+	for (auto& obstacleAABB : obstacleList_) {
+		//弾がステージに当たった時
+		for (Bom* bullet : bullets_) {
+			AABB bulletAABB = bullet->GetAABB();
+			if (IsCollisionAABB(bulletAABB, obstacleAABB)) {
+				bullet->OnCollision();
+			}
+		}
+	}
+
+
 	if (!isPlayer) {
 
 		// 重力処理
@@ -72,9 +84,18 @@ void CannonEnemy::Update() {
 				} else {
 					onGround_ = false;
 				}
+				//弾がステージに当たった時
+				for (Bom* bullet : bullets_) {
+					AABB bulletAABB = bullet->GetAABB();
+					if (IsCollisionAABB(bulletAABB, obstacleAABB)) {
+						bullet->OnCollision();
+					}
+				}
+			
 			}
 			iterations++;
 		} while (collisionOccurred && iterations < maxIterations);
+
 
 		// 衝突解決後のAABB中心をプレイヤー座標に反映
 		position.x = (enemyAABB.min.x + enemyAABB.max.x) * 0.5f;
@@ -182,7 +203,7 @@ void CannonEnemy::Fire() {
 		bullets_.push_back(newBullet);
 
 		// 次の発射までのクールダウン
-		fireTimer = 2.0f;
+		fireTimer = 1.5f;
 	}
 }
 
@@ -193,8 +214,11 @@ void CannonEnemy::PlayerFire() {
 
 	velocity = TransformNormal(velocity, worldTransform_.matWorld_);
 
+	Vector3 playerPosition = player_->GetWorldPosition();
+	playerPosition += TransformNormal({0,0,2}, worldTransform_.matWorld_);
+
 	Bom* newBullet = new Bom();
-	newBullet->Init(player_->GetWorldPosition(), velocity);
+	newBullet->Init(playerPosition, velocity);
 
 	bullets_.push_back(newBullet);
 }

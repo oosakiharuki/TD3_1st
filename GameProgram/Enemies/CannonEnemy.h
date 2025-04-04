@@ -77,7 +77,7 @@ private:
 	bool isPlayer = false;
 
 	float radius = 50.0f;
-	float fireTimer = 2.0f;
+	float fireTimer = 1.5f;
 
 	std::list<Bom*> bullets_;
 	Player* player_ = nullptr;

@@ -128,11 +128,20 @@ void Player::Update() {
 		cameraPitch += zCamera * 2.5f;
 	}
 
-	cameraPitch = std::clamp(cameraPitch, 10.0f, 60.0f);
+	cameraPitch = std::clamp(cameraPitch, 10.0f, 80.0f);
 
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
 	worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
+
+
+	//if (velocityY_ == 0.0f) {
+	//	onGround_ = true;
+	//}
+	//else {
+	//	onGround_ = false;
+	//}
+
 
 	// ジャンプ・移動時の各種処理
 	if (!onGround_) {
@@ -147,19 +156,19 @@ void Player::Update() {
 		isTransfar = false;
 	}
 
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && onGround_) {
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && velocityY_ == 0.0f) {
 		velocityY_ = 0.3f;
 		onGround_ = false;
-	} else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && onGround_) {
+	} else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && velocityY_ == 0.0f) {
 		velocityY_ = 0.3f;
 		onGround_ = false;
 	}
 
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B) && onGround_ && EnemyContral) {
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B) && velocityY_ == 0.0f && EnemyContral) {
 		velocityY_ = 0.0f;
 		EnemyContral = false;
 		onEnemy = true;
-	} else if (Input::GetInstance()->TriggerKey(DIK_K) && onGround_ && EnemyContral) {
+	} else if (Input::GetInstance()->TriggerKey(DIK_K) && velocityY_ == 0.0f && EnemyContral) {
 		velocityY_ = 0.0f;
 		EnemyContral = false;
 		onEnemy = true;
