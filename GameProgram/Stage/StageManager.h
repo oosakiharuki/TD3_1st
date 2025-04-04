@@ -6,6 +6,7 @@
 #include "GhostEnemy.h"
 #include "Key.h"
 #include "Player.h"
+#include "MoveTile.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -69,6 +70,9 @@ private:
 	// ステージデータ
 	std::vector<std::vector<AABB>> allObstacles_;
 	std::stringstream stageCommand_;
+
+	// 移動床
+	std::vector<MoveTile*> moveTiles_;
 
 	// ステージ状態
 	int currentStage_ = 1;              // 現在のステージ番号（1: 第1ステージ、2: 第2ステージ）

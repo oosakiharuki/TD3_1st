@@ -67,10 +67,12 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 			data.type = MapObjectType::Door;
 		} else if (token == "block") {
 			data.type = MapObjectType::Block;
-		} else if (token == "colorWall") { // goalタイプを追加
+		} else if (token == "colorWall") { 
 			data.type = MapObjectType::ColorWall;
 		} else if (token == "goal") { // goalタイプを追加
 			data.type = MapObjectType::Goal;
+		} else if (token == "tile") {
+			data.type = MapObjectType::Tile;
 		} else {
 			return false; // 未知のオブジェクトタイプ
 		}
@@ -130,18 +132,21 @@ void MapLoader::CreateObjects(Player* player) {
 			// CSVからIDが指定されている場合はそれを使用、そうでなければ自動採番
 			if (objectData.id > 0) {
 				key->SetKeyID(objectData.id);
-			} else {
+			}
+			else {
 				key->SetKeyID(++keyIdCounter);
 			}
 
 			keys_.push_back(key);
-		} else if (objectData.type == MapObjectType::Door) {
+		}
+		else if (objectData.type == MapObjectType::Door) {
 			Door* door = new Door();
 			door->Init();
 			door->SetPosition(objectData.position);
 			door->SetPlayer(player);
 			doors_.push_back(door);
-		} else if (objectData.type == MapObjectType::Block) {
+		}
+		else if (objectData.type == MapObjectType::Block) {
 			Block* block = new Block();
 			block->Init();
 			block->SetPosition(objectData.position);
@@ -163,11 +168,19 @@ void MapLoader::CreateObjects(Player* player) {
 			goal_->SetPosition(objectData.position);
 			foundGoal = true;
 		}
+		else if (objectData.type == MapObjectType::Tile) {
+			MoveTile* tile = new MoveTile();
+			tile->Init();
+			tile->SetPosition(objectData.position);
+			tile->SetPlayer(player);
+			tiles_.push_back(tile);
+		}
 	}
 
 	// 鍵とドアの相互参照を設定
 	SetupObjectReferences();
 }
+
 
 void MapLoader::SetupObjectReferences() {
 	// すべてのドアに対して、すべての鍵への参照を設定
@@ -195,6 +208,10 @@ void MapLoader::Update() {
 	for (auto* block : blocks_) {
 		block->Update();
 	}
+
+	// すべてのタイルを更新
+	for (auto* tile : tiles_) {
+		tile->Update();
 
 	//全てのゴーストブロックの更新
 	for (auto* ghostBlock : ghostBlocks_) {
@@ -230,9 +247,14 @@ void MapLoader::Draw() {
 
 	// Goalを描画（存在する場合のみ）
 	if (goal_) {
-		goal_->Draw();
-		
+		goal_->Draw();	
 	}
+
+	// すべてのタイルを描画
+	for (auto* tile : tiles_) {
+		tile->Draw();
+	}
+
 }
 
 void MapLoader::Draw2D() {
@@ -288,6 +310,11 @@ void MapLoader::ClearResources() {
 	if (goal_) {
 		delete goal_;
 		goal_ = nullptr;
+	}
+
+	// タイルのリソースを解放
+	for (auto* tile : tiles_) {
+		delete tile;
 	}
 }
 

@@ -250,6 +250,11 @@ void Player::Update() {
 		ResolveAABBCollision(playerAABB, doorAABB, velocityY_, onGround_);
 	}
 
+	// Tileとの衝突判定
+	if (IsCollisionAABB(playerAABB, moveTileAABB)) {
+		ResolveAABBCollision(playerAABB, moveTileAABB, velocityY_, onGround_);
+	}
+
 	// 敵との衝突処理
 	for (auto it = ghostEnemies_.begin(); it != ghostEnemies_.end();) {
 		enemyAABB = (*it)->GetAABB();

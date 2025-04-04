@@ -201,6 +201,8 @@
     <ClCompile Include="GameProgram\Collision.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
+    <ClCompile Include="MoveTile.cpp">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
     <ClCompile Include="GameProgram\Enemies\GhostEnemy.cpp">
       <Filter>ソース ファイル\GameProgram\Enemies</Filter>
     </ClCompile>
@@ -365,6 +367,8 @@
     <ClInclude Include="GameProgram\Collision.h">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
+    <ClInclude Include="MoveTile.h">
+      <Filter>ソース ファイル\GameProgram\Object</Filter>
     <ClInclude Include="GameProgram\Enemies\GhostColor.h">
       <Filter>ソース ファイル\GameProgram\Enemies</Filter>
     </ClInclude>

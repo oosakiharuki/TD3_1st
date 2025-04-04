@@ -2,6 +2,7 @@
 #include "Block.h"
 #include "Door.h"
 #include "Goal.h" 
+#include "MoveTile.h"
 #include "Key.h"
 #include "Player.h"
 #include <fstream>
@@ -14,6 +15,7 @@ enum class MapObjectType {
 	Key,
 	Door,
 	Block,
+	Tile
 	ColorWall,
 	Goal // Goalタイプを追加
 };
@@ -86,7 +88,10 @@ private:
 	// 生成されたブロックのリスト
 	std::vector<Block*> blocks_;
 
-	// 生成されたブロックのリスト
+	// 生成されたタイルのリスト
+	std::vector<MoveTile*> tiles_;
+  
+	// 生成されたゴーストブロックのリスト
 	std::vector<GhostBlock*> ghostBlocks_;
 
 	// Goal（追加）
