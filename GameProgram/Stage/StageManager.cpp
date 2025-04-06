@@ -220,6 +220,8 @@ void StageManager::Update() {
 	}
 
 	// ImGuiでステージ情報を表示
+#ifdef _DEBUG
+
 	ImGui::Begin("Stage Info");
 	ImGui::Text("Current Stage: %d", currentStage_);
 	if (currentStage_ == 1) {
@@ -240,6 +242,9 @@ void StageManager::Update() {
 		ImGui::Text("Congratulations on clearing Stage 1!");
 	}
 	ImGui::End();
+
+#endif // DEBUG
+
 }
 
 void StageManager::Draw() {

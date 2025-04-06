@@ -85,6 +85,7 @@ public:
 	void CheckDamage();
 
 	void TakeDamage();
+	int GetHp() { return hp; }
 
 private:
 	Vector3 position = {0, 10, -10};
@@ -106,7 +107,7 @@ private:
 	bool isOpenDoor = false;
 	
 	float velocityY_ = 0.0f;
-	float hp = 3;
+	int hp = 200;
 	float coolTime = 0.0f;
 	float cameraPitch = 5.0f;
 	float cameraYaw = 0.0f;

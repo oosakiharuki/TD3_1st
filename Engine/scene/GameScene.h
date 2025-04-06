@@ -22,6 +22,8 @@
 #include "Skydome.h"
 #include "SpringEnemy.h"
 
+#include "UIManager.h"
+
 class GameScene : public IScene {
 public:
 	// コンストラクタ
@@ -79,6 +81,8 @@ private:
 	float longPress = 1.0f;
 	const float RestartTimer = 1.0f;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
+
+	UIManager* uiManager = nullptr;
 
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;

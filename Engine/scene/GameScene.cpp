@@ -12,6 +12,8 @@ void GameScene::Finalize() {
 	delete stage;
 	delete skydome_;
 
+	delete uiManager;
+
 	allObstacles_.clear();
 }
 
@@ -140,6 +142,8 @@ void GameScene::Initialize() {
 		player_->SetGoal(mapLoader_->GetGoal());
 	}
 
+	uiManager = new UIManager();
+	uiManager->Initialize();
 }
 
 void GameScene::Update() {
@@ -224,6 +228,7 @@ void GameScene::Update() {
 	camera_->Update();
 
 
+	uiManager->Update();
 
 #ifdef  USE_IMGUI
 
@@ -283,6 +288,8 @@ void GameScene::Draw() {
 	if (mapLoader_) {
 		mapLoader_->Draw2D();
 	}
+	
+	uiManager->Draw(player_->GetHp());
 }
 
 

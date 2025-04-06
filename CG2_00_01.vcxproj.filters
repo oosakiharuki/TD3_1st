@@ -168,6 +168,9 @@
     <ClCompile Include="Engine\base\WinApp.cpp">
       <Filter>ソース ファイル\Engine\base</Filter>
     </ClCompile>
+    <ClCompile Include="GameProgram\UIManager.cpp">
+      <Filter>ソース ファイル\GameProgram</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\audio\Audio.h">
@@ -337,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="Engine\math\Matrix4x4.h">
       <Filter>ソース ファイル\Engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\UIManager.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
