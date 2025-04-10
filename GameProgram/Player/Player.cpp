@@ -456,7 +456,7 @@ void Player::DrawUI() {
 
 	const char* stateNames[] = {"Normal", "Bomb", "Ghost"};
 	ImGui::Text("Current State: %s", stateNames[static_cast<int>(currentState)]);
-	ImGui::DragFloat("Hp", &hp);
+	//ImGui::DragFloat("Hp", &hp);
 
 	ImGui::End();
 

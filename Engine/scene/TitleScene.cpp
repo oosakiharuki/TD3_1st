@@ -33,4 +33,5 @@ void TitleScene::Draw() {
 
 void TitleScene::Finalize() {
 	delete sprite;
+	delete backGround;
 }

@@ -38,7 +38,7 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("stage4");
 
 	ModelManager::GetInstance()->LoadModel("stage2");
-	ModelManager::GetInstance()->LoadModel("stage3"); 
+	ModelManager::GetInstance()->LoadModel("stage5"); 
 	ModelManager::GetInstance()->LoadModel("BlueGhost");
 
 
@@ -97,6 +97,9 @@ void GameScene::Initialize() {
 	else if (currentStage_ == 4) {
 		// Stage 3への移行時の座標
 		StartPosition = { 27.256f, 100.018f, 25.295f };
+	}else if (currentStage_ == 5) {
+		// Stage 3への移行時の座標
+		StartPosition = {0,4,0 };
 	}
 
 	player_->SetPosition(StartPosition);

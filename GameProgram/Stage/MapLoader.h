@@ -25,6 +25,7 @@ struct MapObjectData {
 	Vector3 position;
 	MapObjectType type;
 	ColorType color;
+	Vector3 size;
 	int id = 0;
 };
 
