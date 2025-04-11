@@ -171,6 +171,9 @@
     <ClCompile Include="GameProgram\UIManager.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
+    <ClCompile Include="LoadingScene.cpp">
+      <Filter>ソース ファイル\Engine\scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\audio\Audio.h">
@@ -340,6 +343,9 @@
     </ClInclude>
     <ClInclude Include="GameProgram\UIManager.h">
       <Filter>ソース ファイル\GameProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadingScene.h">
+      <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
