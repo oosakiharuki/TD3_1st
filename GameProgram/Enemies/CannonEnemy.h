@@ -28,8 +28,6 @@ public:
 
 	void AddObstacle(const AABB& obstacle);
 
-	// void SetPlayerAABB(AABB aabb) { playerAABB = aabb; }
-
 	void SetPlayer(Player* player) { player_ = player; }
 	AABB GetAABB();
 
@@ -49,17 +47,12 @@ public:
 private:
 	WorldTransform worldTransform_; // Fix the error by ensuring the type is defined
 	Object3d* model_ = nullptr;
-	Vector3 position = {0, 5, 30};
+	Vector3 position = { 0, 5, 30 };
 	bool onGround_ = true;
 	float velocityY_ = 0.0f;
 
 	// 障害物リスト
 	std::vector<AABB> obstacleList_;
-
-	// WorldTransform worldTransform;
-
-	// Vector3 velocity;
-	//  bool IsJump = false;
 
 	XINPUT_STATE state, preState;
 	const float speed = 0.2f;
@@ -76,8 +69,10 @@ private:
 
 	bool isPlayer = false;
 
-	float radius = 50.0f;
-	float fireTimer = 1.5f;
+	// 攻撃関連のパラメータ
+	float attackRadius = 30.0f;     // 攻撃検知範囲（これを小さくすると検知範囲が縮小）
+	float fireTimer = 0.0f;         // 現在の発射タイマー
+	float fireInterval = 3.0f;      // 発射間隔（秒）- 3秒に変更
 
 	std::list<Bom*> bullets_;
 	Player* player_ = nullptr;

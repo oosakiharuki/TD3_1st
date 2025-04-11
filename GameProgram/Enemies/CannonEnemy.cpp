@@ -33,11 +33,9 @@ void CannonEnemy::AddObstacle(const AABB& obstacle) { obstacleList_.push_back(ob
 void CannonEnemy::Update() {
 
 	// 入力による移動
-	// float moveSpeed = 0.0f;
-
-	// const float moveSpeed_ = 0.02f;
 	const float deltaTime = 1.0f / 60.0f;
 
+	// スタン状態の処理
 	if (isStan) {
 		timerS += deltaTime;
 		if (timerS > stanTime) {
@@ -46,9 +44,8 @@ void CannonEnemy::Update() {
 		}
 	}
 
-
+	// 弾とステージの衝突チェック
 	for (auto& obstacleAABB : obstacleList_) {
-		//弾がステージに当たった時
 		for (Bom* bullet : bullets_) {
 			AABB bulletAABB = bullet->GetAABB();
 			if (IsCollisionAABB(bulletAABB, obstacleAABB)) {
@@ -57,21 +54,19 @@ void CannonEnemy::Update() {
 		}
 	}
 
-
 	if (!isPlayer) {
-
 		// 重力処理
 		float gravity = 0.01f;
 		velocityY_ -= gravity;
 		position.y += velocityY_;
 
-		// プレイヤーのAABB作成（例：幅1.0, 高さ2.0, 奥行1.0）
+		// 大砲のAABB更新
 		float halfW = 1.0f, halfH = 1.0f, halfD = 1.0f;
 		AABB enemyAABB;
-		enemyAABB.min = {position.x - halfW, position.y - halfH, position.z - halfD};
-		enemyAABB.max = {position.x + halfW, position.y + halfH, position.z + halfD};
+		enemyAABB.min = { position.x - halfW, position.y - halfH, position.z - halfD };
+		enemyAABB.max = { position.x + halfW, position.y + halfH, position.z + halfD };
 
-		// 反復的衝突解決（すり抜け防止のため、最大10回まで解決を試みる）
+		// 衝突解決
 		const int maxIterations = 10;
 		int iterations = 0;
 		bool collisionOccurred = false;
@@ -81,62 +76,40 @@ void CannonEnemy::Update() {
 				if (IsCollisionAABB(enemyAABB, obstacleAABB)) {
 					ResolveAABBCollision(enemyAABB, obstacleAABB, velocityY_, onGround_);
 					collisionOccurred = true;
-				} else {
+				}
+				else {
 					onGround_ = false;
 				}
-				//弾がステージに当たった時
-				for (Bom* bullet : bullets_) {
-					AABB bulletAABB = bullet->GetAABB();
-					if (IsCollisionAABB(bulletAABB, obstacleAABB)) {
-						bullet->OnCollision();
-					}
-				}
-			
 			}
 			iterations++;
 		} while (collisionOccurred && iterations < maxIterations);
 
-
-		// 衝突解決後のAABB中心をプレイヤー座標に反映
+		// 衝突解決後の位置更新
 		position.x = (enemyAABB.min.x + enemyAABB.max.x) * 0.5f;
 		position.y = (enemyAABB.min.y + enemyAABB.max.y) * 0.5f;
 		position.z = (enemyAABB.min.z + enemyAABB.max.z) * 0.5f;
 
-		/// 敵の移動、攻撃　ここから
-
-		if (!isStan) {
-
+		/// 敵の攻撃ロジック
+		if (!isStan && player_) {
+			// プレイヤーのAABBとの距離を計算
 			AABB playerAABB = player_->GetAABB();
 
+			// プレイヤーとの最短距離を計算
 			Vector3 closestPoint{
-			    std::clamp(position.x, playerAABB.min.x, playerAABB.max.x), std::clamp(position.y, playerAABB.min.y, playerAABB.max.y), std::clamp(position.z, playerAABB.min.z, playerAABB.max.z)
+				std::clamp(position.x, playerAABB.min.x, playerAABB.max.x),
+				std::clamp(position.y, playerAABB.min.y, playerAABB.max.y),
+				std::clamp(position.z, playerAABB.min.z, playerAABB.max.z)
 			};
 
+			// プレイヤーとの距離を計算
 			float distance = Length(closestPoint - position);
 
-			// 円にプレイヤーが入ってきたとき弾を発射する
-			if (distance <= radius) {
+			// プレイヤーが攻撃範囲内に入ったら発射
+			if (distance <= attackRadius) {
+				// 発射メソッドを呼び出し
 				Fire();
 			}
-
-			// timer += deltaTime;
-
-			// if (timer > corveTime && collisionOccurred) {
-			//	if (Normal) {
-			//		Normal = false;
-			//	} else {
-			//		Normal = true;
-			//	}
-			//	timer = 0.0f;
-			// }
-			// if (Normal) {
-			//	position.z += moveSpeed_;
-			// } else {
-			//	position.z -= moveSpeed_;
-			// }
 		}
-
-		/// ここまで
 
 		// プレイヤーの方向を向く処理
 		if (player_) {
@@ -149,28 +122,34 @@ void CannonEnemy::Update() {
 
 		worldTransform_.translation_ = position;
 	}
+
 #ifdef _DEBUG
-	ImGui::Begin("enemy");
-	ImGui::DragFloat3("translate", &position.x);
+	ImGui::Begin("Cannon Enemy");
+	ImGui::DragFloat3("Position", &position.x);
+	ImGui::DragFloat("Attack Radius", &attackRadius, 1.0f, 0.0f, 100.0f);
+	ImGui::DragFloat("Fire Interval", &fireInterval, 0.1f, 1.0f, 10.0f);
+	ImGui::Text("Fire Timer: %.1f", fireTimer);
 	ImGui::End();
 #endif
+
+	// 弾の更新
 	for (Bom* bom : bullets_) {
 		bom->Update();
 	}
 
+	// 使用済み弾の削除
 	bullets_.remove_if([](Bom* bom) {
 		if (bom->IsDaed()) {
 			delete bom;
 			return true;
 		}
 		return false;
-	});
+		});
 
 	worldTransform_.UpdateMatrix();
 }
 
 void CannonEnemy::Draw() {
-
 	model_->Draw(worldTransform_);
 
 	for (Bom* bom : bullets_) {
@@ -182,8 +161,9 @@ void CannonEnemy::Fire() {
 	const float deltaTimer = 1.0f / 60.0f;
 	fireTimer -= deltaTimer;
 
+	// 発射間隔が経過したら発射
 	if (fireTimer <= 0.0f) {
-		const float kSpeed = 0.5f;
+		const float kSpeed = 0.3f; // 弾の速度（少し遅く）
 
 		// プレイヤーの位置を取得
 		Vector3 playerPosition = player_->GetWorldPosition();
@@ -191,10 +171,10 @@ void CannonEnemy::Fire() {
 
 		// プレイヤーへの方向ベクトルを計算（ワールド座標系）
 		Vector3 direction = playerPosition - enemyPosition;
-		Vector3 normalize = Normalize(direction); // 正規化
+		Vector3 normalizedDirection = Normalize(direction); // 正規化
 
 		// 速度ベクトルをプレイヤーの方向に設定
-		Vector3 velocity = normalize * kSpeed;
+		Vector3 velocity = normalizedDirection * kSpeed;
 
 		// 新しい弾を生成
 		Bom* newBullet = new Bom();
@@ -202,8 +182,8 @@ void CannonEnemy::Fire() {
 
 		bullets_.push_back(newBullet);
 
-		// 次の発射までのクールダウン
-		fireTimer = 1.5f;
+		// 次の発射までのクールダウンを設定（3秒に延長）
+		fireTimer = fireInterval;
 	}
 }
 
@@ -215,7 +195,7 @@ void CannonEnemy::PlayerFire() {
 	velocity = TransformNormal(velocity, worldTransform_.matWorld_);
 
 	Vector3 playerPosition = player_->GetWorldPosition();
-	playerPosition += TransformNormal({0,0,2}, worldTransform_.matWorld_);
+	playerPosition += TransformNormal({ 0,0,2 }, worldTransform_.matWorld_);
 
 	Bom* newBullet = new Bom();
 	newBullet->Init(playerPosition, velocity);
@@ -227,14 +207,14 @@ void CannonEnemy::PlayerFire() {
 AABB CannonEnemy::GetAABB() {
 	float halfW = 1.0f, halfH = 1.0f, halfD = 1.0f;
 	AABB enemyAABB;
-	enemyAABB.min = {worldTransform_.translation_.x - halfW, worldTransform_.translation_.y - halfH, worldTransform_.translation_.z - halfD};
-	enemyAABB.max = {worldTransform_.translation_.x + halfW, worldTransform_.translation_.y + halfH, worldTransform_.translation_.z + halfD};
+	enemyAABB.min = { worldTransform_.translation_.x - halfW, worldTransform_.translation_.y - halfH, worldTransform_.translation_.z - halfD };
+	enemyAABB.max = { worldTransform_.translation_.x + halfW, worldTransform_.translation_.y + halfH, worldTransform_.translation_.z + halfD };
 	return enemyAABB;
 }
 
 void CannonEnemy::ContralPlayer() {
 	isPlayer = true;
-	worldTransform_.translation_ = {0, -2, 0};
+	worldTransform_.translation_ = { 0, -2, 0 };
 	worldTransform_.rotation_ = { 0, 0, 0 };
 	if (player_) {
 		player_->SetState(Player::State::Bomb);
