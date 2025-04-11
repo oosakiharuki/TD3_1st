@@ -41,21 +41,24 @@ bool EnemyLoader::ParseCSVLine(const std::string& line, EnemyData& data) {
 	// x座標を読み込む
 	if (std::getline(iss, token, ',')) {
 		data.position.x = std::stof(token);
-	} else {
+	}
+	else {
 		return false;
 	}
 
 	// y座標を読み込む
 	if (std::getline(iss, token, ',')) {
 		data.position.y = std::stof(token);
-	} else {
+	}
+	else {
 		return false;
 	}
 
 	// z座標を読み込む
 	if (std::getline(iss, token, ',')) {
 		data.position.z = std::stof(token);
-	} else {
+	}
+	else {
 		return false;
 	}
 
@@ -63,14 +66,18 @@ bool EnemyLoader::ParseCSVLine(const std::string& line, EnemyData& data) {
 	if (std::getline(iss, token, ',')) {
 		if (token == "ghost") {
 			data.type = EnemyType::Ghost;
-		} else if (token == "cannon") {
+		}
+		else if (token == "cannon") {
 			data.type = EnemyType::Cannon;
-		} else if (token == "spring") {
+		}
+		else if (token == "spring") {
 			data.type = EnemyType::Spring;
-		} else {
+		}
+		else {
 			return false; // 未知の敵タイプ
 		}
-	} else {
+	}
+	else {
 		return false;
 	}
 
@@ -148,6 +155,11 @@ void EnemyLoader::CreateEnemies(Player* player, const std::vector<std::vector<AA
 			break;
 		}
 		}
+	}
+
+	// ゴースト敵に他のゴースト敵への参照を設定
+	for (auto* ghost : ghostEnemies_) {
+		ghost->SetOtherGhosts(&ghostEnemies_);
 	}
 }
 
