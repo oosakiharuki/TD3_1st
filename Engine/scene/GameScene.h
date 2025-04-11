@@ -22,6 +22,10 @@
 #include "Skydome.h"
 #include "SpringEnemy.h"
 
+#include "UIManager.h"
+
+#include "Audio.h"
+
 class GameScene : public IScene {
 public:
 	// コンストラクタ
@@ -79,6 +83,16 @@ private:
 	float longPress = 1.0f;
 	const float RestartTimer = 1.0f;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
+
+
+	// BGM関連
+	Audio* audio_ = nullptr;
+	SoundData BGMSound;
+	int stageBGMHandle_ = 0;
+	int stageBGMID_ = -1; // 再生IDを保持するために必要
+
+
+	UIManager* uiManager = nullptr;
 
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;

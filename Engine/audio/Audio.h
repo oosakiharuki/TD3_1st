@@ -34,12 +34,25 @@ struct SoundData {
 
 class Audio{
 public:
-	~Audio();
-	void Initialize(const char* filename);
+
+	static Audio* GetInstance();
+
+	void Initialize();
+	void Finalize();
+
+	SoundData LoadWave(const char* filename);
+
 	//音声再生
-	void SoundPlayWave(const float volume);
+	void SoundPlayWave(SoundData soundData, const float volume, bool isLoop = false);
 
 private:
+
+	static Audio* instance;
+
+	Audio() = default;
+	~Audio() = default;
+	Audio(Audio&) = default;
+	Audio& operator=(Audio&) = default;
 
 	SoundData SoundLoadWave(const char* filename);//string?
 
@@ -49,7 +62,7 @@ private:
 
 
 
-	SoundData soundData;
+	SoundData soundData_;
 
 	//audio
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;

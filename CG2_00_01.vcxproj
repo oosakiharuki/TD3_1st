@@ -156,6 +156,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GameProgram\Stage\MapChip.cpp" />
     <ClCompile Include="GameProgram\Stage\MapLoader.cpp" />
     <ClCompile Include="GameProgram\Stage\StageManager.cpp" />
+    <ClCompile Include="GameProgram\UIManager.cpp" />
     <ClCompile Include="MoveTile.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,7 +170,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\base\D3DResorceLeakChecker.h" />
     <ClInclude Include="Engine\base\DirectXCommon.h" />
     <ClInclude Include="Engine\base\SrvManager.h" />
-    <ClInclude Include="Engine\Framework.h" />
     <ClInclude Include="Engine\scene\GameManager.h" />
     <ClInclude Include="Engine\scene\GameScene.h" />
     <ClInclude Include="Engine\input\Input.h" />
@@ -214,6 +214,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GameProgram\Stage\MapChip.h" />
     <ClInclude Include="GameProgram\Stage\MapLoader.h" />
     <ClInclude Include="GameProgram\Stage\StageManager.h" />
+    <ClInclude Include="GameProgram\UIManager.h" />
     <ClInclude Include="MoveTile.h" />
   </ItemGroup>
   <ItemGroup>

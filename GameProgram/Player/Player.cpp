@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include"Audio.h"
+
 using namespace MyMath;
 
 Player::Player() {}
@@ -22,6 +24,14 @@ void Player::Init(Camera* camera) {
 	PlayerModel_->Initialize();
 	PlayerModel_->SetModelFile("player");
 	worldTransform_.translation_ = position;
+
+
+	audio_ = Audio::GetInstance();
+
+	JumpSound_ = audio_->LoadWave("sound/jump.wav");
+	SnapSound_ = audio_->LoadWave("sound/snap.wav");
+	//DamageSound_ = Audio::GetInstance()->LoadWave("sound/damage.wav");//読み取れんかった
+
 }
 
 void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -29,7 +39,7 @@ void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_
 void Player::AddObstacle(const AABB& obstacle) { obstacleList_.push_back(obstacle); }
 
 void Player::Update() {
-
+#pragma region 入力処理
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
@@ -71,7 +81,9 @@ void Player::Update() {
 		position.x += move.x;
 		position.z += move.z;
 	}
+#pragma endregion
 
+#pragma region 状態切替
 	// 状態切替
 	if (Input::GetInstance()->TriggerKey(DIK_1)) {
 		currentState = State::Normal;
@@ -82,7 +94,9 @@ void Player::Update() {
 	if (Input::GetInstance()->TriggerKey(DIK_3)) {
 		currentState = State::Ghost;
 	}
+#pragma endregion
 
+#pragma region カメラ操作
 	// コントローラとキーボード両方で回さないようにするフラグ
 	bool isKeyBorad = false;
 
@@ -142,7 +156,9 @@ void Player::Update() {
 	//	onGround_ = false;
 	//}
 
+#pragma endregion
 
+#pragma region ジャンプ・移動処理
 	// ジャンプ・移動時の各種処理
 	if (!onGround_) {
 		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !EnemyContral && !isTransfar) {
@@ -159,9 +175,15 @@ void Player::Update() {
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && velocityY_ == 0.0f) {
 		velocityY_ = 0.3f;
 		onGround_ = false;
+
+		// ジャンプ音を再生
+		audio_->SoundPlayWave(JumpSound_,0.7f);
 	} else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && velocityY_ == 0.0f) {
 		velocityY_ = 0.3f;
 		onGround_ = false;
+
+		// ジャンプ音を再生
+		audio_->SoundPlayWave(JumpSound_, 0.7f);
 	}
 
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B) && velocityY_ == 0.0f && EnemyContral) {
@@ -173,7 +195,9 @@ void Player::Update() {
 		EnemyContral = false;
 		onEnemy = true;
 	}
+#pragma endregion
 
+#pragma region 物理演算と衝突処理
 	// 重力と垂直移動
 	float gravity = 0.01f;
 	velocityY_ -= gravity;
@@ -198,7 +222,9 @@ void Player::Update() {
 		}
 		iterations++;
 	} while (collisionOccurred && iterations < maxIterations);
+#pragma endregion
 
+#pragma region 敵との衝突処理
 	// キャノン敵との衝突処理
 	AABB cannonAABB = cannonEnemy->GetAABB();
 	if (IsCollisionAABB(playerAABB, cannonAABB)) {
@@ -207,6 +233,9 @@ void Player::Update() {
 			cannonEnemy->ContralPlayer();
 			EnemyContral = true;
 			collisionEnemy = true;
+
+			// 乗り移り音を再生
+			audio_->SoundPlayWave(SnapSound_, 0.6f);
 		}
 	}
 
@@ -235,6 +264,9 @@ void Player::Update() {
 				springEnemy->ContralPlayer();
 				EnemyContral = true;
 				collisionEnemy = true;
+
+				// 乗り移り音を再生
+				audio_->SoundPlayWave(SnapSound_, 0.6f);
 			}
 		}
 
@@ -281,6 +313,9 @@ void Player::Update() {
 				(*it)->ContralPlayer();
 				EnemyContral = true;
 				collisionEnemy = true;
+
+				// 乗り移り音を再生
+				audio_->SoundPlayWave(SnapSound_, 0.6f);
 			}
 		}
 
@@ -291,7 +326,9 @@ void Player::Update() {
 		}
 		++it;
 	}
+#pragma endregion
 
+#pragma region 位置更新
 	// AABBの中心を基に位置を更新
 	position.x = (playerAABB.min.x + playerAABB.max.x) * 0.5f;
 	position.y = (playerAABB.min.y + playerAABB.max.y) * 0.5f;
@@ -308,7 +345,9 @@ void Player::Update() {
 	if (EnemyContral) {
 		worldTransform_.translation_.y += 2.0f;
 	}
+#pragma endregion
 
+#pragma region 追加チェック処理
 	// ばね敵との衝突チェック
 	CheckCollisionWithSprings();
 
@@ -317,7 +356,9 @@ void Player::Update() {
 
 	//ゴールの旗に当たったか
 	CheckCollisionWithGoal(); 
+#pragma endregion
 
+#pragma region デバッグ表示
 #ifdef _DEBUG
 	ImGui::Begin("player");
 	ImGui::DragFloat3("translate", &worldTransform_.translation_.x);
@@ -325,6 +366,7 @@ void Player::Update() {
 	ImGui::DragFloat3("aabbMin", &playerAABB.min.x);
 	ImGui::End();
 #endif
+#pragma endregion
 
 	//速すぎてものが貫通しないようにする
 	velocityY_ = std::clamp(velocityY_, -20.0f, 20.0f);
@@ -392,62 +434,6 @@ void Player::CheckCollision() {
 
 }
 
-//
-//void Player::CheckCollision() {
-//	// ブロックリストが空の場合は処理を行わない
-//	if (blocks_.empty()) {
-//		return;
-//	}
-//
-//	// 重複宣言を避けるため、1回だけ宣言する
-//	AABB mainBlockAABB = block_->GetAABB();
-//	AABB ghostBlockAABB = ghostBlock_->GetAABB();
-//
-//	// 現在の状態に応じて各ブロックとの衝突判定を行う
-//	switch (currentState) {
-//	case State::Normal:
-//		// 通常状態：すべてのブロックと衝突判定
-//		for (Block* block : blocks_) {
-//			if (block && block->IsActive()) {
-//				// 変数名を変えて、重複を回避
-//				AABB currentBlockAABB = block->GetAABB();
-//				if (IsCollisionAABB(playerAABB, currentBlockAABB)) {
-//					ResolveAABBCollision(playerAABB, currentBlockAABB, velocityY_, onGround_);
-//				}
-//			}
-//		}
-//		if (ghostBlock_->IsActive() && IsCollisionAABB(playerAABB, ghostBlockAABB)) {
-//			ResolveAABBCollision(playerAABB, ghostBlockAABB, velocityY_, onGround_);
-//		}
-//		break;
-//
-//	case State::Bomb:
-//		// 爆弾状態：衝突判定とブロック破壊
-//		for (Block* block : blocks_) {
-//			if (block && block->IsActive()) {
-//				// 変数名を変えて、重複を回避
-//				AABB currentBlockAABB = block->GetAABB();
-//				if (IsCollisionAABB(playerAABB, currentBlockAABB)) {
-//					ResolveAABBCollision(playerAABB, currentBlockAABB, velocityY_, onGround_);
-//				}
-//
-//				// キャノン敵の弾との衝突判定
-//				for (Bom* bom : cannonEnemy->GetBom()) {
-//					AABB bomAABB = bom->GetAABB();
-//					if (IsCollisionAABB(bomAABB, currentBlockAABB) && cannonEnemy->GetPlayerCtrl()) {
-//						block->SetActive(false);
-//					}
-//				}
-//			}
-//		}
-//		break;
-//
-//	case State::Ghost:
-//		// ゴースト状態：衝突判定なし
-//		break;
-//	}
-//}
-
 void Player::DrawUI() {
 
 #ifdef _DEBUG
@@ -456,7 +442,7 @@ void Player::DrawUI() {
 
 	const char* stateNames[] = {"Normal", "Bomb", "Ghost"};
 	ImGui::Text("Current State: %s", stateNames[static_cast<int>(currentState)]);
-	ImGui::DragFloat("Hp", &hp);
+	//ImGui::DragFloat("Hp", &hp);
 
 	ImGui::End();
 

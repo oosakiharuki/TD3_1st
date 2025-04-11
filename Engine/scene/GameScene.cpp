@@ -12,6 +12,8 @@ void GameScene::Finalize() {
 	delete stage;
 	delete skydome_;
 
+	delete uiManager;
+
 	allObstacles_.clear();
 }
 
@@ -36,7 +38,7 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("stage4");
 
 	ModelManager::GetInstance()->LoadModel("stage2");
-	ModelManager::GetInstance()->LoadModel("stage3"); 
+	ModelManager::GetInstance()->LoadModel("stage5"); 
 	ModelManager::GetInstance()->LoadModel("BlueGhost");
 
 
@@ -95,6 +97,9 @@ void GameScene::Initialize() {
 	else if (currentStage_ == 4) {
 		// Stage 3への移行時の座標
 		StartPosition = { 27.256f, 100.018f, 25.295f };
+	}else if (currentStage_ == 5) {
+		// Stage 3への移行時の座標
+		StartPosition = {0,4,0 };
 	}
 
 	player_->SetPosition(StartPosition);
@@ -140,6 +145,13 @@ void GameScene::Initialize() {
 		player_->SetGoal(mapLoader_->GetGoal());
 	}
 
+	uiManager = new UIManager();
+	uiManager->Initialize();
+
+	// ステージ1のBGM読み込みと再生
+	audio_ = Audio::GetInstance();
+	BGMSound = audio_->LoadWave("sound/stage1.wav");
+	audio_->SoundPlayWave(BGMSound, 0.25f,true);
 }
 
 void GameScene::Update() {
@@ -224,6 +236,7 @@ void GameScene::Update() {
 	camera_->Update();
 
 
+	uiManager->Update();
 
 #ifdef  USE_IMGUI
 
@@ -283,6 +296,8 @@ void GameScene::Draw() {
 	if (mapLoader_) {
 		mapLoader_->Draw2D();
 	}
+	
+	uiManager->Draw(player_->GetHp());
 }
 
 

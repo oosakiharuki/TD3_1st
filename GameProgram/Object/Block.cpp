@@ -34,12 +34,18 @@ void Block::Draw() {
 
 AABB Block::GetAABB() const {
 	AABB aabb;
-	aabb.min = worldTransform.translation_ - Vector3(12.0f, 1.0f, 2.0f);
-	aabb.max = worldTransform.translation_ + Vector3(12.0f, 15.0f, 2.0f);
+	aabb.min = worldTransform.translation_ - size_;
+	aabb.max = worldTransform.translation_ + size_;
 	return aabb;
 }
 
 void Block::SetPosition(const Vector3& pos) {
 	worldTransform.translation_ = pos;
+	worldTransform.UpdateMatrix();
+}
+
+void Block::SetSize(const Vector3& size) {
+	worldTransform.scale_ = size;
+	size_ = size;
 	worldTransform.UpdateMatrix();
 }

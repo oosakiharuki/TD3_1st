@@ -18,6 +18,7 @@ public:
 
 	// 位置を設定するメソッドを追加
 	void SetPosition(const Vector3& pos);
+	void SetSize(const Vector3& size);
 
 private:
 	WorldTransform worldTransform;
@@ -25,4 +26,6 @@ private:
 	Object3d* model_ = nullptr;
 	bool isActive_ = true; // ブロックが有効かどうか
 	uint32_t texturehandle_ = 0;
+
+	Vector3 size_;
 };

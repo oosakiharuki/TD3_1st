@@ -46,6 +46,8 @@ public:
 	void SetTextureLT(const Vector2& textureLeftTop) { this->textureLeftTop = textureLeftTop; }
 	void SetTextureSize(const Vector2& textureSize) { this->textureSize = textureSize; }
 
+	void SetTextureFile(std::string newFile);
+
 private:
 	SpriteCommon* spriteCommon_ = nullptr;
 

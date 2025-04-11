@@ -11,6 +11,7 @@
 #include "MyMath.h"
 #include "SpringEnemy.h"
 #include <vector>
+#include "Audio.h"
 
 class GhostEnemy;
 
@@ -85,6 +86,7 @@ public:
 	void CheckDamage();
 
 	void TakeDamage();
+	int GetHp() { return hp; }
 
 private:
 	Vector3 position = {0, 10, -10};
@@ -106,7 +108,7 @@ private:
 	bool isOpenDoor = false;
 	
 	float velocityY_ = 0.0f;
-	float hp = 3;
+	int hp = 200;
 	float coolTime = 0.0f;
 	float cameraPitch = 5.0f;
 	float cameraYaw = 0.0f;
@@ -135,4 +137,11 @@ private:
 	bool isVisible = true;            // 現在表示中かどうか
 	const float flashInterval = 0.1f; // 点滅間隔（秒）
 	const float flashDuration = 1.0f; // 点滅継続時間（秒）
+
+	// サウンド関連
+	Audio* audio_ = nullptr;
+	SoundData JumpSound_;
+	SoundData SnapSound_;
+	SoundData DamageSound_;
+
 };

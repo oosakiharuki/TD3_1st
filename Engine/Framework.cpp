@@ -42,6 +42,8 @@ void Framework::Initialize() {
 	particleCommon->Initialize(dxCommon);
 	ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
 
+	audio_ = Audio::GetInstance();
+	audio_->Initialize();
 }
 
 void Framework::Update() {
@@ -80,6 +82,8 @@ void Framework::Finalize() {
 	delete modelCommon;
 	
 	particleCommon->Finalize();
+
+	audio_->Finalize();
 }
 
 

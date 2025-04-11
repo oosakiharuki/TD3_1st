@@ -49,7 +49,10 @@ private:
 
 	// 鍵のID（複数の鍵を区別するため）
 	int keyID_ = 0;
-	Audio* keyGTAudio_ = nullptr;
+	//カギを取った時の音声
+	Audio* audio_ = nullptr;
+	SoundData keyGetSound_;
+
 	//int KeyAudioHandle_ = 0;
 	int KeyGetAudio_ = 0;
 

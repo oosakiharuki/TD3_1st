@@ -67,8 +67,53 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 			data.type = MapObjectType::Door;
 		} else if (token == "block") {
 			data.type = MapObjectType::Block;
+
+			//ブロックのサイズ変更
+			// x座標を読み込む
+			if (std::getline(iss, token, ',')) {
+				data.size.x = std::stof(token);
+			}
+			else {
+				//しない場合は元々のサイズ
+				data.size.x = 1.0f;
+			}
+
+			// y座標を読み込む
+			if (std::getline(iss, token, ',')) {
+				data.size.y = std::stof(token);
+			}
+			else {
+				data.size.y = 1.0f;
+			}
+
+			// z座標を読み込む
+			if (std::getline(iss, token, ',')) {
+				data.size.z = std::stof(token);
+			}
+			else {
+				data.size.z = 1.0f;
+			}
+
 		} else if (token == "colorWall") { 
-			data.type = MapObjectType::ColorWall;
+			data.type = MapObjectType::ColorWall;	
+			// 敵タイプを読み込む	
+			if (std::getline(iss, token, ',')) {
+				if (token == "Blue") {
+					data.color = ColorType::Blue;
+				}
+				else if (token == "Green") {
+					data.color = ColorType::Green;
+				}
+				else if (token == "Red") {
+					data.color = ColorType::Red;
+				}
+				else {
+					return false; // 未知の敵タイプ
+				}
+			}
+			else {
+				return false;
+			}
 		} else if (token == "goal") { // goalタイプを追加
 			data.type = MapObjectType::Goal;
 		} else if (token == "tile") {
@@ -81,26 +126,7 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 	}
 
 	// オプションのIDフィールドを読み込む
-	if (data.type == MapObjectType::ColorWall) {
-		// 敵タイプを読み込む
-		if (std::getline(iss, token, ',')) {
-			if (token == "Blue") {
-				data.color = ColorType::Blue;
-			}
-			else if (token == "Green") {
-				data.color = ColorType::Green;
-			}
-			else if (token == "Red") {
-				data.color = ColorType::Red;
-			}
-			else {
-				return false; // 未知の敵タイプ
-			}
-		}
-		else {
-			return false;
-		}
-	} else if (std::getline(iss, token, ',')) {
+	if (std::getline(iss, token, ',')) {
 		// ID値が存在する場合、読み込む
 		data.id = std::stoi(token);
 	} else {
@@ -150,6 +176,7 @@ void MapLoader::CreateObjects(Player* player) {
 			Block* block = new Block();
 			block->Init();
 			block->SetPosition(objectData.position);
+			block->SetSize(objectData.size);
 			blocks_.push_back(block);
 		} else if (objectData.type == MapObjectType::ColorWall) {
 			GhostBlock* ghostBlock = new GhostBlock();
