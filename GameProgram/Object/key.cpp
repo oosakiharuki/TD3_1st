@@ -1,4 +1,3 @@
-
 #include "Key.h"
 
 #ifdef _DEBUG
@@ -12,10 +11,6 @@ Key::~Key() { delete model_; }
 void Key::Init() {
 
 	worldTransform_.Initialize();
-
-	//まだできてない
-	//keyGTAudio_= Audio::GetInstance();
-	
 	
 	// "cube" モデルを読み込み
 
@@ -33,10 +28,8 @@ void Key::Init() {
 	worldTransform_.UpdateMatrix();
 
 	// 鍵取得音の読み込み
-	keyGTAudio_ = new Audio();
-	keyGTAudio_->Initialize("sound/key_get.wav");
-	//KeyAudioHandle_ = keyGTAudio_->LoadWave("./sound/key_get.wav");
-
+	audio_ = Audio::GetInstance();
+	keyGetSound_ = audio_->LoadWave("sound/key_get.wav");
 }
 
 void Key::Update() {
@@ -60,7 +53,7 @@ void Key::Update() {
 	}
 
 	if (KeyGetAudio_ < 0) {
-		keyGTAudio_->SoundPlayWave(0.5);
+		audio_->SoundPlayWave(keyGetSound_, 0.5);
 		KeyGetAudio_++;
 	}
 

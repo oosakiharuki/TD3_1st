@@ -24,6 +24,8 @@
 
 #include "UIManager.h"
 
+#include "Audio.h"
+
 class GameScene : public IScene {
 public:
 	// コンストラクタ
@@ -76,11 +78,19 @@ private:
 	//Model* modelSkydome_ = nullptr;
 
 	// 現在のステージ番号
-	int currentStage_ = 5;
+	int currentStage_ = 0;
 
 	float longPress = 1.0f;
 	const float RestartTimer = 1.0f;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
+
+
+	// BGM関連
+	Audio* audio_ = nullptr;
+	SoundData BGMSound;
+	int stageBGMHandle_ = 0;
+	int stageBGMID_ = -1; // 再生IDを保持するために必要
+
 
 	UIManager* uiManager = nullptr;
 

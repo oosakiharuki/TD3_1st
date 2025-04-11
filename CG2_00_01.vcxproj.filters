@@ -275,9 +275,6 @@
     <ClInclude Include="Engine\MyGame.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Framework.h">
-      <Filter>ソース ファイル\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\2d\ImGuiManager.h">
       <Filter>ソース ファイル\Engine\2d</Filter>
     </ClInclude>

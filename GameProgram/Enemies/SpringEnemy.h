@@ -5,7 +5,7 @@
 #include "Object3d.h"
 #include "Input.h"
 #include <vector>
-
+#include "Audio.h"
 
 class Player;      // 前方宣言
 class SpringEnemy; // 前方宣言
@@ -69,6 +69,12 @@ private:
 	bool isStan = false;
 	float timerS = 0.0f;
 	const float stanTime = 3.0f;
+
+	// 音声関連
+	Audio* audio_ = nullptr;
+	SoundData BaneSound;
+	int springSoundHandle_ = 0;
+	int springSoundID_ = -1;
 
 	// デバッグ用
 	XINPUT_STATE state, preState;

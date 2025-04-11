@@ -1,27 +1,33 @@
 #include "Audio.h"
 
+Audio* Audio::instance = nullptr;
 
-Audio::~Audio() {
-	xAudio2.Reset();
-	SoundUnload(&soundData);
+Audio* Audio::GetInstance() {
+	if (instance == nullptr) {
+		instance = new Audio();
+	}
+	return instance;
 }
 
-void Audio::Initialize(const char* filename){
+void Audio::Finalize() {
+	xAudio2.Reset();
+	SoundUnload(&soundData_);
+}
+
+void Audio::Initialize() {
 
 	result = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	result = xAudio2->CreateMasteringVoice(&masterVoice);
 
-
-	soundData = SoundLoadWave(filename);
 }
 
-
-
+SoundData Audio::LoadWave(const char* filename) {
+	soundData_ = SoundLoadWave(filename);
+	return soundData_;
+}
 
 SoundData Audio::SoundLoadWave(const char* filename)//string?
 {
-	//HRESULT result;
-
 	//ファイルオープン
 	//file入力ストリームのインスタンス
 	std::ifstream file;
@@ -98,7 +104,7 @@ SoundData Audio::SoundLoadWave(const char* filename)//string?
 }
 
 
-void Audio::SoundPlayWave(const float volume) {
+void Audio::SoundPlayWave(SoundData soundData,const float volume, bool isLoop) {
 
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
 	result = xAudio2.Get()->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
@@ -108,7 +114,13 @@ void Audio::SoundPlayWave(const float volume) {
 	buf.pAudioData = soundData.pBuffer;
 	buf.AudioBytes = soundData.byfferSize;
 	buf.Flags = XAUDIO2_END_OF_STREAM;
-
+	
+	//ループさせる処理
+	if (isLoop) {
+		buf.LoopBegin = 0;
+		buf.LoopCount = XAUDIO2_MAX_LOOP_COUNT;
+		buf.LoopLength = 0;
+	}
 
 	result = pSourceVoice->SetVolume(volume);//音量調節
 	result = pSourceVoice->SubmitSourceBuffer(&buf);

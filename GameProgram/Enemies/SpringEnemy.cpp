@@ -20,6 +20,10 @@ void SpringEnemy::Init() {
 	// 重力と落下を無効化
 	velocityY_ = 0.0f;
 	onGround_ = true;
+
+	// 音声のロード
+	audio_ = Audio::GetInstance();
+	BaneSound = audio_->LoadWave("./sound/bane.wav");
 }
 
 void SpringEnemy::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -163,6 +167,9 @@ AABB SpringEnemy::GetAABB() const {
 void SpringEnemy::Compress() {
 	isCompressed = true;
 	compressionTimer = 0.0f;
+
+	// バネの音を再生
+	audio_->SoundPlayWave(BaneSound, 0.5f);
 }
 
 void SpringEnemy::ContralPlayer() {
@@ -179,6 +186,9 @@ void SpringEnemy::ReMove(const Vector3& position_) {
 		isStan = true;
 		isPlayer = false;
 		worldTransform_.parent_ = nullptr;
+
+		// バネの音を再生
+		//audio_->SoundPlayWave(BaneSound, 0.5f);
 	}
 }
 

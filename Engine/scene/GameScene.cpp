@@ -147,6 +147,11 @@ void GameScene::Initialize() {
 
 	uiManager = new UIManager();
 	uiManager->Initialize();
+
+	// ステージ1のBGM読み込みと再生
+	audio_ = Audio::GetInstance();
+	BGMSound = audio_->LoadWave("sound/stage1.wav");
+	audio_->SoundPlayWave(BGMSound, 0.25f,true);
 }
 
 void GameScene::Update() {
