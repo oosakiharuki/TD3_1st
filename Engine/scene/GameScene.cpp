@@ -33,12 +33,12 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("stage0");//チュートリアル用
 	ModelManager::GetInstance()->LoadModel("stage1");
 
-//	ModelManager::GetInstance()->LoadModel("stage2");
+	//	ModelManager::GetInstance()->LoadModel("stage2");
 	ModelManager::GetInstance()->LoadModel("stage3");
 	ModelManager::GetInstance()->LoadModel("stage4");
 
 	ModelManager::GetInstance()->LoadModel("stage2");
-	ModelManager::GetInstance()->LoadModel("stage5"); 
+	ModelManager::GetInstance()->LoadModel("stage5");
 	ModelManager::GetInstance()->LoadModel("BlueGhost");
 
 
@@ -50,7 +50,7 @@ void GameScene::Initialize() {
 	//cameraTranslate = { 0.0f,0.0f,-15.0f };
 	//camera_->SetRotate(cameraRotate);
 	//camera_->SetTranslate(cameraTranslate);
-	
+
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
 	ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
 
@@ -97,9 +97,10 @@ void GameScene::Initialize() {
 	else if (currentStage_ == 4) {
 		// Stage 3への移行時の座標
 		StartPosition = { 27.256f, 100.018f, 25.295f };
-	}else if (currentStage_ == 5) {
+	}
+	else if (currentStage_ == 5) {
 		// Stage 3への移行時の座標
-		StartPosition = {0,4,0 };
+		StartPosition = { 0,4,0 };
 	}
 
 	player_->SetPosition(StartPosition);
@@ -151,7 +152,7 @@ void GameScene::Initialize() {
 	// ステージ1のBGM読み込みと再生
 	audio_ = Audio::GetInstance();
 	BGMSound = audio_->LoadWave("sound/stage1.wav");
-	audio_->SoundPlayWave(BGMSound, 0.25f,true);
+	audio_->SoundPlayWave(BGMSound, 0.25f, true);
 }
 
 void GameScene::Update() {
@@ -296,7 +297,7 @@ void GameScene::Draw() {
 	if (mapLoader_) {
 		mapLoader_->Draw2D();
 	}
-	
+
 	uiManager->Draw(player_->GetHp());
 }
 
@@ -331,7 +332,7 @@ void GameScene::ChangeStage(int nextStage) {
 			mapLoader_->CreateObjects(player_);
 		}
 	}
-	 
+
 	// **新しい障害物データをロード**
 	std::string stageFile = "resource/Object/stage" + std::to_string(currentStage_) + "/stage" + std::to_string(currentStage_) + ".obj";
 	LoadStage(stageFile);
@@ -450,7 +451,7 @@ void GameScene::UpdateStageAABB() {
 		std::string word;
 
 		getline(line_stream, word, ' ');
-		
+
 		if (word.find("vn") == 0) {
 			break; //vを読み取ったら終了
 		}
