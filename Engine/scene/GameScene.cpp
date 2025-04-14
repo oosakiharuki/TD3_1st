@@ -32,13 +32,13 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("Spring");
 	ModelManager::GetInstance()->LoadModel("stage0");//チュートリアル用
 	ModelManager::GetInstance()->LoadModel("stage1");
-
-	//	ModelManager::GetInstance()->LoadModel("stage2");
+	ModelManager::GetInstance()->LoadModel("stage2");
 	ModelManager::GetInstance()->LoadModel("stage3");
 	ModelManager::GetInstance()->LoadModel("stage4");
-
-	ModelManager::GetInstance()->LoadModel("stage2");
 	ModelManager::GetInstance()->LoadModel("stage5");
+
+	//	ModelManager::GetInstance()->LoadModel("stage2");
+
 	ModelManager::GetInstance()->LoadModel("BlueGhost");
 
 
@@ -220,7 +220,7 @@ void GameScene::Update() {
 			// Stage 3への移行時の座標
 			newPosition = { -37.0f, -18.512f, -51.500f };
 		}
-		else if (currentStage_ == 4) {
+		else if (nextStage == 4) {
 			// Stage 3への移行時の座標
 			newPosition = { 42.096f, 69.548f, 3.163f };
 		}
