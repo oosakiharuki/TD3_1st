@@ -61,7 +61,7 @@ public:
 	void OnCollisions();
 
 	void ResolveCollisionWithDoor(const AABB& aabb) { doorAABB = aabb; }
-	void ResolveCollisionWithTile(const AABB& aabb) { moveTileAABB = aabb; }
+	void ResolveCollisionWithTile(const AABB& aabb) { moveTileAABBs.push_back(aabb); }
 	void SetOpenDoor(bool isOpen) { isOpenDoor = isOpen; }
 
 	void SetSpringEnemies(const std::vector<SpringEnemy*>& springEnemies);
@@ -119,7 +119,7 @@ private:
 	AABB playerAABB;
 	AABB enemyAABB;
 	AABB doorAABB;
-	AABB moveTileAABB;
+	std::vector<AABB> moveTileAABBs;
 	
 	
 	uint32_t textureHandle = 0;

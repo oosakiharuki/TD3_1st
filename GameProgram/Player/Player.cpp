@@ -292,9 +292,12 @@ void Player::Update() {
 	}
 
 	// Tileとの衝突判定
-	if (IsCollisionAABB(playerAABB, moveTileAABB)) {
-		ResolveAABBCollision(playerAABB, moveTileAABB, velocityY_, onGround_);
+	for (auto& tileAABB : moveTileAABBs) {
+		if (IsCollisionAABB(playerAABB, tileAABB)) {
+			ResolveAABBCollision(playerAABB, tileAABB, velocityY_, onGround_);
+		}
 	}
+	moveTileAABBs.clear(); // 次のフレームのために配列をクリア
 
 	// 敵との衝突処理
 	for (auto it = ghostEnemies_.begin(); it != ghostEnemies_.end();) {

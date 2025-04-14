@@ -224,6 +224,10 @@ void GameScene::Update() {
 			// Stage 3への移行時の座標
 			newPosition = { 42.096f, 69.548f, 3.163f };
 		}
+		else if (nextStage == 5) {
+			// Stage 3への移行時の座標
+			newPosition = { 0, 10, -10 };
+		}
 
 		// プレイヤーの座標を変更
 		player_->SetPosition(newPosition);
