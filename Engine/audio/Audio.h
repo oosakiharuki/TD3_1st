@@ -30,6 +30,8 @@ struct SoundData {
 	BYTE* pBuffer;
 	//サイズ
 	unsigned int byfferSize;
+	//ソースボイス
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
 };
 
 class Audio{
@@ -44,6 +46,7 @@ public:
 
 	//音声再生
 	void SoundPlayWave(SoundData soundData, const float volume, bool isLoop = false);
+	void StopWave(SoundData soundData);
 
 private:
 

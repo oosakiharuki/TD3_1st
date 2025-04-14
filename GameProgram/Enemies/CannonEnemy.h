@@ -74,6 +74,8 @@ private:
 	float fireTimer = 0.0f;         // 現在の発射タイマー
 	float fireInterval = 3.0f;      // 発射間隔（秒）- 3秒に変更
 
+	float animertion = 0.0f;
+
 	std::list<Bom*> bullets_;
 	Player* player_ = nullptr;
 };
