@@ -54,8 +54,10 @@ public:
 	void SetPosition(const Vector3& position);
 
 	// 重複宣言を削除し、ここに1つだけ残す
-	void SetCannon(CannonEnemy* cannon);
-
+	void SetCannon(CannonEnemy* cannon); // 後方互換性のため残す
+	void SetCannonEnemies(const std::vector<CannonEnemy*>& cannons);
+	
+	
 	void OnCollisions();
 
 	void ResolveCollisionWithDoor(const AABB& aabb) { doorAABB = aabb; }
@@ -123,7 +125,10 @@ private:
 	uint32_t textureHandle = 0;
 	//GhostEnemy* ghostEnemy = nullptr;//乗っ取ったゴースト
 	State currentState = State::Normal;
+	std::vector<CannonEnemy*> cannonEnemies_; // 単一ポインタではなくベクトルに変更
 	CannonEnemy* cannonEnemy = nullptr;
+
+	
 	Goal* goal_ = nullptr;
 
 	std::vector<AABB> obstacleList_;

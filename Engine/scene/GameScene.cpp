@@ -121,9 +121,7 @@ void GameScene::Initialize() {
 	player_->SetGhostEnemies(enemyLoader_->GetGhostList());
 
 	// キャノン敵への参照をプレイヤーに設定
-	if (!enemyLoader_->GetCannonEnemyList().empty()) {
-		player_->SetCannon(enemyLoader_->GetCannonEnemyList()[0]); // 一番最初のキャノン敵を設定
-	}
+	player_->SetCannonEnemies(enemyLoader_->GetCannonEnemyList());
 
 	// バネ敵への参照をプレイヤーに設定
 	player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());

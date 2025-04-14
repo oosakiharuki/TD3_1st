@@ -13,8 +13,8 @@ using namespace MyMath;
 
 Player::Player() {}
 
-Player::~Player() { 
-	delete PlayerModel_; 
+Player::~Player() {
+	delete PlayerModel_;
 }
 
 void Player::Init(Camera* camera) {
@@ -45,7 +45,7 @@ void Player::Update() {
 
 	// キーボードとGamePad左スティックの入力を合算して移動処理する
 	float keyboardSpeed = 0.55f;
-	Vector3 inputVec = {0.0f, 0.0f, 0.0f};
+	Vector3 inputVec = { 0.0f, 0.0f, 0.0f };
 
 	// キーボード入力 (WASD)
 	if (Input::GetInstance()->PushKey(DIK_W)) {
@@ -164,11 +164,13 @@ void Player::Update() {
 		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !EnemyContral && !isTransfar) {
 			velocityY_ -= 1.2f;
 			isTransfar = true;
-		} else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && !EnemyContral && !isTransfar) {
+		}
+		else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && !EnemyContral && !isTransfar) {
 			velocityY_ -= 1.2f;
 			isTransfar = true;
 		}
-	} else {
+	}
+	else {
 		isTransfar = false;
 	}
 
@@ -177,8 +179,9 @@ void Player::Update() {
 		onGround_ = false;
 
 		// ジャンプ音を再生
-		audio_->SoundPlayWave(JumpSound_,0.7f);
-	} else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && velocityY_ == 0.0f) {
+		audio_->SoundPlayWave(JumpSound_, 0.7f);
+	}
+	else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && velocityY_ == 0.0f) {
 		velocityY_ = 0.3f;
 		onGround_ = false;
 
@@ -190,7 +193,8 @@ void Player::Update() {
 		velocityY_ = 0.0f;
 		EnemyContral = false;
 		onEnemy = true;
-	} else if (Input::GetInstance()->TriggerKey(DIK_K) && velocityY_ == 0.0f && EnemyContral) {
+	}
+	else if (Input::GetInstance()->TriggerKey(DIK_K) && velocityY_ == 0.0f && EnemyContral) {
 		velocityY_ = 0.0f;
 		EnemyContral = false;
 		onEnemy = true;
@@ -205,8 +209,8 @@ void Player::Update() {
 
 	// プレイヤーのAABB更新
 	float halfW = 1.0f, halfH = 1.0f, halfD = 1.0f;
-	playerAABB.min = {position.x - halfW, position.y - halfH, position.z - halfD};
-	playerAABB.max = {position.x + halfW, position.y + halfH, position.z + halfD};
+	playerAABB.min = { position.x - halfW, position.y - halfH, position.z - halfD };
+	playerAABB.max = { position.x + halfW, position.y + halfH, position.z + halfD };
 
 	// 障害物との衝突解決
 	const int maxIterations = 10;
@@ -225,29 +229,33 @@ void Player::Update() {
 #pragma endregion
 
 #pragma region 敵との衝突処理
-	// キャノン敵との衝突処理
-	AABB cannonAABB = cannonEnemy->GetAABB();
-	if (IsCollisionAABB(playerAABB, cannonAABB)) {
-		ResolveAABBCollision(playerAABB, cannonAABB, velocityY_, onGround_);
-		if (isTransfar && (playerAABB.min.y >= cannonAABB.max.y) && !EnemyContral) {
-			cannonEnemy->ContralPlayer();
-			EnemyContral = true;
-			collisionEnemy = true;
+	// キャノン敵との衝突処理 - 全てのキャノン敵をチェック
+	for (CannonEnemy* cannon : cannonEnemies_) {
+		AABB cannonAABB = cannon->GetAABB();
+		if (IsCollisionAABB(playerAABB, cannonAABB)) {
+			ResolveAABBCollision(playerAABB, cannonAABB, velocityY_, onGround_);
+			if (isTransfar && (playerAABB.min.y >= cannonAABB.max.y) && !EnemyContral) {
+				cannon->ContralPlayer();
+				EnemyContral = true;
+				collisionEnemy = true;
 
-			// 乗り移り音を再生
-			audio_->SoundPlayWave(SnapSound_, 0.6f);
+				// 乗り移り音を再生
+				audio_->SoundPlayWave(SnapSound_, 0.6f);
+			}
 		}
-	}
 
-	if (EnemyContral && cannonEnemy->GetPlayerCtrl()) {
-		cannonEnemy->SetParent(&worldTransform_);
-		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_X) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_X)) {
-			cannonEnemy->PlayerFire();
-		} else if (Input::GetInstance()->TriggerKey(DIK_J)) {
-			cannonEnemy->PlayerFire();
+		if (EnemyContral && cannon->GetPlayerCtrl()) {
+			cannon->SetParent(&worldTransform_);
+			if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_X) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_X)) {
+				cannon->PlayerFire();
+			}
+			else if (Input::GetInstance()->TriggerKey(DIK_J)) {
+				cannon->PlayerFire();
+			}
 		}
-	} else {
-		cannonEnemy->ReMove(worldTransform_.translation_);
+		else {
+			cannon->ReMove(worldTransform_.translation_);
+		}
 	}
 
 	CheckCollision();
@@ -272,7 +280,8 @@ void Player::Update() {
 
 		if (EnemyContral && springEnemy->GetPlayerCtrl()) {
 			springEnemy->SetParent(&worldTransform_);
-		} else {
+		}
+		else {
 			springEnemy->ReMove(worldTransform_.translation_);
 		}
 	}
@@ -305,7 +314,8 @@ void Player::Update() {
 					velocityY_ = 0.0f;
 					onGround_ = true;
 				}
-			} else { //　横に当たったらダメージ
+			}
+			else { //　横に当たったらダメージ
 				isDamage = true;
 			}
 
@@ -321,7 +331,8 @@ void Player::Update() {
 
 		if (EnemyContral && (*it)->GetPlayerCtrl()) {
 			(*it)->SetParent(&worldTransform_);
-		} else {
+		}
+		else {
 			(*it)->ReMove(worldTransform_.translation_);
 		}
 		++it;
@@ -355,7 +366,7 @@ void Player::Update() {
 	CheckDamage();
 
 	//ゴールの旗に当たったか
-	CheckCollisionWithGoal(); 
+	CheckCollisionWithGoal();
 #pragma endregion
 
 #pragma region デバッグ表示
@@ -385,10 +396,13 @@ void Player::CheckCollision() {
 		AABB blockAABB = block_->GetAABB();
 		switch (currentState) {
 		case State::Bomb:
-			for (Bom* bom : cannonEnemy->GetBom()) {
-				AABB bomAABB = bom->GetAABB();
-				if (block_->IsActive() && IsCollisionAABB(bomAABB, blockAABB) && cannonEnemy->GetPlayerCtrl()) {
-					block_->SetActive(false);
+			// 全てのキャノン敵の弾でブロック破壊チェック
+			for (CannonEnemy* cannon : cannonEnemies_) {
+				for (Bom* bom : cannon->GetBom()) {
+					AABB bomAABB = bom->GetAABB();
+					if (block_->IsActive() && IsCollisionAABB(bomAABB, blockAABB) && cannon->GetPlayerCtrl()) {
+						block_->SetActive(false);
+					}
 				}
 			}
 			break;
@@ -440,7 +454,7 @@ void Player::DrawUI() {
 
 	ImGui::Begin("Player State");
 
-	const char* stateNames[] = {"Normal", "Bomb", "Ghost"};
+	const char* stateNames[] = { "Normal", "Bomb", "Ghost" };
 	ImGui::Text("Current State: %s", stateNames[static_cast<int>(currentState)]);
 	//ImGui::DragFloat("Hp", &hp);
 
@@ -450,13 +464,15 @@ void Player::DrawUI() {
 }
 
 void Player::OnCollisions() {
+	// 全てのキャノン敵の弾を確認
+	for (CannonEnemy* cannon : cannonEnemies_) {
+		for (Bom* bom : cannon->GetBom()) {
+			AABB bomAABB = bom->GetAABB();
 
-	for (Bom* bom : cannonEnemy->GetBom()) {
-		AABB bomAABB = bom->GetAABB();
-
-		if (IsCollisionAABB(bomAABB, playerAABB) && !cannonEnemy->GetPlayerCtrl()) {
-			isDamage = true;
-			bom->OnCollision();
+			if (IsCollisionAABB(bomAABB, playerAABB) && !cannon->GetPlayerCtrl()) {
+				isDamage = true;
+				bom->OnCollision();
+			}
 		}
 	}
 }
@@ -475,7 +491,17 @@ void Player::SetGhostEnemies(const std::vector<GhostEnemy*>& enemies) { ghostEne
 
 void Player::SetSpringEnemies(const std::vector<SpringEnemy*>& springEnemies) { springEnemies_ = springEnemies; }
 
-void Player::SetCannon(CannonEnemy* cannon) { cannonEnemy = cannon; }
+void Player::SetCannon(CannonEnemy* cannon) {
+	// 後方互換性のため - 既存をクリアしてこれを追加
+	cannonEnemies_.clear();
+	if (cannon) {
+		cannonEnemies_.push_back(cannon);
+	}
+}
+
+void Player::SetCannonEnemies(const std::vector<CannonEnemy*>& cannons) {
+	cannonEnemies_ = cannons;
+}
 
 //// ★ 新しく追加：ドアとの衝突解決処理
 // void Player::ResolveCollisionWithDoor(const AABB& doorAABB) {
@@ -566,7 +592,8 @@ void Player::CheckDamage() {
 		isFlashing = true;
 		flashTimer = 0.0f;
 		isVisible = true;
-	} else {
+	}
+	else {
 		isDamage = false;
 	}
 }
