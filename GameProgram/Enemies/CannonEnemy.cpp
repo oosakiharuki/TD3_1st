@@ -108,6 +108,11 @@ void CannonEnemy::Update() {
 			if (distance <= attackRadius) {
 				// 発射メソッドを呼び出し
 				Fire();
+			}else{
+				//発射モーションリセット
+				worldTransform_.scale_ = { 1,1,1 };
+				fireTimer = fireInterval;
+				animertion = 0.0f;
 			}
 		}
 
@@ -144,7 +149,7 @@ void CannonEnemy::Update() {
 			return true;
 		}
 		return false;
-		});
+	});
 
 	worldTransform_.UpdateMatrix();
 }
@@ -160,6 +165,9 @@ void CannonEnemy::Draw() {
 void CannonEnemy::Fire() {
 	const float deltaTimer = 1.0f / 60.0f;
 	fireTimer -= deltaTimer;
+	animertion += deltaTimer;
+
+	Vector3 Scale = { 1.0f + animertion / 3.0f, 1.0f + animertion / 3.0f, 1.0f + animertion / 3.0f };
 
 	// 発射間隔が経過したら発射
 	if (fireTimer <= 0.0f) {
@@ -184,7 +192,12 @@ void CannonEnemy::Fire() {
 
 		// 次の発射までのクールダウンを設定（3秒に延長）
 		fireTimer = fireInterval;
-	}
+		animertion = 0.0f;
+	}	
+
+	//発射モーション
+	worldTransform_.scale_ = Scale;
+
 }
 
 void CannonEnemy::PlayerFire() {
@@ -214,6 +227,18 @@ AABB CannonEnemy::GetAABB() {
 
 void CannonEnemy::ContralPlayer() {
 	isPlayer = true;
+
+	// のりうつった時の弾の削除
+	bullets_.remove_if([](Bom* bom) {
+		delete bom;
+		return true;
+	});
+
+	//発射モーションリセット
+	worldTransform_.scale_ = { 1,1,1 };
+	fireTimer = fireInterval;
+	animertion = 0.0f;
+	
 	worldTransform_.translation_ = { 0, -2, 0 };
 	worldTransform_.rotation_ = { 0, 0, 0 };
 	if (player_) {

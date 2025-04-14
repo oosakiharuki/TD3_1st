@@ -100,16 +100,16 @@ SoundData Audio::SoundLoadWave(const char* filename)//string?
 	soundData.pBuffer = reinterpret_cast<BYTE*>(pBuffer);
 	soundData.byfferSize = data.size;
 
+	result = xAudio2.Get()->CreateSourceVoice(&soundData.pSourceVoice, &soundData.wfex);
+	assert(SUCCEEDED(result));
+
 	return soundData;
 }
 
 
 void Audio::SoundPlayWave(SoundData soundData,const float volume, bool isLoop) {
 
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2.Get()->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
-	assert(SUCCEEDED(result));
-
+	//波状データを読み込む
 	XAUDIO2_BUFFER buf{};
 	buf.pAudioData = soundData.pBuffer;
 	buf.AudioBytes = soundData.byfferSize;
@@ -122,10 +122,9 @@ void Audio::SoundPlayWave(SoundData soundData,const float volume, bool isLoop) {
 		buf.LoopLength = 0;
 	}
 
-	result = pSourceVoice->SetVolume(volume);//音量調節
-	result = pSourceVoice->SubmitSourceBuffer(&buf);
-	result = pSourceVoice->Start();
-
+	result = soundData.pSourceVoice->SetVolume(volume);//音量調節
+	result = soundData.pSourceVoice->SubmitSourceBuffer(&buf);
+	result = soundData.pSourceVoice->Start();
 
 }
 
@@ -136,4 +135,8 @@ void Audio::SoundUnload(SoundData* soundData) {
 	soundData->pBuffer = 0;
 	soundData->byfferSize = 0;
 	soundData->wfex = {};
+}
+
+void Audio::StopWave(SoundData soundData) {
+	result = soundData.pSourceVoice->Stop();
 }

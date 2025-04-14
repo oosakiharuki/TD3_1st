@@ -19,38 +19,8 @@ void GameScene::Finalize() {
 
 void GameScene::Initialize() {
 
-	ModelManager::GetInstance()->LoadModel("cannon");
-	ModelManager::GetInstance()->LoadModel("cube");
-	ModelManager::GetInstance()->LoadModel("door");
-	ModelManager::GetInstance()->LoadModel("tile");
-	ModelManager::GetInstance()->LoadModel("EnemyBullet");
-	ModelManager::GetInstance()->LoadModel("EnemyGhost");
-	ModelManager::GetInstance()->LoadModel("goal");
-	ModelManager::GetInstance()->LoadModel("key");
-	ModelManager::GetInstance()->LoadModel("player");
-	ModelManager::GetInstance()->LoadModel("space");
-	ModelManager::GetInstance()->LoadModel("Spring");
-	ModelManager::GetInstance()->LoadModel("stage0");//チュートリアル用
-	ModelManager::GetInstance()->LoadModel("stage1");
-	ModelManager::GetInstance()->LoadModel("stage2");
-	ModelManager::GetInstance()->LoadModel("stage3");
-	ModelManager::GetInstance()->LoadModel("stage4");
-	ModelManager::GetInstance()->LoadModel("stage5");
-
-	//	ModelManager::GetInstance()->LoadModel("stage2");
-
-	ModelManager::GetInstance()->LoadModel("BlueGhost");
-
-
-
 	camera_ = new Camera();
-	//cameraRotate = { 1.4f,0.0f,0.0f };
-	//cameraTranslate = { 0.0f,30.0f,-8.0f };
-	//cameraRotate = { 0.0f,0.0f,0.0f };
-	//cameraTranslate = { 0.0f,0.0f,-15.0f };
-	//camera_->SetRotate(cameraRotate);
-	//camera_->SetTranslate(cameraTranslate);
-
+	
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
 	ParticleCommon::GetInstance()->SetDefaultCamera(camera_);
 
@@ -159,6 +129,7 @@ void GameScene::Update() {
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
 	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
+		audio_->StopWave(BGMSound);
 		sceneNo = Title;
 	}
 
@@ -172,6 +143,7 @@ void GameScene::Update() {
 	// 0になった時リスタート / 押しなおさないと更新されなくする
 	if (longPress < 0 && longPress > -0.017f) {
 		Finalize();
+		audio_->StopWave(BGMSound);
 		Initialize();
 	}
 
@@ -192,10 +164,6 @@ void GameScene::Update() {
 	if (mapLoader_) {
 		mapLoader_->Update();
 	}
-
-	//for (auto& springEnemy : enemyLoader_->GetSpringEnemyList()) {
-	//	springEnemy->Update();
-	//}
 
 	player_->DrawUI();
 	skydome_->Update();
@@ -234,30 +202,7 @@ void GameScene::Update() {
 
 	camera_->Update();
 
-
 	uiManager->Update();
-
-#ifdef  USE_IMGUI
-
-	////ここにテキストを入れられる
-
-	////開発用UIの処理
-	////ImGui::ShowDemoWindow();
-
-	//ImGui::Begin("camera");
-	//ImGui::Text("ImGuiText");
-
-	////カメラ
-	//ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
-
-	//ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
-	//ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
-	//ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
-	////camera_->SetRotate(cameraRotate);
-	////camera_->SetTranslate(cameraTranslate);
-
-	//ImGui::End();
-#endif //  USE_IMGUI
 }
 
 void GameScene::Draw() {
