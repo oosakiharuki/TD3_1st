@@ -87,6 +87,7 @@ void LoadingScene::Update() {
             ModelManager::GetInstance()->LoadModel("stage3");
             ModelManager::GetInstance()->LoadModel("stage4");
             ModelManager::GetInstance()->LoadModel("stage5");
+            ModelManager::GetInstance()->LoadModel("stage6");
             ModelManager::GetInstance()->LoadModel("BlueGhost");
 
             loadingProgress = 0.0f;
