@@ -4,8 +4,6 @@
 #include "CameraController.h"
 #include "CannonEnemy.h"
 #include "Collision.h"
-//#include "Enemy.h"
-//#include "GhostEnemy.h"
 #include "GhostBlock.h"
 #include "Goal.h"
 #include "MyMath.h"
@@ -14,8 +12,6 @@
 #include "Audio.h"
 
 class GhostEnemy;
-
-//class Enemy;
 
 class Player {
 public:
@@ -53,11 +49,15 @@ public:
 
 	void SetPosition(const Vector3& position);
 
+	// 初期位置を設定・取得するメソッド
+	void SetInitialPosition(const Vector3& initialPos) { initialPosition = initialPos; }
+	Vector3 GetInitialPosition() const { return initialPosition; }
+
 	// 重複宣言を削除し、ここに1つだけ残す
 	void SetCannon(CannonEnemy* cannon); // 後方互換性のため残す
 	void SetCannonEnemies(const std::vector<CannonEnemy*>& cannons);
-	
-	
+
+
 	void OnCollisions();
 
 	void ResolveCollisionWithDoor(const AABB& aabb) { doorAABB = aabb; }
@@ -88,19 +88,22 @@ public:
 	void CheckDamage();
 
 	void TakeDamage();
+	// 指定されたダメージを受ける関数を追加
+	void TakeDamage(int damageAmount);
 	int GetHp() { return hp; }
 
 private:
-	Vector3 position = {0, 10, -10};
+	Vector3 position = { 0, 10, -10 };
+	Vector3 initialPosition = { 0, 10, -10 }; // 初期位置保存用
 	Vector3 velocity;
-	Vector3 size = {2, 2, 2};
-	Vector3 stop = {0, 0, 0};
+	Vector3 size = { 2, 2, 2 };
+	Vector3 stop = { 0, 0, 0 };
 
 	WorldTransform worldTransform_;
 	Camera* camera_ = nullptr;
 	Object3d* PlayerModel_ = nullptr;
 	CameraController cameraController_;
-	
+
 	bool onGround_ = true;
 	bool onEnemy;
 	bool isTransfar = false;
@@ -108,27 +111,30 @@ private:
 	bool EnemyContral = false;
 	bool collisionEnemy = false;
 	bool isOpenDoor = false;
-	
+
 	float velocityY_ = 0.0f;
 	int hp = 200;
 	float coolTime = 0.0f;
 	float cameraPitch = 5.0f;
 	float cameraYaw = 0.0f;
-	const float speed = 0.2f;
+	const float speed = 0.25f;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 	AABB playerAABB;
 	AABB enemyAABB;
 	AABB doorAABB;
 	std::vector<AABB> moveTileAABBs;
-	
-	
+
+	// 落下判定用
+	const float fallThreshold = -60.0f;
+	const int fallDamage = 40; // 通常ダメージの2倍相当
+
 	uint32_t textureHandle = 0;
 	//GhostEnemy* ghostEnemy = nullptr;//乗っ取ったゴースト
 	State currentState = State::Normal;
 	std::vector<CannonEnemy*> cannonEnemies_; // 単一ポインタではなくベクトルに変更
 	CannonEnemy* cannonEnemy = nullptr;
 
-	
+
 	Goal* goal_ = nullptr;
 
 	std::vector<AABB> obstacleList_;
@@ -136,7 +142,7 @@ private:
 	std::vector<Block*> blocks_;
 	std::vector<GhostBlock*> ghostBlocks_;
 
-	 // 点滅関連の追加変数
+	// 点滅関連の追加変数
 	bool isFlashing = false;          // 点滅中かどうか
 	float flashTimer = 0.0f;          // 点滅用タイマー
 	bool isVisible = true;            // 現在表示中かどうか
@@ -148,5 +154,10 @@ private:
 	SoundData JumpSound_;
 	SoundData SnapSound_;
 	SoundData DamageSound_;
+	SoundData FallSound_; // 落下音追加
 
+	// 初期位置にリセットする関数
+	void ResetToInitialPosition();
+	// 落下チェック関数
+	void CheckFallOut();
 };

@@ -25,13 +25,15 @@ void Player::Init(Camera* camera) {
 	PlayerModel_->SetModelFile("player");
 	worldTransform_.translation_ = position;
 
+	// 初期位置を保存
+	initialPosition = position;
 
 	audio_ = Audio::GetInstance();
 
 	JumpSound_ = audio_->LoadWave("sound/jump.wav");
 	SnapSound_ = audio_->LoadWave("sound/snap.wav");
 	//DamageSound_ = Audio::GetInstance()->LoadWave("sound/damage.wav");//読み取れんかった
-
+	FallSound_ = audio_->LoadWave("sound/fall.wav"); // 仮に落下音もジャンプ音と同じものを使用
 }
 
 void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -370,6 +372,9 @@ void Player::Update() {
 
 	//ゴールの旗に当たったか
 	CheckCollisionWithGoal();
+
+	// 落下判定チェック
+	CheckFallOut();
 #pragma endregion
 
 #pragma region デバッグ表示
@@ -378,6 +383,8 @@ void Player::Update() {
 	ImGui::DragFloat3("translate", &worldTransform_.translation_.x);
 	ImGui::DragFloat3("aabbMax", &playerAABB.max.x);
 	ImGui::DragFloat3("aabbMin", &playerAABB.min.x);
+	ImGui::Text("HP: %d", hp);
+	ImGui::Text("Position Y: %.2f (Fall at: %.2f)", position.y, fallThreshold);
 	ImGui::End();
 #endif
 #pragma endregion
@@ -388,6 +395,29 @@ void Player::Update() {
 	worldTransform_.UpdateMatrix();
 
 	cameraController_.Update(camera_, position);
+}
+
+// 落下チェック関数
+void Player::CheckFallOut() {
+	// Y座標が閾値を下回った場合
+	if (position.y < fallThreshold) {
+		// 初期位置にリセット
+		ResetToInitialPosition();
+
+		// ダメージを与える（通常の2倍）
+		TakeDamage(fallDamage);
+
+		// 落下音を再生
+		audio_->SoundPlayWave(FallSound_, 0.7f);
+	}
+}
+
+// 初期位置にリセットする関数
+void Player::ResetToInitialPosition() {
+	position = initialPosition;
+	velocityY_ = 0.0f;
+	worldTransform_.translation_ = position;
+	onGround_ = true;
 }
 
 void Player::CheckCollision() {
@@ -459,7 +489,8 @@ void Player::DrawUI() {
 
 	const char* stateNames[] = { "Normal", "Bomb", "Ghost" };
 	ImGui::Text("Current State: %s", stateNames[static_cast<int>(currentState)]);
-	//ImGui::DragFloat("Hp", &hp);
+	ImGui::Text("HP: %d", hp);
+	ImGui::Text("Position Y: %.2f", position.y);
 
 	ImGui::End();
 
@@ -506,18 +537,22 @@ void Player::SetCannonEnemies(const std::vector<CannonEnemy*>& cannons) {
 	cannonEnemies_ = cannons;
 }
 
-//// ★ 新しく追加：ドアとの衝突解決処理
-// void Player::ResolveCollisionWithDoor(const AABB& doorAABB) {
-//	AABB currentAABB = GetAABB();
-//	ResolveAABBCollision(currentAABB, doorAABB, velocityY_, onGround_);
-//	position.x = (currentAABB.min.x + currentAABB.max.x) * 0.5f;
-//	position.y = (currentAABB.min.y + currentAABB.max.y) * 0.5f;
-//	position.z = (currentAABB.min.z + currentAABB.max.z) * 0.5f;
-//	worldTransform_.translation_ = position;
-// }
-
 void Player::TakeDamage() {
 	isDamage = true;
+}
+
+// 指定されたダメージを受ける関数
+void Player::TakeDamage(int damageAmount) {
+	if (!isFlashing) { // 無敵時間中でなければダメージを受ける
+		hp -= damageAmount;
+		if (hp < 0) hp = 0; // HPが0未満にならないようにする
+
+		isDamage = false;
+		coolTime = flashDuration; // 1.5秒間の点滅時間
+		isFlashing = true;
+		flashTimer = 0.0f;
+		isVisible = true;
+	}
 }
 
 void Player::CheckCollisionWithSprings() {
@@ -549,6 +584,8 @@ void Player::ClearObstacleList() {
 void Player::SetPosition(const Vector3& newPosition) {
 	position = newPosition;
 	worldTransform_.translation_ = position;
+	// 初期位置も更新
+	initialPosition = newPosition;
 }
 
 
@@ -589,12 +626,8 @@ void Player::CheckDamage() {
 
 	// ダメージを受けたときの処理
 	if (isDamage && !isFlashing) {
-		hp--;
+		TakeDamage(20); // 通常のダメージ量を20とする
 		isDamage = false;
-		coolTime = flashDuration; // 1.5秒間の点滅時間
-		isFlashing = true;
-		flashTimer = 0.0f;
-		isVisible = true;
 	}
 	else {
 		isDamage = false;
