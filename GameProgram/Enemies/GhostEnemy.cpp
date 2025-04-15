@@ -210,6 +210,9 @@ void GhostEnemy::Update() {
 			CheckCollisionWithObstacles();
 		}
 
+
+		CheckAndResolveGhostCollisions();
+
 		worldTransform_.translation_.y = position.y;
 	}
 
@@ -516,4 +519,75 @@ bool GhostEnemy::IsPlayerInChaseRadius() {
 void GhostEnemy::SetFieldBoundaries(const Vector3& min, const Vector3& max) {
 	fieldMin_ = min;
 	fieldMax_ = max;
+}
+// GhostEnemy.cpp 内に追加する関数
+
+void GhostEnemy::CheckAndResolveGhostCollisions() {
+	if (!otherGhosts_ || isPlayer) return;
+
+	for (auto* otherGhost : *otherGhosts_) {
+		// 自分自身は無視
+		if (otherGhost == this || otherGhost->isPlayer) continue;
+
+		// お互いのAABBを取得
+		AABB myAABB = GetAABB();
+		AABB otherAABB = otherGhost->GetAABB();
+
+		// 衝突判定
+		if (IsCollisionAABB(myAABB, otherAABB)) {
+			// 衝突した場合、押し出し方向と距離を計算
+			Vector3 overlap = GetOverlapAmount(myAABB, otherAABB);
+			Vector3 myCenterPos = {
+				(myAABB.min.x + myAABB.max.x) * 0.5f,
+				(myAABB.min.y + myAABB.max.y) * 0.5f,
+				(myAABB.min.z + myAABB.max.z) * 0.5f
+			};
+
+			Vector3 otherCenterPos = {
+				(otherAABB.min.x + otherAABB.max.x) * 0.5f,
+				(otherAABB.min.y + otherAABB.max.y) * 0.5f,
+				(otherAABB.min.z + otherAABB.max.z) * 0.5f
+			};
+
+			// 押し出し方向ベクトル（自分から相手への方向の逆）
+			Vector3 pushDir = {
+				myCenterPos.x - otherCenterPos.x,
+				myCenterPos.y - otherCenterPos.y,
+				myCenterPos.z - otherCenterPos.z
+			};
+
+			if (Length(pushDir) < 0.0001f) {
+				// 完全に重なっている場合はランダムな方向に少しずらす
+				pushDir.x = static_cast<float>(std::rand()) / RAND_MAX * 2.0f - 1.0f;
+				pushDir.z = static_cast<float>(std::rand()) / RAND_MAX * 2.0f - 1.0f;
+			}
+
+			pushDir = Normalize(pushDir);
+
+			// X軸とZ軸の重なり具合を比較し、より小さい方向に押し出す
+			if (overlap.x < overlap.z) {
+				// X軸方向の押し出し
+				float pushAmount = overlap.x * 0.5f; // 半分ずつ押し出す
+				worldTransform_.translation_.x += pushDir.x * pushAmount;
+				// 相手側も押す（相互作用）
+				otherGhost->worldTransform_.translation_.x -= pushDir.x * pushAmount;
+			}
+			else {
+				// Z軸方向の押し出し
+				float pushAmount = overlap.z * 0.5f; // 半分ずつ押し出す
+				worldTransform_.translation_.z += pushDir.z * pushAmount;
+				// 相手側も押す（相互作用）
+				otherGhost->worldTransform_.translation_.z -= pushDir.z * pushAmount;
+			}
+
+			// 衝突したら少し速度を落とす（衝撃表現）
+			velocity.x *= 0.9f;
+			velocity.z *= 0.9f;
+
+			// 衝突後の新しい目的地を設定する確率を上げる
+			if (randomMoveTimer_ > 1.0f && std::rand() % 100 < 30) {
+				SetNewRandomDestination();
+			}
+		}
+	}
 }

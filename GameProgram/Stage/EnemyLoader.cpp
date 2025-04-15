@@ -157,9 +157,14 @@ void EnemyLoader::CreateEnemies(Player* player, const std::vector<std::vector<AA
 		}
 	}
 
-	// ゴースト敵に他のゴースト敵への参照を設定
-	for (auto* ghost : ghostEnemies_) {
-		ghost->SetOtherGhosts(&ghostEnemies_);
+	// すべてのゴーストに他のゴーストへの参照を設定
+	if (!ghostEnemies_.empty()) {
+		for (auto& ghost : ghostEnemies_) {
+			ghost->SetOtherGhosts(&ghostEnemies_);
+
+			// フィールド境界を適切に設定
+			ghost->SetFieldBoundaries({ -150.0f, -50.0f, -150.0f }, { 150.0f, 100.0f, 150.0f });
+		}
 	}
 }
 
