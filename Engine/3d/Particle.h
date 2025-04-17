@@ -30,6 +30,13 @@ struct AccelerationField {
 	AABB area;
 };
 
+enum class BornParticle {
+	TimerMode, //タイマーで出てくる
+	MomentMode,//瞬間的に出てくる
+	Stop,
+};
+
+
 class Particle{
 public:
 	void Initialize(ParticleCommon* particleCommon, const std::string& fileName);
@@ -61,6 +68,10 @@ public:
 	//std::list<Particles> MakeEmit(const Emitter& emitter, std::mt19937& randomEngine);
 
 	bool IsCollision(const AABB& aabb, const Vector3& point);
+
+	void ChangeMode(BornParticle mode) { bornP = mode; }
+
+	void SetParticleCount(uint32_t countnum) { count = countnum; }
 
 private:
 	ParticleCommon* particleCommon = nullptr;
@@ -100,7 +111,7 @@ private:
 	uint32_t numInstance = 0;
 
 	Transform transform;
-	uint32_t count = 3;
+	uint32_t count = 1;
 
 	Transform transformL;
 
@@ -112,4 +123,6 @@ private:
 	//std::list<Particles> MakeEmit(const Emitter& emitter, std::mt19937& randomEngine);
 
 	AccelerationField accelerationField;
+
+	BornParticle bornP = BornParticle::TimerMode;
 };

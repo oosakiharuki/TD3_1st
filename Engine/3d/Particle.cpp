@@ -86,23 +86,43 @@ void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fil
 
 void Particle::Update() {
 
-	
 	const float kDeltaTime = 1.0f / 60.0f;
-	emitter.frequencyTime += kDeltaTime;
 
-	ParticleManager::GetInstance()->Emit(fileName,transform.translate,count);
+	switch (bornP)
+	{
+	case BornParticle::TimerMode:
 
-	if (emitter.frequency <= emitter.frequencyTime) {
-		particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
-		emitter.frequencyTime -= emitter.frequency;
+		emitter.frequencyTime += kDeltaTime;
+
+		//発生処理
+		ParticleManager::GetInstance()->Emit(fileName, transform.translate, count);
+
+		if (emitter.frequency <= emitter.frequencyTime) {
+			particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
+			emitter.frequencyTime -= emitter.frequency;
+		}
+		break;
+	case BornParticle::MomentMode:
+
+		emitter.frequencyTime += kDeltaTime;
+
+		//発生処理
+		ParticleManager::GetInstance()->Emit(fileName, transform.translate, count);
+
+		if (emitter.frequency <= emitter.frequencyTime) {
+			particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
+			emitter.frequencyTime -= emitter.frequency;
+			bornP = BornParticle::Stop;
+		}
+
+		break;
+	case BornParticle::Stop:
+		break;
 	}
-
-
-
 
 	numInstance = 0;
 	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
-	
+
 	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera->GetWorldMatrix());
 	billboardMatrix.m[3][0] = 0.0f;
 	billboardMatrix.m[3][1] = 0.0f;
@@ -116,25 +136,10 @@ void Particle::Update() {
 			particleIterator = particles.erase(particleIterator);
 			continue;
 		}
-	
-		Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
-		Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
 
-		Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
-		//Matrix4x4 worldMatrix = Multiply(billboardMatrix, MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate));
 
-		
-		Matrix4x4 WorldViewProjectionMatrix;
 
-		if (camera) {
-			Matrix4x4 projectionMatrix = camera->GetViewProjectionMatrix();
-			WorldViewProjectionMatrix = Multiply(worldMatrix, projectionMatrix);
-		}
-		else {
-			WorldViewProjectionMatrix = worldMatrix;
-		}
 
-		const float kDeltaTime = 1.0f / 60.0f;
 		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
 
 		if (IsCollision(accelerationField.area, (*particleIterator).transform.translate)) {
@@ -147,11 +152,28 @@ void Particle::Update() {
 
 		(*particleIterator).transform.scale = transform.scale;
 
-	
+
 		(*particleIterator).currentTime += kDeltaTime;
 
+		Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+		Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+
+		Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
+		//Matrix4x4 worldMatrix = Multiply(billboardMatrix, MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate));
+
+
+		Matrix4x4 WorldViewProjectionMatrix;
+
+		if (camera) {
+			Matrix4x4 projectionMatrix = camera->GetViewProjectionMatrix();
+			WorldViewProjectionMatrix = Multiply(worldMatrix, projectionMatrix);
+		}
+		else {
+			WorldViewProjectionMatrix = worldMatrix;
+		}
+
 		wvpData[numInstance].World = worldMatrix;
-		
+
 		wvpData[numInstance].color = (*particleIterator).color;
 		wvpData[numInstance].color.s = alpha;
 
@@ -161,7 +183,7 @@ void Particle::Update() {
 		}
 		++particleIterator;
 	}
-	
+
 	directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
 
 }
