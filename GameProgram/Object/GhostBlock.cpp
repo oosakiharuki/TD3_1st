@@ -12,7 +12,6 @@ void GhostBlock::Init() {
 	model_->SetModelFile("EnemyBullet");
 
     worldTransform_.Initialize();
-    worldTransform_.scale_ = { 5, 2, 3 };
 	worldTransform_.UpdateMatrix();
 }
 
@@ -41,7 +40,13 @@ void GhostBlock::Draw() {
 
 AABB GhostBlock::GetAABB() const {
     AABB aabb;
-    aabb.min = worldTransform_.translation_ - Vector3(worldTransform_.scale_);
-    aabb.max = worldTransform_.translation_ + Vector3(worldTransform_.scale_);
+    aabb.min = worldTransform_.translation_ - size_;
+    aabb.max = worldTransform_.translation_ + size_;
     return aabb;
+}
+
+void GhostBlock::SetSize(const Vector3& size) {
+    worldTransform_.scale_ = size;
+    size_ = size;
+    worldTransform_.UpdateMatrix();
 }
