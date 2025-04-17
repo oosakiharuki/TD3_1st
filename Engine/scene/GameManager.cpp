@@ -1,5 +1,4 @@
 #include "GameManager.h"
-#include "LoadingScene.h" // LoadingSceneのインクルードを追加
 
 GameManager::GameManager() {
 	sceneArr_[Title] = new TitleScene();
@@ -31,6 +30,12 @@ void GameManager::SceneChange(int prev, int current) {
 		break;
 	case Game:
 		sceneArr_[current] = new GameScene();
+		break;
+	case GameClear:
+		sceneArr_[current] = new GameClearScene();
+		break;
+	case GameOver:
+		sceneArr_[current] = new GameOverScene();
 		break;
 	}
 }

@@ -136,6 +136,17 @@ void GameScene::Update() {
 		sceneNo = Title;
 	}
 
+	if (Input::GetInstance()->TriggerKey(DIK_F2)) { //シーンが切り替わる
+		audio_->StopWave(BGMSound);
+		sceneNo = GameClear;
+	}
+
+	// プレイヤーのHPが0になった場合、GameOverSceneに移行
+	if (player_->GetHp() <= 0) {
+		audio_->StopWave(BGMSound);
+		sceneNo = GameOver; // GameOverSceneに遷移
+	}
+
 	// リスタート処理
 	if (Input::GetInstance()->PushKey(DIK_R) || ((state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) && (preState.Gamepad.wButtons & XINPUT_GAMEPAD_Y))) {
 		longPress -= 1.0f / 60.0f;

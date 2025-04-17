@@ -5,6 +5,8 @@
 #include "GameScene.h"//ゲーム
 #include "TitleScene.h"//タイトル
 #include "LoadingScene.h"//ローディング
+#include "GameOverScene.h"//ゲームオーバー
+#include "GameClearScene.h"//ゲームクリア
 
 class GameManager {
 public:
@@ -20,8 +22,8 @@ private:
 
 	void SceneChange(int prev, int current);//シーン入れ替え
 
-	//ステージの最大数 - Loadingシーンを含めるために増加
-	static const uint32_t SceneNum = 3;
+	//ゲームオーバー,クリア追加のため+2
+	static const uint32_t SceneNum = 5;
 
 	IScene* sceneArr_[SceneNum];
 
