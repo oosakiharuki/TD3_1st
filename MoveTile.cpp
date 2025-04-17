@@ -15,7 +15,7 @@ void MoveTile::Init() {
 	model_->SetModelFile("tile");
 
 	// 行列を更新
-	worldTransform_.UpdateMatrix(); 
+	worldTransform_.UpdateMatrix();
 }
 
 void MoveTile::Update() {
