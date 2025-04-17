@@ -110,6 +110,30 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 				else {
 					return false; // 未知の敵タイプ
 				}
+				// x座標を読み込む
+				if (std::getline(iss, token, ',')) {
+					data.size.x = std::stof(token);
+				}
+				else {
+					//しない場合は元々のサイズ
+					data.size.x = 1.0f;
+				}
+
+				// y座標を読み込む
+				if (std::getline(iss, token, ',')) {
+					data.size.y = std::stof(token);
+				}
+				else {
+					data.size.y = 1.0f;
+				}
+
+				// z座標を読み込む
+				if (std::getline(iss, token, ',')) {
+					data.size.z = std::stof(token);
+				}
+				else {
+					data.size.z = 1.0f;
+				}
 			}
 			else {
 				return false;
@@ -183,6 +207,7 @@ void MapLoader::CreateObjects(Player* player) {
 			ghostBlock->Init();
 			ghostBlock->SetPosition(objectData.position);
 			ghostBlock->SetColor(objectData.color);
+			ghostBlock->SetSize(objectData.size);
 			ghostBlocks_.push_back(ghostBlock);
 		} else if (objectData.type == MapObjectType::Goal) {
 			// Goalの生成

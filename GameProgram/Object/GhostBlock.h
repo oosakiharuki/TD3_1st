@@ -21,11 +21,13 @@ public:
     
     ColorType GetColor() { return colorType; }
     void SetColor(ColorType color) { colorType = color; }
+    void SetSize(const Vector3& size);
 private:
     WorldTransform worldTransform_;
+
     Object3d* model_ = nullptr;
     bool isActive_ = true; // ブロックが有効かどうか
     uint32_t texturehandle_ = 0;
-
+    Vector3 size_;
     ColorType colorType = ColorType::Blue;
 };
