@@ -58,7 +58,7 @@ void GameScene::Initialize() {
 	}
 	else if (currentStage_ == 2) {
 		// Stage 2への移行時の座標
-		StartPosition = { -55.070f, 1.649f, -68.019f };
+		StartPosition = { 62.208f, 1.000f, -7.227f };
 	}
 	else if (currentStage_ == 3) {
 		// Stage 3への移行時の座標
@@ -185,7 +185,7 @@ void GameScene::Update() {
 		}
 		else if (nextStage == 2) {
 			// Stage 2への移行時の座標
-			newPosition = { -55.070f, 1.649f, -68.019f };
+			newPosition = { 62.208f, 1.000f, -7.227f };
 		}
 		else if (nextStage == 3) {
 			// Stage 3への移行時の座標
