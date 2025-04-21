@@ -86,11 +86,19 @@ void Player::Update() {
 
 	// 入力があれば正規化してスピード分移動
 	if (Length(inputVec) > 0) {
-		Vector3 move = Normalize(inputVec) * speed; // ※speedはメンバ変数等で定義済みとする
-		move = TransformNormal(move, worldTransform_.matWorld_);
-		position.x += move.x;
-		position.z += move.z;
+		Vector3 move = Normalize(inputVec) * speed;
+		float yawRad = cameraYaw * (3.14159265f / 180.0f);
+
+		// カメラ向きに合わせて回転
+		Vector3 rotatedMove;
+		rotatedMove.x = move.x * cosf(yawRad) + move.z * sinf(yawRad);
+		rotatedMove.z = -move.x * sinf(yawRad) + move.z * cosf(yawRad);
+		rotatedMove.y = 0.0f;
+
+		position.x += rotatedMove.x;
+		position.z += rotatedMove.z;
 	}
+
 #pragma endregion
 
 #pragma region 状態切替
@@ -156,7 +164,7 @@ void Player::Update() {
 
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
-	worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
+	//worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
 
 
 	//if (velocityY_ == 0.0f) {
