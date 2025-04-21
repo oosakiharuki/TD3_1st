@@ -25,6 +25,9 @@ void GameManager::SceneChange(int prev, int current) {
 	case Title:
 		sceneArr_[current] = new TitleScene();
 		break;
+	case Select:
+		sceneArr_[current] = new StageSelect();
+		break;
 	case Loading:
 		sceneArr_[current] = new LoadingScene(); // 新しいローディングシーン
 		break;

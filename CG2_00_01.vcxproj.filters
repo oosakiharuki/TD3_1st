@@ -180,6 +180,9 @@
     <ClCompile Include="GameClearScene.cpp">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClCompile>
+    <ClCompile Include="StageSelect.cpp">
+      <Filter>ソース ファイル\Engine\scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\audio\Audio.h">
@@ -357,6 +360,9 @@
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
     <ClInclude Include="GameClearScene.h">
+      <Filter>ソース ファイル\Engine\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="StageSelect.h">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,16 +1,16 @@
-#include "TitleScene.h"
+#include "StageSelect.h"
 
-void TitleScene::Initialize() {
+void StageSelect::Initialize() {
 	sprite = new Sprite();
-	sprite->Initialize("TitleName.png");
+	sprite->Initialize("StageSelectName.png");
 	sprite->SetPosition({ 0,-200 });
 
 	backGround = new Sprite();
-	backGround->Initialize("title_background.png");
+	backGround->Initialize("StageSelect_background.png");
 	backGround->SetPosition({ 0,0 });
 }
 
-void TitleScene::Update() {
+void StageSelect::Update() {
 	sprite->Update();
 	backGround->Update();
 
@@ -19,19 +19,19 @@ void TitleScene::Update() {
 
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
 		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		// TitleからSelectに変更
-		sceneNo = Select;
+		// SelectからLoadingに変更  - ローディング画面へ遷移
+		sceneNo = Loading;
 	}
 }
 
-void TitleScene::Draw() {
+void StageSelect::Draw() {
 	SpriteCommon::GetInstance()->Command();
 
 	backGround->Draw();
 	sprite->Draw();
 }
 
-void TitleScene::Finalize() {
+void StageSelect::Finalize() {
 	delete sprite;
 	delete backGround;
 }
