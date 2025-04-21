@@ -37,6 +37,11 @@ enum class BornParticle {
 };
 
 
+enum class ParticleType {
+	Normal,
+	Plane,
+};
+
 class Particle{
 public:
 	void Initialize(ParticleCommon* particleCommon, const std::string& fileName);
@@ -70,8 +75,12 @@ public:
 	bool IsCollision(const AABB& aabb, const Vector3& point);
 
 	void ChangeMode(BornParticle mode) { bornP = mode; }
+	void ChangeType(ParticleType type) { particleType = type; }
 
 	void SetParticleCount(uint32_t countnum) { count = countnum; }
+
+
+	void Emit(const Vector3& position, uint32_t count, ParticleType type);
 
 private:
 	ParticleCommon* particleCommon = nullptr;
@@ -125,4 +134,5 @@ private:
 	AccelerationField accelerationField;
 
 	BornParticle bornP = BornParticle::TimerMode;
+	ParticleType particleType = ParticleType::Normal;
 };

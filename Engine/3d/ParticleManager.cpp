@@ -20,11 +20,11 @@ ParticleManager* ParticleManager::GetInstance() {
 void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager) {
 	particleCommon = ParticleCommon::GetInstance(); 
 	this->srvManager = srvManager;
-	particleCommon->Initialize(dxCommon);
+	//particleCommon->Initialize(dxCommon);
 }
 
 void ParticleManager::Finalize() {
-	particleCommon->Finalize();
+	//particleCommon->Finalize();
 	delete instance;
 	instance = nullptr;
 }
@@ -121,18 +121,18 @@ std::list<Particles> ParticleManager::GetParticle(const std::string filePath) {
 
 
 
-void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
-	ParticleGroup& particleG = particleGroups[name];
-
-
-	emitter.transform.translate = position;
-	emitter.count = count;
-
-	//
-	std::random_device seedGenerator;
-	std::mt19937 randomEngine(seedGenerator());
-
-	particleG.particles = particleEmit.MakeEmit(emitter, randomEngine);
-	//emitter.frequencyTime -= emitter.frequency;
-	
-}
+//void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType type) {
+//	ParticleGroup& particleG = particleGroups[name];
+//
+//
+//	emitter.transform.translate = position;
+//	emitter.count = count;
+//
+//	//
+//	std::random_device seedGenerator;
+//	std::mt19937 randomEngine(seedGenerator());
+//
+//	particleG.particles = ParticleEmitter::GetInstance()->MakeEmit(emitter, randomEngine, type);
+//	//emitter.frequencyTime -= emitter.frequency;
+//	
+//}

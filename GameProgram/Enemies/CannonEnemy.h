@@ -10,6 +10,7 @@
 #include "Input.h"
 
 class Player;
+class Particle;
 
 class CannonEnemy {
 public:
@@ -20,7 +21,8 @@ public:
 	void Init();
 	void Update();
 	void Draw();
-
+	void DrawP();
+	
 	void Fire();
 	void PlayerFire();
 
@@ -78,4 +80,6 @@ private:
 
 	std::list<Bom*> bullets_;
 	Player* player_ = nullptr;
+
+	Particle* particleMove_ = nullptr;
 };

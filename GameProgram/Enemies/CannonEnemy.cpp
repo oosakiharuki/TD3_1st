@@ -14,6 +14,7 @@ CannonEnemy::~CannonEnemy() {
 	for (Bom* bom : bullets_) {
 		delete bom;
 	}
+	delete particleMove_;
 }
 
 void CannonEnemy::Init() {
@@ -22,6 +23,9 @@ void CannonEnemy::Init() {
 	model_ = new Object3d();
 	model_->Initialize();
 	model_->SetModelFile("cannon");
+	particleMove_ = new Particle();
+	particleMove_->Initialize(ParticleCommon::GetInstance(), "02");
+	particleMove_->ChangeMode(BornParticle::Stop);
 
 	worldTransform_.translation_ = position;
 }
@@ -107,7 +111,7 @@ void CannonEnemy::Update() {
 			// プレイヤーが攻撃範囲内に入ったら発射
 			if (distance <= attackRadius) {
 				// 発射メソッドを呼び出し
-				Fire();
+				Fire();			
 			}else{
 				//発射モーションリセット
 				worldTransform_.scale_ = { 1,1,1 };
@@ -150,7 +154,7 @@ void CannonEnemy::Update() {
 		}
 		return false;
 	});
-
+	particleMove_->Update();
 	worldTransform_.UpdateMatrix();
 }
 
@@ -162,6 +166,10 @@ void CannonEnemy::Draw() {
 	}
 }
 
+void CannonEnemy::DrawP() {
+	particleMove_->Draw();
+}
+
 void CannonEnemy::Fire() {
 	const float deltaTimer = 1.0f / 60.0f;
 	fireTimer -= deltaTimer;
@@ -171,6 +179,14 @@ void CannonEnemy::Fire() {
 
 	// 発射間隔が経過したら発射
 	if (fireTimer <= 0.0f) {
+
+		particleMove_->SetParticleCount(20);
+		particleMove_->SetFrequency(0.01f);
+		particleMove_->SetTranslate(worldTransform_.translation_);
+
+		particleMove_->ChangeType(ParticleType::Plane);
+		particleMove_->ChangeMode(BornParticle::MomentMode);
+
 		const float kSpeed = 0.3f; // 弾の速度（少し遅く）
 
 		// プレイヤーの位置を取得

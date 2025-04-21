@@ -247,7 +247,10 @@ void GameScene::Draw() {
 
 
 	player_->DrawP();
-
+	
+	for(CannonEnemy* it : enemyLoader_->GetCannonEnemyList()){
+		it->DrawP();
+	}
 
 	//スプライト描画処理(UI用)
 	SpriteCommon::GetInstance()->Command();
