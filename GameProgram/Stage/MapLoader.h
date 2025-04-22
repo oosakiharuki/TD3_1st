@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 
 // マップオブジェクトの種類を表す列挙型
 enum class MapObjectType {
@@ -20,6 +21,18 @@ enum class MapObjectType {
 	Goal // Goalタイプを追加
 };
 
+// MoveTileの動きプリセット
+enum class TileMovementPreset {
+	Normal,     // 標準設定
+	Slow,       // ゆっくり動く
+	Fast,       // 速く動く
+	SmallRange, // 小さい範囲で動く
+	WideRange,  // 広い範囲で動く
+	High,       // 高い位置
+	Low,        // 低い位置
+	Custom      // カスタム設定（数値指定）
+};
+
 // CSVから読み込んだオブジェクトデータの構造体
 struct MapObjectData {
 	Vector3 position;
@@ -27,6 +40,11 @@ struct MapObjectData {
 	ColorType color;
 	Vector3 size;
 	int id = 0;
+	// MoveTile用のパラメータを追加
+	float moveSpeed = 1.0f;
+	float moveRange = 15.0f;
+	float initialY = 92.0f;
+	TileMovementPreset movePreset = TileMovementPreset::Normal;
 };
 
 class MapLoader {
@@ -91,7 +109,7 @@ private:
 
 	// 生成されたタイルのリスト
 	std::vector<MoveTile*> tiles_;
-  
+
 	// 生成されたゴーストブロックのリスト
 	std::vector<GhostBlock*> ghostBlocks_;
 
@@ -101,6 +119,12 @@ private:
 
 	// CSVから座標とオブジェクトタイプを解析
 	bool ParseCSVLine(const std::string& line, MapObjectData& data);
+
+	// 文字列からTileMovementPresetを解析
+	TileMovementPreset ParseTileMovementPreset(const std::string& presetStr);
+
+	// プリセットに基づいてMoveTileのパラメータを設定
+	void ApplyTileMovementPreset(MapObjectData& data);
 
 	// リソースのクリーンアップ
 	void ClearResources();

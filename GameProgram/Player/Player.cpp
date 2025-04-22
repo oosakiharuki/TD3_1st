@@ -9,12 +9,15 @@
 
 #include"Audio.h"
 
+#include "ParticleManager.h"
+
 using namespace MyMath;
 
 Player::Player() {}
 
 Player::~Player() {
 	delete PlayerModel_;
+	delete particle_;
 }
 
 void Player::Init(Camera* camera) {
@@ -34,6 +37,11 @@ void Player::Init(Camera* camera) {
 	SnapSound_ = audio_->LoadWave("sound/snap.wav");
 	//DamageSound_ = Audio::GetInstance()->LoadWave("sound/damage.wav");//読み取れんかった
 	FallSound_ = audio_->LoadWave("sound/fall.wav"); // 仮に落下音もジャンプ音と同じものを使用
+
+	ParticleManager::GetInstance()->CreateParticleGroup("01","resource/Sprite/uvChecker.png");
+
+	particle_ = new Particle();
+	particle_->Initialize(ParticleCommon::GetInstance(),"01");
 }
 
 void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -78,11 +86,21 @@ void Player::Update() {
 
 	// 入力があれば正規化してスピード分移動
 	if (Length(inputVec) > 0) {
-		Vector3 move = Normalize(inputVec) * speed; // ※speedはメンバ変数等で定義済みとする
-		move = TransformNormal(move, worldTransform_.matWorld_);
-		position.x += move.x;
-		position.z += move.z;
+		Vector3 move = Normalize(inputVec) * speed;
+		float yawRad = cameraYaw * (3.14159265f / 180.0f);
+
+		// カメラ向きに合わせて回転
+		Vector3 rotatedMove;
+		rotatedMove.x = move.x * cosf(yawRad) + move.z * sinf(yawRad);
+		rotatedMove.z = -move.x * sinf(yawRad) + move.z * cosf(yawRad);
+		rotatedMove.y = 0.0f;
+
+		position.x += rotatedMove.x;
+		position.z += rotatedMove.z;
+
+		RotateY = std::atan2(rotatedMove.x, rotatedMove.z);
 	}
+
 #pragma endregion
 
 #pragma region 状態切替
@@ -148,7 +166,7 @@ void Player::Update() {
 
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
-	worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
+	worldTransform_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
 
 
 	//if (velocityY_ == 0.0f) {
@@ -353,14 +371,52 @@ void Player::Update() {
 		position.y += 2.0f;
 		onEnemy = false;
 	}
+
+	particle_->ChangeMode(BornParticle::Stop);
+
+	if (EnemyContral) {
+		if (worldTransform_.translation_.x != position.x || worldTransform_.translation_.y != position.y + 2.0f  || worldTransform_.translation_.z != position.z) {
+			particle_->SetParticleCount(2);
+			particle_->SetFrequency(0.25f);
+			particle_->SetTranslate(worldTransform_.translation_);
+
+			particle_->ChangeMode(BornParticle::TimerMode);
+		}
+		else {
+			particle_->ChangeMode(BornParticle::Stop);
+		}
+	}
+	else {
+		if (worldTransform_.translation_.x != position.x || worldTransform_.translation_.y != position.y|| worldTransform_.translation_.z != position.z) {
+			particle_->SetParticleCount(2);
+			particle_->SetFrequency(0.25f);
+			particle_->SetTranslate(worldTransform_.translation_);
+
+			particle_->ChangeMode(BornParticle::TimerMode);
+		}
+		else {
+			particle_->ChangeMode(BornParticle::Stop);
+		}
+	}
+
+	
+	if (collisionEnemy) {
+		particle_->SetParticleCount(20);
+		particle_->SetFrequency(0.01f);
+		particle_->SetTranslate(worldTransform_.translation_);
+		particle_->ChangeMode(BornParticle::MomentMode);
+	}
+
+
 	if (EnemyContral && collisionEnemy) {
-		position.y -= 2.0f;
+		position.y -= 2.0f;	
 		collisionEnemy = false;
 	}
 	worldTransform_.translation_ = position;
 	if (EnemyContral) {
 		worldTransform_.translation_.y += 2.0f;
-	}
+	}	
+	particle_->Update();
 #pragma endregion
 
 #pragma region 追加チェック処理
@@ -383,6 +439,9 @@ void Player::Update() {
 	ImGui::DragFloat3("translate", &worldTransform_.translation_.x);
 	ImGui::DragFloat3("aabbMax", &playerAABB.max.x);
 	ImGui::DragFloat3("aabbMin", &playerAABB.min.x);
+
+	ImGui::DragFloat3("translate", &worldTransform_.rotation_.x);
+
 	ImGui::Text("HP: %d", hp);
 	ImGui::Text("Position Y: %.2f (Fall at: %.2f)", position.y, fallThreshold);
 	ImGui::End();
@@ -519,6 +578,10 @@ void Player::Draw() {
 
 	// 通常の描画（テクスチャハンドルは使わない）
 	PlayerModel_->Draw(worldTransform_);
+}
+
+void Player::DrawP() {
+	//particle_->Draw();
 }
 
 void Player::SetGhostEnemies(const std::vector<GhostEnemy*>& enemies) { ghostEnemies_ = enemies; }

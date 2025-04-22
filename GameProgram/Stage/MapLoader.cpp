@@ -21,7 +21,7 @@ bool MapLoader::LoadMapData(const std::string& csvPath) {
 
 	// CSVの各行を読み込む
 	while (std::getline(file, line)) {
-		if (line.empty())
+		if (line.empty() || line[0] == '#') // コメント行もスキップ
 			continue;
 
 		MapObjectData data;
@@ -34,6 +34,77 @@ bool MapLoader::LoadMapData(const std::string& csvPath) {
 	return true;
 }
 
+TileMovementPreset MapLoader::ParseTileMovementPreset(const std::string& presetStr) {
+	// 大文字小文字を区別しない比較のため、小文字に変換する
+	std::string lowerPreset = presetStr;
+	std::transform(lowerPreset.begin(), lowerPreset.end(), lowerPreset.begin(),
+		[](unsigned char c) { return std::tolower(c); });
+
+	if (lowerPreset == "normal") return TileMovementPreset::Normal;
+	if (lowerPreset == "slow") return TileMovementPreset::Slow;
+	if (lowerPreset == "fast") return TileMovementPreset::Fast;
+	if (lowerPreset == "smallrange" || lowerPreset == "small") return TileMovementPreset::SmallRange;
+	if (lowerPreset == "widerange" || lowerPreset == "wide") return TileMovementPreset::WideRange;
+	if (lowerPreset == "high") return TileMovementPreset::High;
+	if (lowerPreset == "low") return TileMovementPreset::Low;
+	if (lowerPreset == "custom") return TileMovementPreset::Custom;
+
+	// 数値かどうか確認（数値ならカスタム設定として扱う）
+	try {
+		float value = std::stof(presetStr); // 戻り値を変数に格納
+		return TileMovementPreset::Custom;
+	}
+	catch (...) {
+		// デフォルト値として標準設定を返す
+		std::cerr << "Unknown tile movement preset: " << presetStr << ". Using Normal instead." << std::endl;
+		return TileMovementPreset::Normal;
+	}
+}
+
+void MapLoader::ApplyTileMovementPreset(MapObjectData& data) {
+	// プリセットに基づいてパラメータを設定
+	switch (data.movePreset) {
+	case TileMovementPreset::Normal:
+		data.moveSpeed = 1.0f;
+		data.moveRange = 15.0f;
+		data.initialY = 92.0f;
+		break;
+	case TileMovementPreset::Slow:
+		data.moveSpeed = 0.5f;
+		data.moveRange = 15.0f;
+		data.initialY = 92.0f;
+		break;
+	case TileMovementPreset::Fast:
+		data.moveSpeed = 2.0f;
+		data.moveRange = 15.0f;
+		data.initialY = 92.0f;
+		break;
+	case TileMovementPreset::SmallRange:
+		data.moveSpeed = 1.0f;
+		data.moveRange = 5.0f;
+		data.initialY = 92.0f;
+		break;
+	case TileMovementPreset::WideRange:
+		data.moveSpeed = 1.0f;
+		data.moveRange = 30.0f;
+		data.initialY = 92.0f;
+		break;
+	case TileMovementPreset::High:
+		data.moveSpeed = 1.0f;
+		data.moveRange = 15.0f;
+		data.initialY = 150.0f;
+		break;
+	case TileMovementPreset::Low:
+		data.moveSpeed = 1.0f;
+		data.moveRange = 15.0f;
+		data.initialY = 50.0f;
+		break;
+	case TileMovementPreset::Custom:
+		// カスタム設定の場合は、既に設定されている値を使用するため、何もしない
+		break;
+	}
+}
+
 bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 	std::istringstream iss(line);
 	std::string token;
@@ -41,21 +112,24 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 	// x座標を読み込む
 	if (std::getline(iss, token, ',')) {
 		data.position.x = std::stof(token);
-	} else {
+	}
+	else {
 		return false;
 	}
 
 	// y座標を読み込む
 	if (std::getline(iss, token, ',')) {
 		data.position.y = std::stof(token);
-	} else {
+	}
+	else {
 		return false;
 	}
 
 	// z座標を読み込む
 	if (std::getline(iss, token, ',')) {
 		data.position.z = std::stof(token);
-	} else {
+	}
+	else {
 		return false;
 	}
 
@@ -63,9 +137,11 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 	if (std::getline(iss, token, ',')) {
 		if (token == "key") {
 			data.type = MapObjectType::Key;
-		} else if (token == "door") {
+		}
+		else if (token == "door") {
 			data.type = MapObjectType::Door;
-		} else if (token == "block") {
+		}
+		else if (token == "block") {
 			data.type = MapObjectType::Block;
 
 			//ブロックのサイズ変更
@@ -94,8 +170,9 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 				data.size.z = 1.0f;
 			}
 
-		} else if (token == "colorWall") { 
-			data.type = MapObjectType::ColorWall;	
+		}
+		else if (token == "colorWall") {
+			data.type = MapObjectType::ColorWall;
 			// 敵タイプを読み込む	
 			if (std::getline(iss, token, ',')) {
 				if (token == "Blue") {
@@ -110,18 +187,100 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 				else {
 					return false; // 未知の敵タイプ
 				}
+				// x座標を読み込む
+				if (std::getline(iss, token, ',')) {
+					data.size.x = std::stof(token);
+				}
+				else {
+					//しない場合は元々のサイズ
+					data.size.x = 1.0f;
+				}
+
+				// y座標を読み込む
+				if (std::getline(iss, token, ',')) {
+					data.size.y = std::stof(token);
+				}
+				else {
+					data.size.y = 1.0f;
+				}
+
+				// z座標を読み込む
+				if (std::getline(iss, token, ',')) {
+					data.size.z = std::stof(token);
+				}
+				else {
+					data.size.z = 1.0f;
+				}
 			}
 			else {
 				return false;
 			}
-		} else if (token == "goal") { // goalタイプを追加
+		}
+		else if (token == "goal") { // goalタイプを追加
 			data.type = MapObjectType::Goal;
-		} else if (token == "tile") {
+		}
+		else if (token == "tile") {
 			data.type = MapObjectType::Tile;
-		} else {
+
+			// MoveTileのパラメータを読み込む
+			bool isPresetSpecified = false;
+
+			// 次のパラメータを読み込む
+			if (std::getline(iss, token, ',')) {
+				// 文字列か数値かを判断
+				bool isNumeric = true;
+				try {
+					data.moveSpeed = std::stof(token);
+				}
+				catch (...) {
+					isNumeric = false;
+				}
+
+				if (!isNumeric) {
+					// プリセット名として扱う
+					data.movePreset = ParseTileMovementPreset(token);
+					isPresetSpecified = true;
+
+					// プリセットに基づいてパラメータを設定
+					ApplyTileMovementPreset(data);
+				}
+			}
+			else {
+				// パラメータが指定されていない場合はデフォルト値
+				data.movePreset = TileMovementPreset::Normal;
+				ApplyTileMovementPreset(data);
+				return true;
+			}
+
+			// プリセットが指定されていない場合（数値指定の場合）は残りのパラメータも読み込む
+			if (!isPresetSpecified) {
+				// moveRangeを読み込む
+				if (std::getline(iss, token, ',')) {
+					data.moveRange = std::stof(token);
+				}
+				else {
+					// デフォルト値を設定
+					data.moveRange = 15.0f;
+				}
+
+				// initialYを読み込む
+				if (std::getline(iss, token, ',')) {
+					data.initialY = std::stof(token);
+				}
+				else {
+					// デフォルト値を設定
+					data.initialY = 92.0f;
+				}
+
+				// カスタム設定としてマーク
+				data.movePreset = TileMovementPreset::Custom;
+			}
+		}
+		else {
 			return false; // 未知のオブジェクトタイプ
 		}
-	} else {
+	}
+	else {
 		return false;
 	}
 
@@ -129,7 +288,8 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 	if (std::getline(iss, token, ',')) {
 		// ID値が存在する場合、読み込む
 		data.id = std::stoi(token);
-	} else {
+	}
+	else {
 		// IDが指定されていない場合はデフォルト値0
 		data.id = 0;
 	}
@@ -178,13 +338,16 @@ void MapLoader::CreateObjects(Player* player) {
 			block->SetPosition(objectData.position);
 			block->SetSize(objectData.size);
 			blocks_.push_back(block);
-		} else if (objectData.type == MapObjectType::ColorWall) {
+		}
+		else if (objectData.type == MapObjectType::ColorWall) {
 			GhostBlock* ghostBlock = new GhostBlock();
 			ghostBlock->Init();
 			ghostBlock->SetPosition(objectData.position);
 			ghostBlock->SetColor(objectData.color);
+			ghostBlock->SetSize(objectData.size);
 			ghostBlocks_.push_back(ghostBlock);
-		} else if (objectData.type == MapObjectType::Goal) {
+		}
+		else if (objectData.type == MapObjectType::Goal) {
 			// Goalの生成
 			if (goal_) {
 				delete goal_;
@@ -200,6 +363,12 @@ void MapLoader::CreateObjects(Player* player) {
 			tile->Init();
 			tile->SetPosition(objectData.position);
 			tile->SetPlayer(player);
+
+			// CSVから読み込んだパラメータを設定
+			tile->SetMoveSpeed(objectData.moveSpeed);
+			tile->SetMoveRange(objectData.moveRange);
+			tile->SetInitialY(objectData.initialY);
+
 			tiles_.push_back(tile);
 		}
 	}
@@ -275,14 +444,13 @@ void MapLoader::Draw() {
 
 	// Goalを描画（存在する場合のみ）
 	if (goal_) {
-		goal_->Draw();	
+		goal_->Draw();
 	}
 
 	// すべてのタイルを描画
 	for (auto* tile : tiles_) {
 		tile->Draw();
 	}
-
 }
 
 void MapLoader::Draw2D() {
@@ -358,7 +526,8 @@ void MapLoader::ChangeStage(int stageNumber, Player* player) {
 	if (LoadMapData(csvPath)) {
 		// 新しいオブジェクトを作成
 		CreateObjects(player);
-	} else {
+	}
+	else {
 		std::cerr << "Failed to load map data: " << csvPath << std::endl;
 	}
 }

@@ -31,6 +31,15 @@ public:
 		worldTransform_.translation_ = position;
 	}
 
+	// 移動速度を設定
+	void SetMoveSpeed(float speed) { moveSpeed_ = speed; }
+
+	// 移動範囲を設定
+	void SetMoveRange(float range) { moveRange_ = range; }
+
+	// 初期Y座標を設定
+	void SetInitialY(float y) { initialY_ = y; }
+
 private:
 
 	WorldTransform worldTransform_;
@@ -42,7 +51,7 @@ private:
 	// 上下移動のためのメンバ変数
 	float moveSpeed_ = 1.0f;
 	float moveRange_ = 15.0f;
-	float initialY_ =92;
+	float initialY_ = 92;
 	bool movingUp_ = true; // 上昇中か下降中かを示すフラグ
 	int frameCount_ = 0; // フレームカウント（初期値0）
 };

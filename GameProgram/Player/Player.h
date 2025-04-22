@@ -11,6 +11,8 @@
 #include <vector>
 #include "Audio.h"
 
+#include "Particle.h"
+
 class GhostEnemy;
 
 class Player {
@@ -92,6 +94,8 @@ public:
 	void TakeDamage(int damageAmount);
 	int GetHp() { return hp; }
 
+	void DrawP();
+
 private:
 	Vector3 position = { 0, 10, -10 };
 	Vector3 initialPosition = { 0, 10, -10 }; // 初期位置保存用
@@ -160,4 +164,8 @@ private:
 	void ResetToInitialPosition();
 	// 落下チェック関数
 	void CheckFallOut();
+
+	Particle* particle_ = nullptr;
+
+	float RotateY = 0.0f;
 };
