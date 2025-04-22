@@ -26,6 +26,8 @@
 
 #include "Audio.h"
 
+#include "GameData.h"
+
 class GameScene : public IScene {
 public:
 	// コンストラクタ
@@ -48,7 +50,7 @@ private:
 	void UpdateStageAABB();
 
 	// 現在のステージ番号
-	int currentStage_;
+	int currentStage_ = 0;
 
 	WorldTransform worldTransform_;
 	Camera* camera_ = nullptr;

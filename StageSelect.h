@@ -1,7 +1,8 @@
 #pragma once  
 #include "Sprite.h"
 #include "Framework.h"
-#include "IScene.h"  
+#include "IScene.h"
+#include "GameData.h"
 
 class StageSelect : public IScene {
 public:
@@ -15,4 +16,3 @@ private:
 	Sprite* backGround;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 };
-

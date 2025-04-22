@@ -199,6 +199,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\scene\TitleScene.h" />
     <ClInclude Include="Engine\3d\WorldTransform.h" />
     <ClInclude Include="GameClearScene.h" />
+    <ClInclude Include="GameData.h" />
     <ClInclude Include="GameOverScene.h" />
     <ClInclude Include="GameProgram\AABB.h" />
     <ClInclude Include="GameProgram\CameraController.h" />

@@ -365,6 +365,7 @@
     <ClInclude Include="StageSelect.h">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
+    <ClInclude Include="GameData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shaders\Object3d.hlsli">

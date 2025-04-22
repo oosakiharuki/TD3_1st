@@ -19,6 +19,8 @@ void GameScene::Finalize() {
 
 void GameScene::Initialize() {
 
+	currentStage_ = GameData::selectedStage;
+
 	camera_ = new Camera();
 	
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
