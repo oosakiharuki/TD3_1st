@@ -166,4 +166,6 @@ private:
 	void CheckFallOut();
 
 	Particle* particle_ = nullptr;
+
+	float RotateY = 0.0f;
 };

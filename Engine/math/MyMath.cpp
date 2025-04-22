@@ -1,4 +1,7 @@
 #include "MyMath.h"
+#include <iostream>
+#include <cmath>
+#include <numbers>
 
 namespace MyMath {
 
@@ -268,6 +271,23 @@ namespace MyMath {
 		float result;
 		result = (float)sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 		return result;
+	}
+
+	float LeapShortAngle(float a, float b, float t)
+	{
+		float result;
+
+		float diff = b - a;
+
+		result = (float)std::fmod(diff, 2 * std::numbers::pi_v<float>);
+
+		if (result >= std::numbers::pi_v<float>)
+			result = (float)std::fmod(-2 * std::numbers::pi_v<float>, result);
+
+		if (result <= -std::numbers::pi_v<float>)
+			result = (float)std::fmod(2 * std::numbers::pi_v<float>, result);
+
+		return a + result * t;
 	}
 
 

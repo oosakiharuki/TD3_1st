@@ -97,6 +97,8 @@ void Player::Update() {
 
 		position.x += rotatedMove.x;
 		position.z += rotatedMove.z;
+
+		RotateY = std::atan2(rotatedMove.x, rotatedMove.z);
 	}
 
 #pragma endregion
@@ -164,7 +166,7 @@ void Player::Update() {
 
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
-	//worldTransform_.rotation_.y = (cameraYaw * (3.14159265f / 180.0f));
+	worldTransform_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
 
 
 	//if (velocityY_ == 0.0f) {
@@ -437,6 +439,9 @@ void Player::Update() {
 	ImGui::DragFloat3("translate", &worldTransform_.translation_.x);
 	ImGui::DragFloat3("aabbMax", &playerAABB.max.x);
 	ImGui::DragFloat3("aabbMin", &playerAABB.min.x);
+
+	ImGui::DragFloat3("translate", &worldTransform_.rotation_.x);
+
 	ImGui::Text("HP: %d", hp);
 	ImGui::Text("Position Y: %.2f (Fall at: %.2f)", position.y, fallThreshold);
 	ImGui::End();
@@ -576,7 +581,7 @@ void Player::Draw() {
 }
 
 void Player::DrawP() {
-	particle_->Draw();
+	//particle_->Draw();
 }
 
 void Player::SetGhostEnemies(const std::vector<GhostEnemy*>& enemies) { ghostEnemies_ = enemies; }
