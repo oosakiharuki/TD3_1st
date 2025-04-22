@@ -20,7 +20,7 @@ void TitleScene::Update() {
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
 		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		// TitleからSelectに変更
-		sceneNo = Select;
+		sceneNo = Loading;
 	}
 }
 

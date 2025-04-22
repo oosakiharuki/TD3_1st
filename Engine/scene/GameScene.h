@@ -47,6 +47,9 @@ private:
 	void LoadStage(std::string objFile);
 	void UpdateStageAABB();
 
+	// 現在のステージ番号
+	int currentStage_;
+
 	WorldTransform worldTransform_;
 	Camera* camera_ = nullptr;
 	Vector3 cameraRotate = { 0.0f,0.0f,0.0f };
@@ -76,9 +79,6 @@ private:
 	// 天球
 	Skydome* skydome_ = nullptr;
 	//Model* modelSkydome_ = nullptr;
-
-	// 現在のステージ番号
-	int currentStage_ = 1;
 
 	float longPress = 1.0f;
 	const float RestartTimer = 1.0f;

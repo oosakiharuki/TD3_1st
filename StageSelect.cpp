@@ -17,10 +17,18 @@ void StageSelect::Update() {
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
+	// Numキーの入力を検知
+	if (Input::GetInstance()->TriggerKey(DIK_1)) {
+	}
+	else if (Input::GetInstance()->TriggerKey(DIK_2)) {
+	}
+	else if (Input::GetInstance()->TriggerKey(DIK_3)) {
+	}
+
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
 		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		// SelectからLoadingに変更  - ローディング画面へ遷移
-		sceneNo = Loading;
+		sceneNo = Game;
 	}
 }
 
