@@ -137,6 +137,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\MyGame.cpp" />
     <ClCompile Include="Engine\scene\TitleScene.cpp" />
     <ClCompile Include="Engine\3d\WorldTransform.cpp" />
+    <ClCompile Include="GameClearScene.cpp" />
+    <ClCompile Include="GameOverScene.cpp" />
     <ClCompile Include="GameProgram\AABB.cpp" />
     <ClCompile Include="GameProgram\CameraController.cpp" />
     <ClCompile Include="GameProgram\Collision.cpp" />
@@ -159,6 +161,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GameProgram\UIManager.cpp" />
     <ClCompile Include="LoadingScene.cpp" />
     <ClCompile Include="MoveTile.cpp" />
+    <ClCompile Include="StageSelect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\2d\ImGuiManager.h" />
@@ -195,6 +198,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\MyGame.h" />
     <ClInclude Include="Engine\scene\TitleScene.h" />
     <ClInclude Include="Engine\3d\WorldTransform.h" />
+    <ClInclude Include="GameClearScene.h" />
+    <ClInclude Include="GameData.h" />
+    <ClInclude Include="GameOverScene.h" />
     <ClInclude Include="GameProgram\AABB.h" />
     <ClInclude Include="GameProgram\CameraController.h" />
     <ClInclude Include="GameProgram\Collision.h" />
@@ -218,6 +224,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GameProgram\UIManager.h" />
     <ClInclude Include="LoadingScene.h" />
     <ClInclude Include="MoveTile.h" />
+    <ClInclude Include="StageSelect.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

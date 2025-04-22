@@ -99,7 +99,7 @@ void LoadingScene::Update() {
             loadingProgress = 1.0f;
 
             // ゲームシーンへ遷移
-            sceneNo = Game;
+            sceneNo = Select;
         }
     }
 }

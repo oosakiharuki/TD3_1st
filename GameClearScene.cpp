@@ -1,16 +1,16 @@
-#include "TitleScene.h"
+#include "GameClearScene.h"
 
-void TitleScene::Initialize() {
+void GameClearScene::Initialize() {
 	sprite = new Sprite();
-	sprite->Initialize("TitleName.png");
+	sprite->Initialize("GameClearName.png");
 	sprite->SetPosition({ 0,-200 });
 
 	backGround = new Sprite();
-	backGround->Initialize("title_background.png");
+	backGround->Initialize("GameClear_background.png");
 	backGround->SetPosition({ 0,0 });
 }
 
-void TitleScene::Update() {
+void GameClearScene::Update() {
 	sprite->Update();
 	backGround->Update();
 
@@ -19,19 +19,19 @@ void TitleScene::Update() {
 
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
 		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		// TitleからSelectに変更
-		sceneNo = Loading;
+		// GameOverからTitleに変更
+		sceneNo = Title;
 	}
 }
 
-void TitleScene::Draw() {
+void GameClearScene::Draw() {
 	SpriteCommon::GetInstance()->Command();
-
+	
 	backGround->Draw();
 	sprite->Draw();
 }
 
-void TitleScene::Finalize() {
+void GameClearScene::Finalize() {
 	delete sprite;
 	delete backGround;
 }

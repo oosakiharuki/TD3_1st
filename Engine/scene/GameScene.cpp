@@ -19,6 +19,8 @@ void GameScene::Finalize() {
 
 void GameScene::Initialize() {
 
+	currentStage_ = GameData::selectedStage;
+
 	camera_ = new Camera();
 	
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
@@ -134,6 +136,17 @@ void GameScene::Update() {
 	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
 		audio_->StopWave(BGMSound);
 		sceneNo = Title;
+	}
+
+	if (Input::GetInstance()->TriggerKey(DIK_F2)) { //シーンが切り替わる
+		audio_->StopWave(BGMSound);
+		sceneNo = GameClear;
+	}
+
+	// プレイヤーのHPが0になった場合、GameOverSceneに移行
+	if (player_->GetHp() <= 0) {
+		audio_->StopWave(BGMSound);
+		sceneNo = GameOver; // GameOverSceneに遷移
 	}
 
 	// リスタート処理
