@@ -26,6 +26,8 @@
 
 #include "Audio.h"
 
+#include "GameData.h"
+
 class GameScene : public IScene {
 public:
 	// コンストラクタ
@@ -46,6 +48,9 @@ private:
 	void AddObstacle(std::vector<std::vector<AABB>>& allObstacles, const Vector3& min, const Vector3& max);
 	void LoadStage(std::string objFile);
 	void UpdateStageAABB();
+
+	// 現在のステージ番号
+	int currentStage_ = 0;
 
 	WorldTransform worldTransform_;
 	Camera* camera_ = nullptr;
@@ -76,9 +81,6 @@ private:
 	// 天球
 	Skydome* skydome_ = nullptr;
 	//Model* modelSkydome_ = nullptr;
-
-	// 現在のステージ番号
-	int currentStage_ = 0;
 
 	float longPress = 1.0f;
 	const float RestartTimer = 1.0f;

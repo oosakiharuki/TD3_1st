@@ -75,7 +75,7 @@ private:
 	std::vector<MoveTile*> moveTiles_;
 
 	// ステージ状態
-	int currentStage_ = 1;              // 現在のステージ番号（1: 第1ステージ、2: 第2ステージ）
+	int currentStage_ = 2;              // 現在のステージ番号（1: 第1ステージ、2: 第2ステージ）
 	bool isStageTransitioning_ = false; // ステージ遷移中フラグ
 	float transitionTimer_ = 0.0f;      // 遷移タイマー
 	float transitionDuration_ = 1.0f;   // 遷移にかかる時間

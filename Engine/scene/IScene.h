@@ -4,8 +4,9 @@
 enum SCENE {
 	Title,
 	Loading, // 新しいローディングシーン状態
+	Select,
 	Game,
-	Clear,
+	GameClear,
 	GameOver,
 };
 
