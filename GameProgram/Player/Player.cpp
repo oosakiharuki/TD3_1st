@@ -17,7 +17,8 @@ Player::Player() {}
 
 Player::~Player() {
 	delete PlayerModel_;
-	delete particle_;
+	delete particleMove_;
+	delete particleTransfar_;
 }
 
 void Player::Init(Camera* camera) {
@@ -38,10 +39,11 @@ void Player::Init(Camera* camera) {
 	//DamageSound_ = Audio::GetInstance()->LoadWave("sound/damage.wav");//読み取れんかった
 	FallSound_ = audio_->LoadWave("sound/fall.wav"); // 仮に落下音もジャンプ音と同じものを使用
 
-	ParticleManager::GetInstance()->CreateParticleGroup("01","resource/Sprite/uvChecker.png");
+	particleMove_ = new Particle();
+	particleMove_->Initialize(ParticleCommon::GetInstance(),"01");
 
-	particle_ = new Particle();
-	particle_->Initialize(ParticleCommon::GetInstance(),"01");
+	particleTransfar_ = new Particle();
+	particleTransfar_->Initialize(ParticleCommon::GetInstance(), "01");
 }
 
 void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -372,39 +374,42 @@ void Player::Update() {
 		onEnemy = false;
 	}
 
-	particle_->ChangeMode(BornParticle::Stop);
+	//particleMove_->ChangeMode(BornParticle::Stop);	
+	//particleTransfar_->ChangeMode(BornParticle::Stop);
 
 	if (EnemyContral) {
 		if (worldTransform_.translation_.x != position.x || worldTransform_.translation_.y != position.y + 2.0f  || worldTransform_.translation_.z != position.z) {
-			particle_->SetParticleCount(2);
-			particle_->SetFrequency(0.25f);
-			particle_->SetTranslate(worldTransform_.translation_);
-
-			particle_->ChangeMode(BornParticle::TimerMode);
+			particleMove_->SetParticleCount(2);
+			particleMove_->SetFrequency(0.25f);
+			particleMove_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 2.0f,worldTransform_.translation_.z });
+		
+			particleMove_->ChangeType(ParticleType::Normal);
+			particleMove_->ChangeMode(BornParticle::TimerMode);
 		}
 		else {
-			particle_->ChangeMode(BornParticle::Stop);
+			particleMove_->ChangeMode(BornParticle::Stop);
 		}
 	}
 	else {
 		if (worldTransform_.translation_.x != position.x || worldTransform_.translation_.y != position.y|| worldTransform_.translation_.z != position.z) {
-			particle_->SetParticleCount(2);
-			particle_->SetFrequency(0.25f);
-			particle_->SetTranslate(worldTransform_.translation_);
-
-			particle_->ChangeMode(BornParticle::TimerMode);
+			particleMove_->SetParticleCount(2);
+			particleMove_->SetFrequency(0.25f);
+			particleMove_->SetTranslate(worldTransform_.translation_);
+		
+			particleMove_->ChangeType(ParticleType::Normal);
+			particleMove_->ChangeMode(BornParticle::TimerMode);
 		}
 		else {
-			particle_->ChangeMode(BornParticle::Stop);
+			particleMove_->ChangeMode(BornParticle::Stop);
 		}
 	}
 
 	
 	if (collisionEnemy) {
-		particle_->SetParticleCount(20);
-		particle_->SetFrequency(0.01f);
-		particle_->SetTranslate(worldTransform_.translation_);
-		particle_->ChangeMode(BornParticle::MomentMode);
+		particleTransfar_->SetParticleCount(10);
+		particleTransfar_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 1.0f,worldTransform_.translation_.z });
+		particleTransfar_->ChangeType(ParticleType::Plane);
+		particleTransfar_->ChangeMode(BornParticle::MomentMode);
 	}
 
 
@@ -416,7 +421,10 @@ void Player::Update() {
 	if (EnemyContral) {
 		worldTransform_.translation_.y += 2.0f;
 	}	
-	particle_->Update();
+	
+	particleMove_->Update();
+	particleTransfar_->Update();
+
 #pragma endregion
 
 #pragma region 追加チェック処理
@@ -581,7 +589,8 @@ void Player::Draw() {
 }
 
 void Player::DrawP() {
-	//particle_->Draw();
+	particleMove_->Draw();
+	particleTransfar_->Draw();
 }
 
 void Player::SetGhostEnemies(const std::vector<GhostEnemy*>& enemies) { ghostEnemies_ = enemies; }

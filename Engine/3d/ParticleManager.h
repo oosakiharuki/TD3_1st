@@ -20,7 +20,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(const std::string filePath);
 	std::list<Particles> GetParticle(const std::string filePath);
 
-	void Emit(const std::string name, const Vector3& position, uint32_t count);
+	//void Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType type);
 
 private:
 	static ParticleManager* instance;
@@ -58,6 +58,5 @@ private:
 	//Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource;
 
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
-	ParticleEmitter particleEmit;
 
 };

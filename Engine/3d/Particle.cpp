@@ -94,26 +94,19 @@ void Particle::Update() {
 
 		emitter.frequencyTime += kDeltaTime;
 
-		//発生処理
-		ParticleManager::GetInstance()->Emit(fileName, transform.translate, count);
-
 		if (emitter.frequency <= emitter.frequencyTime) {
-			particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
+			//発生処理
+			Emit(transform.translate, count, particleType);
+			//particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
 			emitter.frequencyTime -= emitter.frequency;
 		}
 		break;
 	case BornParticle::MomentMode:
 
-		emitter.frequencyTime += kDeltaTime;
-
 		//発生処理
-		ParticleManager::GetInstance()->Emit(fileName, transform.translate, count);
-
-		if (emitter.frequency <= emitter.frequencyTime) {
-			particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
-			emitter.frequencyTime -= emitter.frequency;
-			bornP = BornParticle::Stop;
-		}
+		Emit(transform.translate, count, particleType);
+		//particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
+		bornP = BornParticle::Stop;
 
 		break;
 	case BornParticle::Stop:
@@ -121,14 +114,6 @@ void Particle::Update() {
 	}
 
 	numInstance = 0;
-	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
-
-	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera->GetWorldMatrix());
-	billboardMatrix.m[3][0] = 0.0f;
-	billboardMatrix.m[3][1] = 0.0f;
-	billboardMatrix.m[3][2] = 0.0f;
-
-
 	for (std::list<Particles>::iterator particleIterator = particles.begin();
 		particleIterator != particles.end(); ) {
 
@@ -147,16 +132,38 @@ void Particle::Update() {
 		}
 
 		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
-
-		(*particleIterator).transform.rotate = transform.rotate;
-
-		(*particleIterator).transform.scale = transform.scale;
-
+	
+		if (particleType == ParticleType::Normal) {
+			if ((*particleIterator).transform.scale.x > 0) {
+				(*particleIterator).transform.scale.x -= 0.5f * kDeltaTime;
+			}
+			if ((*particleIterator).transform.scale.y > 0) {
+				(*particleIterator).transform.scale.y -= 0.5f * kDeltaTime;
+			}
+			if ((*particleIterator).transform.scale.z > 0) {
+				(*particleIterator).transform.scale.z -= 0.5f * kDeltaTime;
+			}
+		}
 
 		(*particleIterator).currentTime += kDeltaTime;
 
 		Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
 		Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+
+		//回転行列
+		Matrix4x4 rotateX = MakeRotateXMatrix((*particleIterator).transform.rotate.x);
+		Matrix4x4 rotateY = MakeRotateYMatrix((*particleIterator).transform.rotate.y);
+		Matrix4x4 rotateZ = MakeRotateZMatrix((*particleIterator).transform.rotate.z);
+		//全てまとめた
+		Matrix4x4 rotateXYZ = Multiply(Multiply(rotateX, rotateY), rotateZ);
+
+		//ビルボード
+		Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
+
+		Matrix4x4 billboardMatrix = Multiply(Multiply(backToFrontMatrix, rotateXYZ), camera->GetWorldMatrix());
+		billboardMatrix.m[3][0] = 0.0f;
+		billboardMatrix.m[3][1] = 0.0f;
+		billboardMatrix.m[3][2] = 0.0f;
 
 		Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
 		//Matrix4x4 worldMatrix = Multiply(billboardMatrix, MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate));
@@ -214,33 +221,15 @@ bool Particle::IsCollision(const AABB& aabb, const Vector3& point) {
 }
 
 
+void Particle::Emit(const Vector3& position, uint32_t count, ParticleType type) {
 
-//Particles Particle::MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate){
-//	//random
-//	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);//position用
-//	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);//color用
-//	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
-//	
-//	Particles particle;
-//	particle.transform.scale = { 1.0f,1.0f,1.0f };
-//	particle.transform.rotate = { 0.0f,3.0f,0.0f };
-//	
-//	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
-//	particle.transform.translate = translate + randomTranslate;
-//	
-//	particle.velocity = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };	
-//	particle.color = { distColor(randomEngine),distColor(randomEngine),distColor(randomEngine),1.0f };
-//	
-//	particle.lifeTime = distTime(randomEngine);
-//	particle.currentTime = 0;
-//	
-//	return particle;
-//}
-//
-//std::list<Particles> Particle::MakeEmit(const Emitter& emitter, std::mt19937& randomEngine) {
-//	std::list<Particles> particles;
-//	for (uint32_t count = 0; count < emitter.count; ++count) {
-//		particles.push_back(MakeNewParticle(randomEngine,emitter.transform.translate));
-//	}
-//	return particles;
-//}
+	emitter.transform.translate = position;
+	emitter.count = count;
+
+	//
+	std::random_device seedGenerator;
+	std::mt19937 randomEngine(seedGenerator());
+
+ 	particles.splice(particles.end(), ParticleEmitter::GetInstance()->MakeEmit(emitter, randomEngine, type));
+
+}

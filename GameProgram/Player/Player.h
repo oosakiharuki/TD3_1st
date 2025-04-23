@@ -165,7 +165,9 @@ private:
 	// 落下チェック関数
 	void CheckFallOut();
 
-	Particle* particle_ = nullptr;
+
+	Particle* particleMove_ = nullptr;
+	Particle* particleTransfar_ = nullptr;
 
 	float RotateY = 0.0f;
 };
