@@ -41,9 +41,11 @@ void Player::Init(Camera* camera) {
 
 	particleMove_ = new Particle();
 	particleMove_->Initialize(ParticleCommon::GetInstance(),"01");
+	particleMove_->ChangeMode(BornParticle::Stop);
 
 	particleTransfar_ = new Particle();
 	particleTransfar_->Initialize(ParticleCommon::GetInstance(), "01");
+	particleTransfar_->ChangeMode(BornParticle::Stop);
 }
 
 void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
