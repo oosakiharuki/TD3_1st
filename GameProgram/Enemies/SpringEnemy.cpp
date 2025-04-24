@@ -175,6 +175,8 @@ void SpringEnemy::Compress() {
 void SpringEnemy::ContralPlayer() {
 	isPlayer = true;
 	worldTransform_.translation_ = {0, -2, 0};
+
+	audio_->StopWave(BaneSound);
 }
 
 void SpringEnemy::ReMove(const Vector3& position_) {

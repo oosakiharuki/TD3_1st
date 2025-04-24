@@ -138,5 +138,6 @@ void Audio::SoundUnload(SoundData* soundData) {
 }
 
 void Audio::StopWave(SoundData soundData) {
-	result = soundData.pSourceVoice->Stop();
+	result = soundData.pSourceVoice->Stop(); //音源を止める
+	result = soundData.pSourceVoice->FlushSourceBuffers(); //音源のリセット
 }
