@@ -50,33 +50,7 @@ void GameScene::Initialize() {
 
 	Vector3 StartPosition;
 	//各ステージのプレイヤー初期位置
-	if (currentStage_ == 0) {
-		// Stage 2への移行時の座標
-		StartPosition = { 0, 10, 0 };
-	}
-	else if (currentStage_ == 1) {
-		// Stage 2への移行時の座標
-		StartPosition = { 0, 10, -10 };
-	}
-	else if (currentStage_ == 2) {
-		// Stage 2への移行時の座標
-		StartPosition = { 62.208f, 1.000f, -7.227f };
-	}
-	else if (currentStage_ == 3) {
-		// Stage 3への移行時の座標
-		StartPosition = { -37.0f, -18.512f, -51.500f };
-	}
-	else if (currentStage_ == 4) {
-		// Stage 3への移行時の座標
-		StartPosition = { 27.256f, 100.018f, 25.295f };
-	}
-	else if (currentStage_ == 5) {
-		// Stage 3への移行時の座標
-		StartPosition = { 0,4,0 };
-	}
-	else {
-		StartPosition = { 0,5,0 };
-	}
+	StartPosition = PlayerPosition::stage[currentStage_];
 
 	player_->SetPosition(StartPosition);
 
@@ -189,32 +163,11 @@ void GameScene::Update() {
 	if (mapLoader_ && mapLoader_->IsDoorOpened()) {
 		// 次のステージ番号を計算
 		int nextStage = currentStage_ + 1;
+		GameData::selectedStage += 1;
 
 		// 次のステージに応じてプレイヤーの座標を設定
 		Vector3 newPosition;
-		if (nextStage == 1) {
-			// Stage 2への移行時の座標		
-			newPosition = { 0, 10, -10 };
-		}
-		else if (nextStage == 2) {
-			// Stage 2への移行時の座標
-			newPosition = { 62.208f, 1.000f, -7.227f };
-		}
-		else if (nextStage == 3) {
-			// Stage 3への移行時の座標
-			newPosition = { -37.0f, -18.512f, -51.500f };
-		}
-		else if (nextStage == 4) {
-			// Stage 3への移行時の座標
-			newPosition = { 42.096f, 69.548f, 3.163f };
-		}
-		else if (nextStage == 5) {
-			// Stage 3への移行時の座標
-			newPosition = { 0, 10, -10 };
-		}
-		else {
-			newPosition = { 0,5,0 };
-		}
+		newPosition = PlayerPosition::stage[nextStage];
 
 		// プレイヤーの座標を変更
 		player_->SetPosition(newPosition);
@@ -343,9 +296,7 @@ void GameScene::ChangeStage(int nextStage) {
 	player_->SetSpringEnemies(enemyLoader_->GetSpringEnemyList());
 
 	// キャノン敵への参照をプレイヤーに設定
-	if (!enemyLoader_->GetCannonEnemyList().empty()) {
-		player_->SetCannon(enemyLoader_->GetCannonEnemyList()[0]);
-	}
+	player_->SetCannonEnemies(enemyLoader_->GetCannonEnemyList());
 
 	// プレイヤーにブロックリストを設定（更新：単一ブロックではなくリスト全体を渡す）
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
