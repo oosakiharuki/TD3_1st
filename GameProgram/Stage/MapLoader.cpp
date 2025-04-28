@@ -140,6 +140,13 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 		}
 		else if (token == "door") {
 			data.type = MapObjectType::Door;
+
+			if (std::getline(iss, token, ',')) {
+				data.rotate = std::stof(token);
+			}
+			else {
+				data.rotate = 0.0f;
+			}
 		}
 		else if (token == "block") {
 			data.type = MapObjectType::Block;
@@ -329,6 +336,7 @@ void MapLoader::CreateObjects(Player* player) {
 			Door* door = new Door();
 			door->Init();
 			door->SetPosition(objectData.position);
+			door->SetRotateY(objectData.rotate);
 			door->SetPlayer(player);
 			doors_.push_back(door);
 		}

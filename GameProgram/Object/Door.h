@@ -41,12 +41,20 @@ public:
 	void SetRequiredKeyCount(int count) { requiredKeyCount_ = count; }
 
 	// AABBを取得
-	AABB GetAABB() const;
+	AABB GetAABB();
 
 	// 位置を設定（CSVから読み込んだ位置に合わせるため）
 	void SetPosition(const Vector3& position) {
 		position_ = position;
 		worldTransform_.translation_ = position;
+	}
+
+	void SetRotateY(const float& rotateY) {
+		normal_ = rotateY;
+	}
+
+	void SetSize(const Vector3& size) {
+		worldTransform_.scale_ = size;
 	}
 
 private:
@@ -71,4 +79,6 @@ private:
 
 	// すべてのキーが取得されているかチェック
 	bool AreAllKeysObtained() const;
+
+	float normal_ = 0.0f;
 };

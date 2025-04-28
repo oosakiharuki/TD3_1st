@@ -12,5 +12,8 @@ public:
 private:
 	Sprite* sprite;
 	Sprite* backGround;
+	
+	Sprite* bottonSprite;
+
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 };

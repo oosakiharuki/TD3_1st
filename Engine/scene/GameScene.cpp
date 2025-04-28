@@ -83,6 +83,10 @@ void GameScene::Initialize() {
 	player_->SetGhostBlocks(ghostBlocks);
 
 
+	const std::vector<Door*>& doors = mapLoader_->GetDoorList();
+	player_->SetDoor(doors);
+
+
 	// 障害物リストを Player にセット
 	for (const auto& obstacles : allObstacles_) {
 		player_->SetObstacleList(obstacles);
@@ -140,6 +144,8 @@ void GameScene::Update() {
 
 	// MapLoaderが管理するGoalの状態をチェック
 	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear()) {
+		audio_->StopWave(BGMSound);
+		sceneNo = GameClear;
 		return; // ゴールクリア状態なら更新処理をスキップ
 	}
 
@@ -160,21 +166,21 @@ void GameScene::Update() {
 
 	// 　↓　ゴールしたら1と2ステージループするようになってる、切り替え処理2を消すとステージ3に進む
 
-	if (mapLoader_ && mapLoader_->IsDoorOpened()) {
-		// 次のステージ番号を計算
-		int nextStage = currentStage_ + 1;
-		GameData::selectedStage += 1;
+	//if (mapLoader_ && mapLoader_->IsDoorOpened()) {
+	//	// 次のステージ番号を計算
+	//	int nextStage = currentStage_ + 1;
+	//	GameData::selectedStage += 1;
 
-		// 次のステージに応じてプレイヤーの座標を設定
-		Vector3 newPosition;
-		newPosition = PlayerPosition::stage[nextStage];
+	//	// 次のステージに応じてプレイヤーの座標を設定
+	//	Vector3 newPosition;
+	//	newPosition = PlayerPosition::stage[nextStage];
 
-		// プレイヤーの座標を変更
-		player_->SetPosition(newPosition);
+	//	// プレイヤーの座標を変更
+	//	player_->SetPosition(newPosition);
 
-		// ステージを切り替え
-		ChangeStage(nextStage);
-	}
+	//	// ステージを切り替え
+	//	ChangeStage(nextStage);
+	//}
 
 	camera_->Update();
 

@@ -13,6 +13,8 @@
 
 #include "Particle.h"
 
+class Door;
+
 class GhostEnemy;
 
 class Player {
@@ -62,9 +64,8 @@ public:
 
 	void OnCollisions();
 
-	void ResolveCollisionWithDoor(const AABB& aabb) { doorAABB = aabb; }
+	void SetDoor(const std::vector<Door*> door) { doors_ = door; }
 	void ResolveCollisionWithTile(const AABB& aabb) { moveTileAABBs.push_back(aabb); }
-	void SetOpenDoor(bool isOpen) { isOpenDoor = isOpen; }
 
 	void SetSpringEnemies(const std::vector<SpringEnemy*>& springEnemies);
 	// ここに重複していた宣言を削除
@@ -114,7 +115,6 @@ private:
 	bool isDamage = false;
 	bool EnemyContral = false;
 	bool collisionEnemy = false;
-	bool isOpenDoor = false;
 
 	float velocityY_ = 0.0f;
 	int hp = 200;
@@ -125,7 +125,6 @@ private:
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 	AABB playerAABB;
 	AABB enemyAABB;
-	AABB doorAABB;
 	std::vector<AABB> moveTileAABBs;
 
 	// 落下判定用
@@ -145,6 +144,7 @@ private:
 	std::vector<SpringEnemy*> springEnemies_;
 	std::vector<Block*> blocks_;
 	std::vector<GhostBlock*> ghostBlocks_;
+	std::vector<Door*> doors_;
 
 	// 点滅関連の追加変数
 	bool isFlashing = false;          // 点滅中かどうか

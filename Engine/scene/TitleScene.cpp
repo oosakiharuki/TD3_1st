@@ -8,11 +8,16 @@ void TitleScene::Initialize() {
 	backGround = new Sprite();
 	backGround->Initialize("title_background.png");
 	backGround->SetPosition({ 0,0 });
+
+	bottonSprite = new Sprite();
+	bottonSprite->Initialize("ui/press_Botton.png");
+	bottonSprite->SetPosition({ 384 ,560 });
 }
 
 void TitleScene::Update() {
 	sprite->Update();
 	backGround->Update();
+	bottonSprite->Update();
 
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
@@ -29,9 +34,11 @@ void TitleScene::Draw() {
 
 	backGround->Draw();
 	sprite->Draw();
+	bottonSprite->Draw();
 }
 
 void TitleScene::Finalize() {
 	delete sprite;
 	delete backGround;
+	delete bottonSprite;
 }

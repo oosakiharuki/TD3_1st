@@ -3,6 +3,8 @@
 #include "ImGuiManager.h"
 #endif
 
+#include <numbers>
+
 Door::Door() {}
 
 Door::~Door() { delete model_; }
@@ -47,9 +49,6 @@ void Door::Update() {
 		AABB playerAABB = player_->GetAABB();
 		AABB doorAABB = GetAABB();
 
-		// プレイヤーにもAABBを渡す
-		player_->ResolveCollisionWithDoor(doorAABB);
-
 		if (IsCollisionAABB(playerAABB, doorAABB) && !isDoorOpened_) {
 			// すべてのキーが取得されている場合、ドアに触れたフラグを立ててアニメーション開始
 			if (AreAllKeysObtained() && !isDoorTouched_) {
@@ -57,7 +56,6 @@ void Door::Update() {
 				isAnimating_ = true;
 			}
 		}
-		player_->SetOpenDoor(isDoorOpened_);
 	}
 
 	// ドアの開閉アニメーション
@@ -70,6 +68,7 @@ void Door::Update() {
 			if (openAngle_ >= 1.5f) {
 				isDoorOpened_ = true;
 				isAnimating_ = false;
+				worldTransform_.rotation_.y = openAngle_;
 			}
 		}
 	}
@@ -98,13 +97,28 @@ void Door::Update() {
 
 void Door::Draw() { model_->Draw(worldTransform_); }
 
-AABB Door::GetAABB() const {
+AABB Door::GetAABB(){
 	// ドアのローカル座標：
 	//   min = (-3, 0, -1), max = (3, 6, 1)
 	//   中心 = (0, 3, 0)
 	//   半サイズ(=halfExtents) = (3, 3, 1)
 	Vector3 localCenter = {0.0f, 3.0f, 0.0f};
-	Vector3 halfExtents = {3.0f, 3.0f, 1.0f};
+	Vector3 halfExtents = { 3.0f, 3.0f, 1.0f };
+
+	if (!isDoorOpened_) {
+		if (normal_ == 90) {
+			halfExtents = { 1.0f, 3.0f, 3.0f };
+			worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2;
+		}
+		if (normal_ == 270) {
+			halfExtents = { 1.0f, 3.0f, 3.0f };
+			worldTransform_.rotation_.y = - std::numbers::pi_v<float> / 2;
+		}
+		if (normal_ == 180) {
+			worldTransform_.rotation_.y = std::numbers::pi_v<float>;
+		}
+	}
+	
 
 	// スケールを要素ごとに乗算
 	Vector3 scaledCenter = {localCenter.x * worldTransform_.scale_.x, localCenter.y * worldTransform_.scale_.y, localCenter.z * worldTransform_.scale_.z};
