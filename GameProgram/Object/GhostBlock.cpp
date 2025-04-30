@@ -9,7 +9,7 @@ GhostBlock::~GhostBlock() { delete model_; }
 void GhostBlock::Init() {
     model_ = new Object3d();
     model_->Initialize();
-	model_->SetModelFile("EnemyBullet");
+	model_->SetModelFile("cube");
 
     worldTransform_.Initialize();
 	worldTransform_.UpdateMatrix();

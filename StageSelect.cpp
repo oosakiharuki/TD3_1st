@@ -41,11 +41,11 @@ void StageSelect::Update() {
 		}
 	}
 
-	if (Input::GetInstance()->PushKey(DIK_D) && stageNum < 6) {
+	if (Input::GetInstance()->PushKey(DIK_D)) {
 		isPrassNum = true;
 	}
 
-	if (Input::GetInstance()->PushKey(DIK_A) && stageNum > 0) {
+	if (Input::GetInstance()->PushKey(DIK_A)) {
 		isMinusNum = true;
 	}
 
@@ -55,7 +55,7 @@ void StageSelect::Update() {
 		steackCount -= deltaTimer;
 	
 
-	if (isPrassNum && stageNum < 6 && steackCount <= 0) {
+	if (isPrassNum && stageNum < 7 && steackCount <= 0) {
 		stageNum += 1;
 		selectLT += 64.0f;
 		steackCount = steackMax;

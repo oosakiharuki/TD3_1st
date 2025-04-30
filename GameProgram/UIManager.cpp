@@ -3,6 +3,7 @@
 #include <TextureManager.h>
 #include "WinApp.h"
 #include <cassert>
+#include <GameData.h>
 
 UIManager::UIManager() {}
 
@@ -20,6 +21,8 @@ UIManager::~UIManager() {
 		delete keyboardGuideSprite_;
 	if (controllerGuideSprite_)
 		delete controllerGuideSprite_;
+
+	delete tutorial;
 }
 
 void UIManager::Initialize() {
@@ -60,6 +63,13 @@ void UIManager::Initialize() {
 	controllerGuideSprite_->Initialize("ui/controller_guide.png");
 	controllerGuideSprite_->SetPosition({ 20, 20 });
 	controllerGuideSprite_->SetSize({300, 150});
+
+	if (GameData::selectedStage == 0) {
+		tutorial = new Sprite();
+		tutorial->Initialize("ui/tutorial01.png");
+		tutorial->SetPosition({ 0, 0 });
+
+	}
 }
 
 void UIManager::Update() {
@@ -71,7 +81,10 @@ void UIManager::Update() {
 	keyboardGuideSprite_->Update();
 	controllerGuideSprite_->Update();
 
-
+	if (GameData::selectedStage == 0) {
+		tutorial->Update();
+	}
+	
 	// 入力デバイスの検出
 	DetectInputDevice();
 
@@ -127,6 +140,10 @@ void UIManager::Draw(int playerHP) {
 		hpTextSprite_->Draw();
 	}
 
+	if (GameData::selectedStage == 0 && !isTutorialEnd) {
+		tutorial->Draw();
+	}
+	
 	// 操作ガイド描画
 	DrawControlGuide();
 
@@ -178,5 +195,26 @@ void UIManager::DrawControlGuide() {
 		keyboardGuideSprite_->Draw();
 	} else if (detectedDevice_ == InputDeviceType::Controller && controllerGuideSprite_) {
 		controllerGuideSprite_->Draw();
+	}
+}
+
+void UIManager::TutorialPos(Vector3 playerPos) {
+	if (playerPos.z >= 10) {
+		tutorial->SetTextureFile("ui/tutorial02.png");
+	}
+	if (playerPos.z >= 25) {
+		tutorial->SetTextureFile("ui/tutorial03.png");
+	}
+	if (playerPos.z >= 50) {
+		tutorial->SetTextureFile("ui/tutorial04.png");
+	}
+	if (playerPos.z >= 60) {
+		tutorial->SetTextureFile("ui/tutorial05.png");
+	}
+	if (playerPos.z >= 80) {
+		tutorial->SetTextureFile("ui/tutorial06.png");
+	}
+	if (playerPos.z >= 110) {
+		isTutorialEnd = true;
 	}
 }

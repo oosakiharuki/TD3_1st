@@ -170,7 +170,7 @@ void GameScene::Update() {
 	//	// 次のステージ番号を計算
 	//	int nextStage = currentStage_ + 1;
 	//	GameData::selectedStage += 1;
-
+	
 	//	// 次のステージに応じてプレイヤーの座標を設定
 	//	Vector3 newPosition;
 	//	newPosition = PlayerPosition::stage[nextStage];
@@ -183,6 +183,10 @@ void GameScene::Update() {
 	//}
 
 	camera_->Update();
+
+	if (GameData::selectedStage == 0) {
+		uiManager->TutorialPos(player_->GetWorldPosition());
+	}
 
 	uiManager->Update();
 }
