@@ -44,7 +44,10 @@ public:
 	const Vector2& GetTextureSize() const { return textureSize; }
 
 	void SetTextureLT(const Vector2& textureLeftTop) { this->textureLeftTop = textureLeftTop; }
-	void SetTextureSize(const Vector2& textureSize) { this->textureSize = textureSize; }
+	void SetTextureSize(const Vector2& textureSize) { 
+		this->textureSize = textureSize; 
+		size = textureSize;
+	}
 
 	void SetTextureFile(std::string newFile);
 
@@ -102,9 +105,9 @@ private:
 	bool isFlipY_ = false;
 
 	//左上から情報を得る
-	Vector2 textureLeftTop = { 0.0f,0.0f };
+	Vector2 textureLeftTop;
 	//切り取りサイズ
-	Vector2 textureSize = { 64.0f,64.0f };
+	Vector2 textureSize;
 
 	//本来のテクスチャの大きさにする
 	void AdjustTextureSize();

@@ -1,4 +1,5 @@
 #include "GameClearScene.h"
+#include "GameData.h"
 
 void GameClearScene::Initialize() {
 	sprite = new Sprite();
@@ -17,11 +18,20 @@ void GameClearScene::Update() {
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
+	//if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
+	//	Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	//	// GameOverからTitleに変更
+	//	sceneNo = Title;
+	//}
+
+
+	//次のステージに行くとき
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
 		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		// GameOverからTitleに変更
-		sceneNo = Title;
+		GameData::selectedStage += 1;
+		sceneNo = Game;
 	}
+
 }
 
 void GameClearScene::Draw() {

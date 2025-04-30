@@ -3,6 +3,7 @@
 #include "ImGuiManager.h"
 #endif
 #include "GhostEnemy.h"
+#include "Door.h"
 
 #include <algorithm>
 #include <iostream>
@@ -311,8 +312,10 @@ void Player::Update() {
 	}
 
 	// ドアとの衝突処理
-	if (IsCollisionAABB(playerAABB, doorAABB) && !isOpenDoor) {
-		ResolveAABBCollision(playerAABB, doorAABB, velocityY_, onGround_);
+	for (Door* doorAABB : doors_) {
+		if (IsCollisionAABB(playerAABB, doorAABB->GetAABB()) && !doorAABB->IsDoorOpened()) {
+			ResolveAABBCollision(playerAABB, doorAABB->GetAABB(), velocityY_, onGround_);
+		}
 	}
 
 	// Tileとの衝突判定

@@ -27,6 +27,8 @@ public:
 	// 操作ガイドの表示
 	void DrawControlGuide();
 
+	void TutorialPos(Vector3 playerPos);
+
 private:
 	// HP表示関連
 	Sprite* hpBarBgSprite_ = nullptr;   // HP背景
@@ -49,4 +51,8 @@ private:
 	// 前回の入力状態
 	XINPUT_STATE prevState_ = {};
 	XINPUT_STATE currentState_ = {};
+
+	Sprite* tutorial = nullptr;
+
+	bool isTutorialEnd = false;
 };

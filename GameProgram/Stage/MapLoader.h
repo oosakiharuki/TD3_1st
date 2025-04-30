@@ -36,6 +36,7 @@ enum class TileMovementPreset {
 // CSVから読み込んだオブジェクトデータの構造体
 struct MapObjectData {
 	Vector3 position;
+	float rotate;
 	MapObjectType type;
 	ColorType color;
 	Vector3 size;
@@ -88,6 +89,9 @@ public:
 
 	// ゴーストブロックリストへのアクセス
 	const std::vector<GhostBlock*>& GetGhostBlockList() const { return ghostBlocks_; }
+
+	// ドアリストのアクセス
+	const std::vector<Door*>& GetDoorList() const { return doors_; }
 
 	// Goalへのアクセス（追加）
 	Goal* GetGoal() const { return goal_ ? goal_ : nullptr; }
