@@ -133,4 +133,8 @@ private:
     Vector3 fieldMin_ = { -100.0f, -50.0f, -100.0f }; // フィールドの最小範囲
     Vector3 fieldMax_ = { 100.0f, 100.0f, 100.0f };   // フィールドの最大範囲
     float bounceBackDistance_ = 20.0f;               // 境界から反発する距離
+
+    //リスポーン地点
+    WorldTransform worldTransformRespown_;
+    Object3d* modelRespown_ = nullptr; // 目印用のオブジェクト
 };

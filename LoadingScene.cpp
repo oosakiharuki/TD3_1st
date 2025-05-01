@@ -64,6 +64,8 @@ void LoadingScene::Update() {
             ModelManager::GetInstance()->LoadModel("tile");
             ModelManager::GetInstance()->LoadModel("EnemyBullet");
             ModelManager::GetInstance()->LoadModel("EnemyGhost");
+            ModelManager::GetInstance()->LoadModel("GhostRespown");
+
 
             loadingProgress = 0.0f;
             loadingStage = 1;

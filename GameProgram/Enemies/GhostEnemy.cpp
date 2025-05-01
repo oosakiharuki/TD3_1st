@@ -22,7 +22,10 @@ GhostEnemy::GhostEnemy() {
 	SetNewRandomDestination();
 }
 
-GhostEnemy::~GhostEnemy() { delete model_; }
+GhostEnemy::~GhostEnemy() { 
+	delete model_;
+	delete modelRespown_;
+}
 
 void GhostEnemy::Init() {
 	worldTransform_.Initialize();
@@ -30,7 +33,14 @@ void GhostEnemy::Init() {
 	model_ = new Object3d();
 	model_->Initialize();
 	model_->SetModelFile("BlueGhost");
+
+	modelRespown_ = new Object3d();
+	modelRespown_->Initialize();
+	modelRespown_->SetModelFile("GhostRespown");
+
 	worldTransform_.translation_ = position;
+
+	worldTransformRespown_.Initialize();
 }
 
 void GhostEnemy::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -40,6 +50,7 @@ void GhostEnemy::AddObstacle(const AABB& obstacle) { obstacleList_.push_back(obs
 void GhostEnemy::SetPosition(const Vector3& pos) {
 	position = pos;
 	worldTransform_.translation_ = position;
+	worldTransformRespown_.translation_ = position;
 }
 
 void GhostEnemy::ClearObstacleList() {
@@ -214,6 +225,9 @@ void GhostEnemy::Update() {
 		CheckAndResolveGhostCollisions();
 
 		worldTransform_.translation_.y = position.y;
+		worldTransform_.translation_.x = std::clamp(worldTransform_.translation_.x, worldTransformRespown_.translation_.x - 30, worldTransformRespown_.translation_.x + 30);
+		worldTransform_.translation_.z = std::clamp(worldTransform_.translation_.z, worldTransformRespown_.translation_.z - 30, worldTransformRespown_.translation_.z + 30);
+
 	}
 
 #ifdef _DEBUG
@@ -241,6 +255,7 @@ void GhostEnemy::Update() {
 #endif
 
 	worldTransform_.UpdateMatrix();
+	worldTransformRespown_.UpdateMatrix();
 }
 
 void GhostEnemy::UpdateRandomMovement(float deltaTime) {
@@ -443,17 +458,21 @@ void GhostEnemy::Draw() {
 	switch (colorType)
 	{
 	case ColorType::Blue:
-		model_->Draw(worldTransform_);
+		model_->Draw(worldTransform_);	
+		modelRespown_->Draw(worldTransformRespown_, "resource/Sprite/BlueGhost.png");
 		break;
 	case ColorType::Green:
 		model_->Draw(worldTransform_, "resource/Sprite/GreenGhost.png");
+		modelRespown_->Draw(worldTransformRespown_, "resource/Sprite/GreenGhost.png");
 		break;
 	case ColorType::Red:
 		model_->Draw(worldTransform_, "resource/Sprite/RedGhost.png");
+		modelRespown_->Draw(worldTransformRespown_, "resource/Sprite/RedGhost.png");
 		break;
 	default:
 		break;
 	}
+
 }
 
 AABB GhostEnemy::GetAABB() const {
@@ -475,9 +494,7 @@ void GhostEnemy::ContralPlayer() {
 
 void GhostEnemy::ReMove(const Vector3& position_) {
 	if (isPlayer) {
-		position.x = position_.x;
-		position.y = position_.y - 2;
-		position.z = position_.z;
+		worldTransform_.translation_ = worldTransformRespown_.translation_;
 		timerS = 0.0f;
 		isStan = true;
 		isPlayer = false;
