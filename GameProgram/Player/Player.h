@@ -100,7 +100,7 @@ public:
 private:
 	Vector3 position = { 0, 10, -10 };
 	Vector3 initialPosition = { 0, 10, -10 }; // 初期位置保存用
-	Vector3 velocity;
+	Vector3 velocity = { 0, 0, 0 }; // 線形補間用の現在速度
 	Vector3 size = { 2, 2, 2 };
 	Vector3 stop = { 0, 0, 0 };
 

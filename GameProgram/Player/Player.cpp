@@ -89,7 +89,8 @@ void Player::Update() {
 		inputVec.z += gpZ;
 	}
 
-	// 入力があれば正規化してスピード分移動
+	// 入力処理とプレイヤーの目標移動速度を計算
+	Vector3 targetVelocity = {0.0f, 0.0f, 0.0f};
 	if (Length(inputVec) > 0) {
 		Vector3 move = Normalize(inputVec) * speed;
 		float yawRad = cameraYaw * (3.14159265f / 180.0f);
@@ -100,11 +101,34 @@ void Player::Update() {
 		rotatedMove.z = -move.x * sinf(yawRad) + move.z * cosf(yawRad);
 		rotatedMove.y = 0.0f;
 
-		position.x += rotatedMove.x;
-		position.z += rotatedMove.z;
+		// 目標速度を設定
+		targetVelocity = rotatedMove;
 
-		RotateY = std::atan2(rotatedMove.x, rotatedMove.z);
+		// 目標の回転角を計算
+		float targetRotateY = std::atan2(rotatedMove.x, rotatedMove.z);
+		
+		// 回転もスムーズにする
+		const float rotationSmoothFactor = 0.2f;
+		RotateY = LeapShortAngle(RotateY, targetRotateY, rotationSmoothFactor);
 	}
+
+	// スムージング係数（当たりをゆるくしつつ、動きは速めに）
+	const float moveSmoothFactor = 0.3f;
+	
+	// 現在の速度から目標速度へ徐々に変化
+	velocity.x = velocity.x + (targetVelocity.x - velocity.x) * moveSmoothFactor;
+	velocity.z = velocity.z + (targetVelocity.z - velocity.z) * moveSmoothFactor;
+
+	// 速度が非常に小さい場合はゼロにする（浮動小数点の問題回避）
+	const float stopThreshold = 0.001f;
+	if (Length(velocity) < stopThreshold) {
+		velocity.x = 0.0f;
+		velocity.z = 0.0f;
+	}
+
+	// 計算された速度で移動
+	position.x += velocity.x;
+	position.z += velocity.z;
 
 #pragma endregion
 

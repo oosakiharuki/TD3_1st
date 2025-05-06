@@ -30,14 +30,27 @@ void CameraController::Update(Camera* camera, const Vector3& playerPosition) {
 	// ピッチ角に基づく垂直オフセットを計算
 	float verticalOffset = distance * std::sin(pitchRad);
 
-	// プレイヤーを中心としたカメラ位置を計算
-	cameraTransofrm_.x = playerPosition.x - horizontalDistance * std::sin(yawRad);
-	cameraTransofrm_.y = playerPosition.y + 5.0f + verticalOffset;
-	cameraTransofrm_.z = playerPosition.z - horizontalDistance * std::cos(yawRad);
+	// 目標位置を計算
+	Vector3 targetPosition;
+	targetPosition.x = playerPosition.x - horizontalDistance * std::sin(yawRad);
+	targetPosition.y = playerPosition.y + 5.0f + verticalOffset;
+	targetPosition.z = playerPosition.z - horizontalDistance * std::cos(yawRad);
 
-	// プレイヤーを見るようにカメラの回転を設定
-	cameraRotate_.x = pitchRad;
-	cameraRotate_.y = yawRad;
+	// スムージング係数（値が大きいほど即座に追従）
+	const float smoothFactor = 0.7f;
+
+	// 現在位置から目標位置へ徐々に移動（線形補間）
+	cameraTransofrm_.x += (targetPosition.x - cameraTransofrm_.x) * smoothFactor;
+	cameraTransofrm_.y += (targetPosition.y - cameraTransofrm_.y) * smoothFactor;
+	cameraTransofrm_.z += (targetPosition.z - cameraTransofrm_.z) * smoothFactor;
+
+	// プレイヤーを見るようにカメラの回転を徐々に更新
+	// 回転のスムージング係数（値が大きいほど即座に追従）
+	const float rotationSmoothFactor = 0.7f;
+
+	// 現在の回転から目標回転へ徐々に移動
+	cameraRotate_.x += (pitchRad - cameraRotate_.x) * rotationSmoothFactor;
+	cameraRotate_.y += (yawRad - cameraRotate_.y) * rotationSmoothFactor;
 	cameraRotate_.z = 0.0f;
 
 #ifdef _DEBUG
