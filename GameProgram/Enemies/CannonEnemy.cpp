@@ -24,7 +24,7 @@ void CannonEnemy::Init() {
 	model_->Initialize();
 	model_->SetModelFile("cannon");
 	particleMove_ = new Particle();
-	particleMove_->Initialize(ParticleCommon::GetInstance(), "02");
+	particleMove_->Initialize("resource/Sprite/GreenGhost.png");
 	particleMove_->ChangeMode(BornParticle::Stop);
 
 	worldTransform_.translation_ = position;

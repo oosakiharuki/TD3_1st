@@ -41,11 +41,11 @@ void Player::Init(Camera* camera) {
 	FallSound_ = audio_->LoadWave("sound/fall.wav"); // 仮に落下音もジャンプ音と同じものを使用
 
 	particleMove_ = new Particle();
-	particleMove_->Initialize(ParticleCommon::GetInstance(),"01");
+	particleMove_->Initialize("resource/Sprite/circle.png");
 	particleMove_->ChangeMode(BornParticle::Stop);
 
 	particleTransfar_ = new Particle();
-	particleTransfar_->Initialize(ParticleCommon::GetInstance(), "01");
+	particleTransfar_->Initialize("resource/Sprite/circle.png");
 	particleTransfar_->ChangeMode(BornParticle::Stop);
 }
 

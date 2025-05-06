@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include "ParticleNumber.h"
 
 GameScene::GameScene() {}
 
@@ -104,9 +105,13 @@ void GameScene::Initialize() {
 	audio_ = Audio::GetInstance();
 	BGMSound = audio_->LoadWave("sound/stage1.wav");
 	audio_->SoundPlayWave(BGMSound, 0.25f, true);
+
+	//パーテイクルのメモリ対策でリセット
+	ParticleNum::number = 0;
 }
 
 void GameScene::Update() {
+
 
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
@@ -226,6 +231,10 @@ void GameScene::Draw() {
 	
 	for(CannonEnemy* it : enemyLoader_->GetCannonEnemyList()){
 		it->DrawP();
+	}
+
+	if (mapLoader_) {
+		mapLoader_->DrawP();
 	}
 
 	//スプライト描画処理(UI用)

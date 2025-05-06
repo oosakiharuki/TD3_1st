@@ -6,7 +6,10 @@
 
 Key::Key() {}
 
-Key::~Key() { delete model_; }
+Key::~Key() { 
+	delete model_; 
+	delete particle;
+}
 
 void Key::Init() {
 
@@ -30,11 +33,18 @@ void Key::Init() {
 	// 鍵取得音の読み込み
 	audio_ = Audio::GetInstance();
 	keyGetSound_ = audio_->LoadWave("sound/key_get.wav");
+
+	particle = new Particle();
+	particle->Initialize("resource/Sprite/get_key.png");
 }
 
 void Key::Update() {
+
+	particle->Update();
+
 	// 既に取得されていたら処理しない
 	if (isObtained_) {
+		particle->ChangeMode(BornParticle::Stop);
 		return;
 	}
 
@@ -61,6 +71,10 @@ void Key::Update() {
 	if (!isObtained_) {
 		rotationY_ += 0.02f;
 		worldTransform_.rotation_.y = rotationY_;
+		
+		particle->SetParticleCount(1);
+		particle->SetFrequency(0.50f);
+		particle->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y,worldTransform_.translation_.z });
 	}
 
 	// 行列を更新
@@ -80,6 +94,9 @@ void Key::Draw() {
 	if (!isObtained_) {
 		model_->Draw(worldTransform_);
 	}
+}
+void Key::DrawP() {
+	particle->Draw();
 }
 
 // AABBを取得するメソッド

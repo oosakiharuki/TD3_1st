@@ -8,12 +8,23 @@
 #include <numbers>
 #include "ModelManager.h"
 
+#include <string>
+#include "ParticleNumber.h"
+
 using namespace MyMath;
 
-void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fileName) {
-	this->particleCommon = ParticleCommon;
+void Particle::Initialize(std::string textureFile) {
+	this->particleCommon = ParticleCommon::GetInstance();
 	this->camera = particleCommon->GetDefaultCamera();
-	this->fileName = fileName;
+	
+	//パーティクルの発生源数を増やす
+	ParticleNum::number++;
+	number = ParticleNum::number;
+
+	ParticleManager::GetInstance()->CreateParticleGroup(std::to_string(number),textureFile);
+
+	this->fileName = std::to_string(number);
+
 
 	modelData = ParticleManager::GetInstance()->GetModelData(fileName);
 

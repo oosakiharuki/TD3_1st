@@ -44,7 +44,7 @@ enum class ParticleType {
 
 class Particle{
 public:
-	void Initialize(ParticleCommon* particleCommon, const std::string& fileName);
+	void Initialize(std::string textureFile);
 	void Update();
 	void Draw();
 
@@ -135,4 +135,6 @@ private:
 
 	BornParticle bornP = BornParticle::TimerMode;
 	ParticleType particleType = ParticleType::Normal;
+
+	uint32_t number = 0;
 };

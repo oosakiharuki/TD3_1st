@@ -78,8 +78,8 @@ void LoadingScene::Update() {
             ModelManager::GetInstance()->LoadModel("space");
             ModelManager::GetInstance()->LoadModel("Spring");
 
-            ParticleManager::GetInstance()->CreateParticleGroup("01", "resource/Sprite/circle.png");
-            ParticleManager::GetInstance()->CreateParticleGroup("02", "resource/Sprite/circle.png");
+            //ParticleManager::GetInstance()->CreateParticleGroup("01", "resource/Sprite/circle.png");
+            //ParticleManager::GetInstance()->CreateParticleGroup("02", "resource/Sprite/circle.png");
 
             loadingProgress = 0.0f;
             loadingStage = 2;
