@@ -407,8 +407,8 @@ void LoadingScene::Update() {
     float wobbleSpeed = 0.04f;
     float offsetY = sin(rotationAngle * wobbleSpeed) * wobbleAmount;
     
-    // テキストもゆっくり上下に動かす
-    float textWobble = sin(rotationAngle * 0.03f) * 3.0f;
+    // テキストをよりゆっくり、より大きく上下に動かす
+    float textWobble = sin(rotationAngle * 0.02f) * 10.0f;
     loadingText->SetPosition({ WinApp::kClientWidth / 2.0f - 200.0f, (WinApp::kClientHeight / 3.0f) + textWobble });
     
     loadingIcon->SetPosition({ posX, posY + offsetY });
@@ -425,25 +425,30 @@ void LoadingScene::Update() {
         }
     }
     
-    // プログレスバーの幅を更新
+    // プログレスバーの幅を更新（イージングを適用してスムーズに）
+    static float smoothProgress = 0.0f;
+    // イージング関数（Smoothstep）でtotalProgressに追いつくように滑らかに変化
+    float easeSpeed = 0.05f;
+    smoothProgress += (totalProgress - smoothProgress) * easeSpeed;
+    
     float barMaxWidth = 400.0f;
-    progressBar->SetSize({ barMaxWidth * totalProgress, progressBar->GetSize().y });
+    progressBar->SetSize({ barMaxWidth * smoothProgress, progressBar->GetSize().y });
     
     // 進行度に応じてプログレスバーの色を変える（聖色と可愛さが増す）
     // 青からピンク、そして白へのグラデーション
     Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f }; // デフォルトは白
     
-    if (totalProgress < 0.5f) {
+    if (smoothProgress < 0.5f) {
         // 0-50%: 青からピンクへ
-        float r = 0.5f + 0.5f * (totalProgress * 2.0f); // 0.5から1.0へ
-        float g = 0.5f + 0.12f * (totalProgress * 2.0f); // 0.5から0.62へ
-        float b = 1.0f - 0.25f * (totalProgress * 2.0f); // 1.0から0.75へ
+        float r = 0.5f + 0.5f * (smoothProgress * 2.0f); // 0.5から1.0へ
+        float g = 0.5f + 0.12f * (smoothProgress * 2.0f); // 0.5から0.62へ
+        float b = 1.0f - 0.25f * (smoothProgress * 2.0f); // 1.0から0.75へ
         color = { r, g, b, 1.0f };
     } else {
         // 50-100%: ピンクから白へ
         float r = 1.0f; // 常に1.0
-        float g = 0.62f + 0.38f * ((totalProgress - 0.5f) * 2.0f); // 0.62から1.0へ
-        float b = 0.75f + 0.25f * ((totalProgress - 0.5f) * 2.0f); // 0.75から1.0へ
+        float g = 0.62f + 0.38f * ((smoothProgress - 0.5f) * 2.0f); // 0.62から1.0へ
+        float b = 0.75f + 0.25f * ((smoothProgress - 0.5f) * 2.0f); // 0.75から1.0へ
         color = { r, g, b, 1.0f };
     }
     
