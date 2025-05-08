@@ -243,7 +243,31 @@ void GameScene::Draw() {
 		mapLoader_->Draw2D();
 	}
 
+	// プレイヤーのHPを表示
 	uiManager->Draw(player_->GetHp());
+
+	// 鍵の数を表示
+	if (mapLoader_) {
+		// 鍵の総数を数える
+		int totalKeys = 0;
+		int remainingKeys = 0;
+
+		const auto& keys = mapLoader_->GetKeys();
+		if (!keys.empty()) {
+			totalKeys = static_cast<int>(keys.size());
+			
+			// 残りの鍵の数を数える
+			remainingKeys = totalKeys; // 初期値は全部の鍵
+			for (const auto* key : keys) {
+				if (key && key->IsKeyObtained()) {
+					remainingKeys--; // 取得済みの鍵は残数から減らす
+				}
+			}
+
+			// 鍵の情報をUIManagerに渡して表示
+			uiManager->DrawKeyCount(remainingKeys, totalKeys);
+		}
+	}
 }
 
 
