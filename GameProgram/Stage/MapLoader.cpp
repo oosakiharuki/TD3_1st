@@ -467,6 +467,13 @@ void MapLoader::Draw2D() {
 	}
 }
 
+void MapLoader::DrawP() {
+	// すべての鍵を描画
+	for (auto* key : keys_) {
+		key->DrawP();
+	}
+}
+
 // スプライトの描画
 void MapLoader::DrawSprites([[maybe_unused]] ID3D12GraphicsCommandList* commandList) {
 	// Goalのスプライト描画（ゴールクリア表示）

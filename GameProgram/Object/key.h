@@ -16,6 +16,7 @@ public:
 
 	// 描画
 	void Draw();
+	void DrawP();
 
 	// プレイヤーの参照を設定
 	void SetPlayer(Player* player) { player_ = player; }
@@ -58,4 +59,6 @@ private:
 
 	// 回転アニメーション用
 	float rotationY_ = 0.0f;
+
+	Particle* particle = nullptr;
 };

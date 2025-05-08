@@ -366,6 +366,12 @@
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
     <ClInclude Include="GameData.h" />
+    <ClInclude Include="Engine\Framework.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ParticleNumber.h">
+      <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resource\shaders\Object3d.hlsli">

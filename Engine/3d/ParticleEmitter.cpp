@@ -17,7 +17,7 @@ ParticleEmitter* ParticleEmitter::GetInstance() {
 Particles ParticleEmitter::MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate) {
 	//random
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);//position用
-	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);//color用
+	//std::uniform_real_distribution<float> distColor(0.0f, 1.0f);//color用
 	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
 
 	Particles particle;
@@ -28,7 +28,8 @@ Particles ParticleEmitter::MakeNewParticle(std::mt19937& randomEngine, const Vec
 	particle.transform.translate = translate;
 
 	particle.velocity = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
-	particle.color = { distColor(randomEngine),distColor(randomEngine),distColor(randomEngine),1.0f };
+	//particle.color = { distColor(randomEngine),distColor(randomEngine),distColor(randomEngine),1.0f };
+	particle.color = { 1,1,1,1 };
 
 	particle.lifeTime = distTime(randomEngine);
 	particle.currentTime = 0;
