@@ -22,7 +22,7 @@ void LoadingScene::Initialize() {
     // ロードテキストの設定 - 画面中央に配置
     loadingText = new Sprite();
     loadingText->Initialize("loading/loading_text.png");
-    loadingText->SetPosition({ WinApp::kClientWidth / 2.0f - 200.0f, WinApp::kClientHeight / 2.0f });
+    loadingText->SetPosition({ WinApp::kClientWidth / 2.0f - 200.0f, WinApp::kClientHeight / 3.0f });
     loadingText->SetSize({ 400.0f, 100.0f }); // テキストを大きく表示
     
     // デバッグ出力
@@ -37,7 +37,7 @@ void LoadingScene::Initialize() {
     loadingIcon->Initialize("loading/loading_icon.png");
 
     // アイコンサイズを設定
-    float iconSize = 120.0f; 
+    float iconSize = 120.0f; // かわいらしいサイズに調整
 
     // 画面中央の座標計算
     posX = WinApp::kClientWidth / 2.0f;
@@ -127,33 +127,43 @@ void LoadingScene::LoadEssentialResources() {
 
 void LoadingScene::StartAsyncLoading() {
     // 各ステージのリソースをロードするための非同期スレッドを開始
+    OutputDebugStringA("LoadingScene::StartAsyncLoading() - 非同期ロード開始\n");
+    
+    // 強化されたスレッド処理と例外ハンドリングのためのスレッド処理
     loadingThread = std::thread([this]() {
         try {
             // ステージ1のリソースロード
+            OutputDebugStringA("AsyncLoad - Stage 1 開始\n");
             LoadStage1Resources();
             {
                 std::lock_guard<std::mutex> lock(loadingMutex);
                 loadingStage = 1;
-                stageProgress[0] = 1.0f;
+                stageProgress[0] = um = 1.0f;
             }
+            OutputDebugStringA("AsyncLoad - Stage 1 完了\n");
             
             // ステージ2のリソースロード
+            OutputDebugStringA("AsyncLoad - Stage 2 開始\n");
             LoadStage2Resources();
             {
                 std::lock_guard<std::mutex> lock(loadingMutex);
                 loadingStage = 2;
                 stageProgress[1] = 1.0f;
             }
+            OutputDebugStringA("AsyncLoad - Stage 2 完了\n");
             
             // ステージ3のリソースロード
+            OutputDebugStringA("AsyncLoad - Stage 3 開始\n");
             LoadStage3Resources();
             {
                 std::lock_guard<std::mutex> lock(loadingMutex);
                 loadingStage = 3;
                 stageProgress[2] = 1.0f;
             }
+            OutputDebugStringA("AsyncLoad - Stage 3 完了\n");
             
             // ステージ4のリソースロード
+            OutputDebugStringA("AsyncLoad - Stage 4 開始\n");
             LoadStage4Resources();
             {
                 std::lock_guard<std::mutex> lock(loadingMutex);
@@ -161,16 +171,39 @@ void LoadingScene::StartAsyncLoading() {
                 stageProgress[3] = 1.0f;
                 isLoadingComplete = true;
             }
+            OutputDebugStringA("AsyncLoad - Stage 4 完了\n");
             
-            OutputDebugStringA("非同期ローディング完了\n");
+            OutputDebugStringA("非同期ローディング完了 - 正常終了\n");
         }
         catch (std::exception& e) {
-            OutputDebugStringA(("ローディングエラー: " + std::string(e.what()) + "\n").c_str());
+            // 例外発生時のログ出力と安全な処理
+            OutputDebugStringA(("ローディング中に例外が発生しました: " + std::string(e.what()) + "\n").c_str());
+            
+            // 安全に処理を完了させるためのフラグ設定
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            isLoadingComplete = true;
+        }
+        catch (...) {
+            // 不明な例外をキャッチして安全に処理
+            OutputDebugStringA("ローディング中に不明な例外が発生しました\n");
+            
+            // 安全に処理を完了させるためのフラグ設定
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            isLoadingComplete = true;
         }
     });
     
-    // スレッドをデタッチ
-    loadingThread.detach();
+    // 例外が発生しないようにスレッドデタッチ処理を安全に実行
+    try {
+        loadingThread.detach();
+        OutputDebugStringA("LoadingScene::StartAsyncLoading() - スレッドが正常にデタッチされました\n");
+    }
+    catch (const std::exception& e) {
+        OutputDebugStringA(("スレッドのデタッチ処理で例外が発生しました: " + std::string(e.what()) + "\n").c_str());
+    }
+    catch (...) {
+        OutputDebugStringA("スレッドのデタッチ処理で不明な例外が発生しました\n");
+    }
 }
 
 void LoadingScene::LoadStage1Resources() {
