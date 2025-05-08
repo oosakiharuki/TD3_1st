@@ -1,44 +1,97 @@
 #include "LoadingScene.h"
-// WinApp.hとTextureManager.hは既に読み込まれている
+#include <thread>
+#include <chrono>
+#include "math/Vector4.h"
 
 void LoadingScene::Initialize() {
     // デバッグ出力
     OutputDebugStringA("LoadingScene::Initialize() が実行されました\n");
+    
+    // 基本的なUIのみを先にロード
+    LoadEssentialResources();
     
     // 背景の読み込み
     background = new Sprite();
     background->Initialize("title_background.png");
     background->SetPosition({ 0,0 });
 
-    // ロードテキストの設定
+    // ロードテキストの設定 - 画面中央に配置
     loadingText = new Sprite();
     loadingText->Initialize("loading/loading_text.png");
-    loadingText->SetPosition({ 0, 20 });
+    loadingText->SetPosition({ WinApp::kClientWidth / 2.0f - 200.0f, WinApp::kClientHeight / 3.0f });
+    loadingText->SetSize({ 400.0f, 100.0f }); // テキストを大きく表示
 
-    // ロードアイコン（回転するスピナー）の設定 - 右下に配置
+    // ロードアイコン（回転するスピナー）の設定
     loadingIcon = new Sprite();
     loadingIcon->Initialize("loading/loading_icon.png");
 
-    // アイコンサイズを大きく設定
-    float iconSize = 150.0f; // より大きなサイズに変更
-    float padding = 30.0f;  // 画面端からの余白
+    // アイコンサイズを設定
+    float iconSize = 120.0f; // かわいらしいサイズに調整
 
-    // 右下の座標計算 - WinAppのクライアントサイズを使用
-    float posX = (WinApp::kClientWidth / 2.0f) - padding;
-    float posY = (WinApp::kClientHeight / 2.0f) - padding;
+    // 画面中央の座標計算
+    posX = WinApp::kClientWidth / 2.0f;
+    posY = WinApp::kClientHeight / 2.0f;
 
     // 位置とサイズを設定
     loadingIcon->SetPosition({ posX, posY });
     loadingIcon->SetSize({ iconSize, iconSize });
     loadingIcon->SetAnchorPoint({ 0.5f, 0.5f }); // 中心を軸に回転させるためのアンカーポイント設定
 
+    // プログレスバーの初期化
+    progressBar = new Sprite();
+    progressBarBg = new Sprite();
+    
+    // プログレスバーのテクスチャはすでにロード済みのUI素材を使用
+    progressBar->Initialize("ui/hp_bar_fill.png"); // 既存HPバーを流用
+    progressBarBg->Initialize("ui/hp_bar_bg.png"); // 既存HPバー背景を流用
+    
+    // プログレスバーの位置とサイズを設定（画面中央の下）
+    float barWidth = 400.0f;
+    float barHeight = 20.0f;
+    float barY = WinApp::kClientHeight / 2.0f + 100.0f; // アイコンの下に配置
+    
+    progressBarBg->SetPosition({ (WinApp::kClientWidth - barWidth) / 2.0f, barY });
+    progressBarBg->SetSize({ barWidth, barHeight });
+    
+    progressBar->SetPosition({ (WinApp::kClientWidth - barWidth) / 2.0f, barY });
+    progressBar->SetSize({ 0.0f, barHeight }); // 幅は0から開始（更新時に変更）
+
     // ロード状態のリセット
     loadingProgress = 0.0f;
     isLoadingComplete = false;
     loadingStage = 0;
     rotationAngle = 0.0f;
+    
+    // キラキラエフェクトの初期化
+    for (int i = 0; i < kMaxStars; i++) {
+        stars[i] = new Sprite();
+        stars[i]->Initialize("circle.png"); // 円形テクスチャを使用
+        
+        // 画面全体にランダム配置
+        float randX = static_cast<float>(rand() % WinApp::kClientWidth);
+        float randY = static_cast<float>(rand() % WinApp::kClientHeight);
+        stars[i]->SetPosition({ randX, randY });
+        
+        // 小さめのサイズで初期化
+        starScales[i] = 0.1f + (static_cast<float>(rand()) / RAND_MAX) * 0.2f;
+        stars[i]->SetSize({ 20.0f * starScales[i], 20.0f * starScales[i] });
+        stars[i]->SetAnchorPoint({ 0.5f, 0.5f }); // 中心を軸に回転
+        
+        // 回転角度もランダム
+        starRotations[i] = static_cast<float>(rand() % 360);
+        stars[i]->SetRotate(starRotations[i]);
+        
+        // 透明度もランダム・白から薄い水色に
+        starAlphas[i] = 0.3f + (static_cast<float>(rand()) / RAND_MAX) * 0.7f;
+        stars[i]->SetColor({ 0.8f, 0.9f, 1.0f, starAlphas[i] });
+    }
+    
+    // 非同期ローディングの開始
+    isAsyncLoadingStarted = false;
+}
 
-    // ローディング画面用のアセットを確実にロード
+void LoadingScene::LoadEssentialResources() {
+    // ローディング画面用の最小限のアセットを確実にロード
     if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/loading/loading_text.png")) {
         TextureManager::GetInstance()->LoadTexture("resource/Sprite/loading/loading_text.png");
     }
@@ -48,123 +101,360 @@ void LoadingScene::Initialize() {
     if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/title_background.png")) {
         TextureManager::GetInstance()->LoadTexture("resource/Sprite/title_background.png");
     }
+    if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/ui/hp_bar_bg.png")) {
+        TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/hp_bar_bg.png");
+    }
+    if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/ui/hp_bar_fill.png")) {
+        TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/hp_bar_fill.png");
+    }
+    if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/circle.png")) {
+        TextureManager::GetInstance()->LoadTexture("resource/Sprite/circle.png");
+    }
+}
+
+void LoadingScene::StartAsyncLoading() {
+    // 各ステージのリソースをロードするための非同期スレッドを開始
+    loadingThread = std::thread([this]() {
+        try {
+            // ステージ1のリソースロード
+            LoadStage1Resources();
+            {
+                std::lock_guard<std::mutex> lock(loadingMutex);
+                loadingStage = 1;
+                stageProgress[0] = 1.0f;
+            }
+            
+            // ステージ2のリソースロード
+            LoadStage2Resources();
+            {
+                std::lock_guard<std::mutex> lock(loadingMutex);
+                loadingStage = 2;
+                stageProgress[1] = 1.0f;
+            }
+            
+            // ステージ3のリソースロード
+            LoadStage3Resources();
+            {
+                std::lock_guard<std::mutex> lock(loadingMutex);
+                loadingStage = 3;
+                stageProgress[2] = 1.0f;
+            }
+            
+            // ステージ4のリソースロード
+            LoadStage4Resources();
+            {
+                std::lock_guard<std::mutex> lock(loadingMutex);
+                loadingStage = 4;
+                stageProgress[3] = 1.0f;
+                isLoadingComplete = true;
+            }
+            
+            OutputDebugStringA("非同期ローディング完了\n");
+        }
+        catch (std::exception& e) {
+            OutputDebugStringA(("ローディングエラー: " + std::string(e.what()) + "\n").c_str());
+        }
+    });
+    
+    // スレッドをデタッチ
+    loadingThread.detach();
+}
+
+void LoadingScene::LoadStage1Resources() {
+    OutputDebugStringA("ロードステージ1: 基本モデルとUIのロード開始\n");
+    
+    // モデルのロード（優先度の高いものから）
+    std::vector<std::string> modelQueue = {
+        "cube",
+        "door",
+        "tile",
+        "EnemyBullet",
+        "EnemyGhost",
+        "GhostRespown",
+        "cannon"
+    };
+    
+    // 各モデルを順番にロード
+    for (size_t i = 0; i < modelQueue.size(); ++i) {
+        ModelManager::GetInstance()->LoadModel(modelQueue[i]);
+        
+        // 進捗状況の更新
+        {
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            stageProgress[0] = static_cast<float>(i + 1) / static_cast<float>(modelQueue.size());
+        }
+        
+        // CPUの負荷を下げるために短い休止
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    
+    // タイトル・ゲームオーバー関連テクスチャをロード
+    std::vector<std::string> textureQueue = {
+        "resource/Sprite/TitleName.png",
+        "resource/Sprite/ui/press_Botton.png",
+        "resource/Sprite/GameOverName.png",
+        "resource/Sprite/GameOver_background.png"
+    };
+    
+    // 各テクスチャを順番にロード
+    for (size_t i = 0; i < textureQueue.size(); ++i) {
+        TextureManager::GetInstance()->LoadTexture(textureQueue[i]);
+        
+        // 進捗状況の更新（モデルのローディングが50%、テクスチャが50%と仮定）
+        {
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            stageProgress[0] = 0.5f + (static_cast<float>(i + 1) / static_cast<float>(textureQueue.size())) * 0.5f;
+        }
+        
+        // CPUの負荷を下げるために短い休止
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+void LoadingScene::LoadStage2Resources() {
+    OutputDebugStringA("ロードステージ2: 追加モデルとUIロード開始\n");
+    
+    // モデルのロード
+    std::vector<std::string> modelQueue = {
+        "goal",
+        "key",
+        "player",
+        "space",
+        "Spring"
+    };
+    
+    // 各モデルを順番にロード
+    for (size_t i = 0; i < modelQueue.size(); ++i) {
+        ModelManager::GetInstance()->LoadModel(modelQueue[i]);
+        
+        // 進捗状況の更新
+        {
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            stageProgress[1] = static_cast<float>(i + 1) / static_cast<float>(modelQueue.size()) * 0.5f;
+        }
+        
+        // CPUの負荷を下げるために短い休止
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    
+    // ステージセレクト関連テクスチャをロード
+    std::vector<std::string> textureQueue = {
+        "resource/Sprite/StageSelectName.png",
+        "resource/Sprite/StageSelect_background.png",
+        "resource/Sprite/stageNumber.png",
+        "resource/Sprite/ui/hp_bar_bg.png",
+        "resource/Sprite/ui/hp_bar_fill.png",
+        "resource/Sprite/ui/hp_icon.png",
+        "resource/Sprite/ui/controller_guide.png"
+    };
+    
+    // 各テクスチャを順番にロード
+    for (size_t i = 0; i < textureQueue.size(); ++i) {
+        if (!TextureManager::GetInstance()->CheckTextureExist(textureQueue[i])) {
+            TextureManager::GetInstance()->LoadTexture(textureQueue[i]);
+        }
+        
+        // 進捗状況の更新
+        {
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            stageProgress[1] = 0.5f + (static_cast<float>(i + 1) / static_cast<float>(textureQueue.size())) * 0.5f;
+        }
+        
+        // CPUの負荷を下げるために短い休止
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+void LoadingScene::LoadStage3Resources() {
+    OutputDebugStringA("ロードステージ3: ステージモデルとキャラクターロード開始\n");
+    
+    // ステージモデルのロード
+    std::vector<std::string> modelQueue = {
+        "stage0",
+        "stage1",
+        "stage2",
+        "stage3",
+        "stage4",
+        "stage5",
+        "stage6",
+        "stage7",
+        "BlueGhost"
+    };
+    
+    // 各モデルを順番にロード
+    for (size_t i = 0; i < modelQueue.size(); ++i) {
+        ModelManager::GetInstance()->LoadModel(modelQueue[i]);
+        
+        // 進捗状況の更新
+        {
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            stageProgress[2] = static_cast<float>(i + 1) / static_cast<float>(modelQueue.size()) * 0.6f;
+        }
+        
+        // CPUの負荷を下げるために少し長めの休止
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    
+    // キャラクター用テクスチャロード
+    std::vector<std::string> textureQueue = {
+        "resource/Sprite/BlueGhost.png",
+        "resource/Sprite/RedGhost.png",
+        "resource/Sprite/GreenGhost.png",
+        "resource/Sprite/player.png",
+        "resource/Sprite/Bullet.png",
+        "resource/Sprite/bane1.png"
+    };
+    
+    // 各テクスチャを順番にロード
+    for (size_t i = 0; i < textureQueue.size(); ++i) {
+        if (!TextureManager::GetInstance()->CheckTextureExist(textureQueue[i])) {
+            TextureManager::GetInstance()->LoadTexture(textureQueue[i]);
+        }
+        
+        // 進捗状況の更新
+        {
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            stageProgress[2] = 0.6f + (static_cast<float>(i + 1) / static_cast<float>(textureQueue.size())) * 0.4f;
+        }
+        
+        // CPUの負荷を下げるために短い休止
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+void LoadingScene::LoadStage4Resources() {
+    OutputDebugStringA("ロードステージ4: 最終ロード処理開始\n");
+    
+    // 最終ステージのテクスチャロード
+    std::vector<std::string> textureQueue = {
+        "resource/Sprite/key.png",
+        "resource/Sprite/get_key.png",
+        "resource/Sprite/Goal.png",
+        "resource/Sprite/Cube.png",
+        "resource/Sprite/ui/tutorial01.png",
+        "resource/Sprite/ui/tutorial02.png",
+        "resource/Sprite/ui/tutorial03.png",
+        "resource/Sprite/ui/tutorial04.png",
+        "resource/Sprite/ui/tutorial05.png",
+        "resource/Sprite/ui/tutorial06.png"
+    };
+    
+    // 各テクスチャを順番にロード
+    for (size_t i = 0; i < textureQueue.size(); ++i) {
+        if (!TextureManager::GetInstance()->CheckTextureExist(textureQueue[i])) {
+            TextureManager::GetInstance()->LoadTexture(textureQueue[i]);
+        }
+        
+        // 進捗状況の更新
+        {
+            std::lock_guard<std::mutex> lock(loadingMutex);
+            stageProgress[3] = static_cast<float>(i + 1) / static_cast<float>(textureQueue.size());
+        }
+        
+        // CPUの負荷を下げるために短い休止
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    
+    // 動くテクスチャを確認するためのチェック
+    TextureManager::GetInstance()->CheckAllTextureLoaded();
+    
+    // ModelManagerの照合チェック
+    ModelManager::GetInstance()->CheckAllModelsLoaded();
+    
+    OutputDebugStringA("ロード完了: タイトル画面へ遷移準備完了\n");
 }
 
 void LoadingScene::Update() {
+    // 非同期ローディングが開始されていない場合は開始
+    if (!isAsyncLoadingStarted) {
+        StartAsyncLoading();
+        isAsyncLoadingStarted = true;
+    }
+    
+    // UIの更新
     background->Update();
     loadingText->Update();
-
-    // ロードアイコンを回転 - 回転速度を調整
-    rotationAngle += 0.05f;
+    progressBarBg->Update();
+    
+    // キラキラエフェクトの更新
+    for (int i = 0; i < kMaxStars; i++) {
+        // 星をゆっくり回転
+        starRotations[i] += 0.02f * (i % 3 + 1);
+        stars[i]->SetRotate(starRotations[i]);
+        
+        // 星の透明度を周期的に変化させる
+        float alpha = 0.3f + sin(rotationAngle * 0.02f + i * 0.5f) * 0.3f + 0.4f;
+        stars[i]->SetColor({ 0.8f, 0.9f, 1.0f, alpha });
+        
+        // 星の大きさも周期的に変化
+        float scale = starScales[i] * (0.8f + sin(rotationAngle * 0.03f + i * 0.7f) * 0.2f);
+        stars[i]->SetSize({ 20.0f * scale, 20.0f * scale });
+        
+        stars[i]->Update();
+    }
+    
+    // ロードアイコンを回転 - かわいらしい動きに
+    rotationAngle += 0.03f; // ゆっくり回転
+    
+    // ロード中のアイコンをゆらゆら動かす（かわいらしさ向上）
+    float wobbleAmount = 8.0f;
+    float wobbleSpeed = 0.04f;
+    float offsetY = sin(rotationAngle * wobbleSpeed) * wobbleAmount;
+    
+    // テキストもゆっくり上下に動かす
+    float textWobble = sin(rotationAngle * 0.03f) * 3.0f;
+    loadingText->SetPosition({ WinApp::kClientWidth / 2.0f - 200.0f, (WinApp::kClientHeight / 3.0f) + textWobble });
+    
+    loadingIcon->SetPosition({ posX, posY + offsetY });
     loadingIcon->SetRotate(rotationAngle);
     loadingIcon->Update();
 
-    // ロード処理のシミュレーション
-    if (!isLoadingComplete) {
-        loadingProgress += loadingSpeed;
-
-        // ロードステージ - 各ステージで異なるアセットをロード
-        if (loadingProgress >= 1.0f && loadingStage == 0) {
-            // ロードステージ1開始
-            OutputDebugStringA("ロードステージ1: 基本モデルとUIのロード開始\n");
-            
-            // ステージ1: 基本モデルのロード
-            ModelManager::GetInstance()->LoadModel("cannon");
-            ModelManager::GetInstance()->LoadModel("cube");
-            ModelManager::GetInstance()->LoadModel("door");
-            ModelManager::GetInstance()->LoadModel("tile");
-            ModelManager::GetInstance()->LoadModel("EnemyBullet");
-            ModelManager::GetInstance()->LoadModel("EnemyGhost");
-            ModelManager::GetInstance()->LoadModel("GhostRespown");
-
-            // タイトル・ゲームオーバー関連テクスチャをロード
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/TitleName.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/press_Botton.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/GameOverName.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/GameOver_background.png");
-
-            loadingProgress = 0.0f;
-            loadingStage = 1;
+    // 全体の進行状況を計算（4つのステージの平均）
+    float totalProgress = 0.0f;
+    
+    {
+        std::lock_guard<std::mutex> lock(loadingMutex);
+        for (int i = 0; i < totalStages; ++i) {
+            totalProgress += stageProgress[i] / static_cast<float>(totalStages);
         }
-        else if (loadingProgress >= 1.0f && loadingStage == 1) {
-            // ロードステージ2開始
-            OutputDebugStringA("ロードステージ2: 追加モデルとUIロード開始\n");
+    }
+    
+    // プログレスバーの幅を更新
+    float barMaxWidth = 400.0f;
+    progressBar->SetSize({ barMaxWidth * totalProgress, progressBar->GetSize().y });
+    
+    // 進行度に応じてプログレスバーの色を変える（聖色と可愛さが増す）
+    // 青からピンク、そして白へのグラデーション
+    Vector4 color = { 1.0f, 1.0f, 1.0f, 1.0f }; // デフォルトは白
+    
+    if (totalProgress < 0.5f) {
+        // 0-50%: 青からピンクへ
+        float r = 0.5f + 0.5f * (totalProgress * 2.0f); // 0.5から1.0へ
+        float g = 0.5f + 0.12f * (totalProgress * 2.0f); // 0.5から0.62へ
+        float b = 1.0f - 0.25f * (totalProgress * 2.0f); // 1.0から0.75へ
+        color = { r, g, b, 1.0f };
+    } else {
+        // 50-100%: ピンクから白へ
+        float r = 1.0f; // 常に1.0
+        float g = 0.62f + 0.38f * ((totalProgress - 0.5f) * 2.0f); // 0.62から1.0へ
+        float b = 0.75f + 0.25f * ((totalProgress - 0.5f) * 2.0f); // 0.75から1.0へ
+        color = { r, g, b, 1.0f };
+    }
+    
+    progressBar->SetColor(color);
+    progressBar->Update();
 
-            // ステージ2: 追加モデルのロード
-            ModelManager::GetInstance()->LoadModel("goal");
-            ModelManager::GetInstance()->LoadModel("key");
-            ModelManager::GetInstance()->LoadModel("player");
-            ModelManager::GetInstance()->LoadModel("space");
-            ModelManager::GetInstance()->LoadModel("Spring");
-
-            // ステージセレクト関連テクスチャをロード
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/StageSelectName.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/StageSelect_background.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/stageNumber.png");
-
-            // ゲーム中のUI要素をロード
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/hp_bar_bg.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/hp_bar_fill.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/hp_icon.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/controller_guide.png");
-
-            loadingProgress = 0.0f;
-            loadingStage = 2;
-        }
-        else if (loadingProgress >= 1.0f && loadingStage == 2) {
-            // ロードステージ3開始
-            OutputDebugStringA("ロードステージ3: ステージモデルとキャラクターロード開始\n");
-
-            // ステージ3: ステージモデルのロード
-            ModelManager::GetInstance()->LoadModel("stage0");
-            ModelManager::GetInstance()->LoadModel("stage1");
-            ModelManager::GetInstance()->LoadModel("stage2");
-            ModelManager::GetInstance()->LoadModel("stage3");
-            ModelManager::GetInstance()->LoadModel("stage4");
-            ModelManager::GetInstance()->LoadModel("stage5");
-            ModelManager::GetInstance()->LoadModel("stage6");
-            ModelManager::GetInstance()->LoadModel("stage7");
-            ModelManager::GetInstance()->LoadModel("BlueGhost");
-
-            // キャラクター用テクスチャロード
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/BlueGhost.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/RedGhost.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/GreenGhost.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/player.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/Bullet.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/bane1.png");
-
-            loadingProgress = 0.0f;
-            loadingStage = 3;
-        }
-        else if (loadingProgress >= 1.0f && loadingStage == 3) {
-            // ロードステージ4開始 - 最終ステージ
-            OutputDebugStringA("ロードステージ4: 最終ロード処理開始\n");
-
-            // ステージ4: おけるものをすべてロード
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/key.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/get_key.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/Goal.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/Cube.png");
-
-            // 全てのチュートリアル画像をロード
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/tutorial01.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/tutorial02.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/tutorial03.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/tutorial04.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/tutorial05.png");
-            TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/tutorial06.png");
-            
-            // 動くテクスチャを確認するためのチェック
-            TextureManager::GetInstance()->CheckAllTextureLoaded();
-            // ModelManagerの照合チェック
-            ModelManager::GetInstance()->CheckAllModelsLoaded();
-
-            // すべてのロードが完了
-            isLoadingComplete = true;
-            loadingProgress = 1.0f;
-
-            // タイトル画面へ遷移
+    // ロード完了したらシーン移行
+    bool completed = false;
+    {
+        std::lock_guard<std::mutex> lock(loadingMutex);
+        completed = isLoadingComplete;
+    }
+    
+    if (completed) {
+        // 少し待機してからタイトル画面へ
+        static int waitCounter = 0;
+        if (waitCounter++ > 30) { // 30フレーム（約0.5秒）待機
             OutputDebugStringA("ロード完了: タイトル画面へ遷移します\n");
             sceneNo = Title;
         }
@@ -175,14 +465,27 @@ void LoadingScene::Draw() {
     SpriteCommon::GetInstance()->Command();
 
     background->Draw();
+    
+    // 星を背景の上に描画
+    for (int i = 0; i < kMaxStars; i++) {
+        stars[i]->Draw();
+    }
+    
+    progressBarBg->Draw();
+    progressBar->Draw();
     loadingText->Draw();
     loadingIcon->Draw();
-
-    // 必要に応じてプログレスバーを追加することも可能
 }
 
 void LoadingScene::Finalize() {
     delete background;
     delete loadingText;
     delete loadingIcon;
+    delete progressBar;
+    delete progressBarBg;
+    
+    // 星を解放
+    for (int i = 0; i < kMaxStars; i++) {
+        delete stars[i];
+    }
 }
