@@ -183,6 +183,9 @@
     <ClCompile Include="StageSelect.cpp">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClCompile>
+    <ClCompile Include="FadeManager.cpp">
+      <Filter>ソース ファイル\GameProgram</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\audio\Audio.h">
@@ -371,6 +374,9 @@
     </ClInclude>
     <ClInclude Include="Engine\ParticleNumber.h">
       <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="FadeManager.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

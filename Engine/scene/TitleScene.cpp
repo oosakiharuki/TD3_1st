@@ -1,4 +1,5 @@
 #include "TitleScene.h"
+#include "FadeManager.h"
 
 void TitleScene::Initialize() {
 	// デバッグ出力
@@ -19,6 +20,9 @@ void TitleScene::Initialize() {
 	// ロード状態確認
 	TextureManager::GetInstance()->CheckAllTextureLoaded();
 	ModelManager::GetInstance()->CheckAllModelsLoaded();
+
+	// フェードイン開始
+	FadeManager::GetInstance()->StartFadeIn(0.03f);
 }
 
 void TitleScene::Update() {

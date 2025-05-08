@@ -52,7 +52,15 @@ void GameManager::Update() {
 	prevSceneNo_ = currentSceneNo_;
 	currentSceneNo_ = sceneArr_[currentSceneNo_]->GetSceneNo();
 
+	// シーン遷移が発生した場合
 	if (prevSceneNo_ != currentSceneNo_) {
+		// ローディングからの遷移以外ではフェード処理を行う
+		// Loadingシーンからの遷移は、LoadingScene内で独自にフェード処理を行っているため
+		if (prevSceneNo_ != Loading) {
+			// フェードアウト・インを行う
+			FadeManager::GetInstance()->StartFadeIn(0.03f);
+		}
+
 		SceneChange(prevSceneNo_, currentSceneNo_);
 		sceneArr_[currentSceneNo_]->Initialize();
 	}

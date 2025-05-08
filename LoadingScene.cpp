@@ -7,6 +7,10 @@ void LoadingScene::Initialize() {
     // デバッグ出力
     OutputDebugStringA("LoadingScene::Initialize() が実行されました\n");
     
+    // フェードマネージャーを初期化し、フェードイン開始
+    FadeManager::GetInstance()->Initialize();
+    FadeManager::GetInstance()->StartFadeIn(0.03f);
+    
     // 基本的なUIのみを先にロード
     LoadEssentialResources();
     
@@ -110,6 +114,8 @@ void LoadingScene::LoadEssentialResources() {
     if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/circle.png")) {
         TextureManager::GetInstance()->LoadTexture("resource/Sprite/circle.png");
     }
+    
+    // フェードマネージャーはcircle.pngを使用するので別途ロードは不要
 }
 
 void LoadingScene::StartAsyncLoading() {
@@ -452,11 +458,23 @@ void LoadingScene::Update() {
     }
     
     if (completed) {
-        // 少し待機してからタイトル画面へ
+        // ロード完了時にフェードアウト開始
+        static bool startedFadeOut = false;
         static int waitCounter = 0;
-        if (waitCounter++ > 30) { // 30フレーム（約0.5秒）待機
-            OutputDebugStringA("ロード完了: タイトル画面へ遷移します\n");
-            sceneNo = Title;
+        
+        if (!startedFadeOut) {
+            FadeManager::GetInstance()->StartFadeOut(0.03f);
+            startedFadeOut = true;
+            OutputDebugStringA("ロード完了: フェードアウト開始\n");
+        }
+        
+        // フェードアウト完了後にタイトル画面へ遷移
+        if (FadeManager::GetInstance()->IsFadeComplete()) {
+            // 少し待機してからタイトル画面へ
+            if (waitCounter++ > 15) { // 15フレーム（約0.25秒）待機
+                OutputDebugStringA("フェードアウト完了: タイトル画面へ遷移します\n");
+                sceneNo = Title;
+            }
         }
     }
 }

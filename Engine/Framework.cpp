@@ -44,6 +44,9 @@ void Framework::Initialize() {
 
 	audio_ = Audio::GetInstance();
 	audio_->Initialize();
+
+	// フェードマネージャーの初期化は行わない
+	// 各シーンの初期化時にテクスチャがロードされた後に行う
 }
 
 void Framework::Update() {
@@ -53,6 +56,9 @@ void Framework::Update() {
 	else {
 		//ゲームの処理
 		input_->Update();
+		
+		// フェードマネージャーの更新
+		FadeManager::GetInstance()->Update();
 	}
 }
 
@@ -84,6 +90,9 @@ void Framework::Finalize() {
 	particleCommon->Finalize();
 
 	audio_->Finalize();
+
+	// フェードマネージャーの終了処理
+	FadeManager::GetInstance()->Finalize();
 }
 
 
