@@ -1,4 +1,6 @@
 #include "ModelManager.h"
+#include <vector>
+#include <string>
 
 ModelManager* ModelManager::instance = nullptr;
 
@@ -39,4 +41,28 @@ Model* ModelManager::FindModel(const std::string& filePath) {
 
 	//ファイル一致なし
 	return nullptr;
+}
+
+bool ModelManager::CheckModelExist(const std::string& filePath) {
+	return models.contains(filePath);
+}
+
+void ModelManager::CheckAllModelsLoaded() {
+	// ロードされたモデルの数を出力
+	OutputDebugStringA(("ロードされたモデル数: " + std::to_string(models.size()) + "\n").c_str());
+
+	// 基本的なモデルがロードされているかチェック
+	const std::vector<std::string> essentialModels = {
+		"player",
+		"stage1",
+		"cube",
+		"EnemyGhost",
+		"cannon"
+	};
+
+	for (const auto& model : essentialModels) {
+		if (!CheckModelExist(model)) {
+			OutputDebugStringA(("重要なモデルがロードされていません: " + model + "\n").c_str());
+		}
+	}
 }

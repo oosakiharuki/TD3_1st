@@ -1,6 +1,9 @@
 #include "StageSelect.h"
 
 void StageSelect::Initialize() {
+	// デバッグ出力
+	OutputDebugStringA("StageSelect::Initialize() が実行されました\n");
+
 	sprite = new Sprite();
 	sprite->Initialize("StageSelectName.png");
 	sprite->SetPosition({ 0,-200 });
@@ -15,6 +18,9 @@ void StageSelect::Initialize() {
 
 	stageNumber->SetTextureSize({ 64,64 });
 
+	// ロード状態確認
+	TextureManager::GetInstance()->CheckAllTextureLoaded();
+	ModelManager::GetInstance()->CheckAllModelsLoaded();
 }
 
 void StageSelect::Update() {

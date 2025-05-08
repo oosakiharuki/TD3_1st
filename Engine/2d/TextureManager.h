@@ -20,6 +20,12 @@ public:
 
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string filePath);
 
+	// 存在チェック用
+	bool CheckTextureExist(const std::string& filePath);
+
+	// 全てのテクスチャが正しくロードされているか確認
+	void CheckAllTextureLoaded();
+
 	const DirectX::TexMetadata& GetMetaData(const std::string filePath);
 private:
 	static TextureManager* instance;

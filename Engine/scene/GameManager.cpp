@@ -1,10 +1,11 @@
 #include "GameManager.h"
 
 GameManager::GameManager() {
-	sceneArr_[Title] = new TitleScene();
+	// 最初はローディングシーンから開始
+	sceneArr_[Loading] = new LoadingScene();
 
 	prevSceneNo_ = 0;
-	currentSceneNo_ = Title;
+	currentSceneNo_ = Loading;
 }
 
 GameManager::~GameManager() {

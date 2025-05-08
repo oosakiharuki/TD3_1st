@@ -15,6 +15,12 @@ public:
 	void LoadModel(const std::string& filePath);
 	Model* FindModel(const std::string& filePath);
 
+	// モデルが存在するかチェック
+	bool CheckModelExist(const std::string& filePath);
+
+	// 全てのモデルが正しくロードされているか確認
+	void CheckAllModelsLoaded();
+
 private:
 	static ModelManager* instance;
 

@@ -1,4 +1,6 @@
 #include "TextureManager.h"
+#include <vector>
+#include <string>
 
 using namespace StringUtility;
 
@@ -90,4 +92,28 @@ const DirectX::TexMetadata& TextureManager::GetMetaData(const std::string filePa
 
 	TextureData& textureData = textureDatas[filePath];
 	return textureData.metadata;
+}
+
+bool TextureManager::CheckTextureExist(const std::string& filePath) {
+	//読み込み済みテクスチャを検索
+	return textureDatas.contains(filePath);
+}
+
+void TextureManager::CheckAllTextureLoaded() {
+	// ロードされたテクスチャの数を出力
+	OutputDebugStringA(("ロードされたテクスチャ数: " + std::to_string(textureDatas.size()) + "\n").c_str());
+
+	// 基本的なテクスチャがロードされているかチェック
+	const std::vector<std::string> essentialTextures = {
+		"resource/Sprite/player.png",
+		"resource/Sprite/Bullet.png",
+		"resource/Sprite/title_background.png",
+		"resource/Sprite/TitleName.png"
+	};
+
+	for (const auto& tex : essentialTextures) {
+		if (!CheckTextureExist(tex)) {
+			OutputDebugStringA(("重要なテクスチャがロードされていません: " + tex + "\n").c_str());
+		}
+	}
 }
