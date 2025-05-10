@@ -2,6 +2,9 @@
 #include "Sprite.h"
 #include "Framework.h"
 #include "IScene.h"
+#include "TextureManager.h"
+#include "ModelManager.h"
+#include "FadeManager.h"
 
 class TitleScene : public IScene{
 public:

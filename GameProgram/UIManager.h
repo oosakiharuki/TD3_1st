@@ -21,6 +21,9 @@ public:
 	// 描画 - intで統一
 	void Draw(int playerHP);
 
+	// 鍵表示機能を追加
+	void DrawKeyCount(int remainingKeys, int totalKeys);
+
 	// 入力デバイスの検出
 	void DetectInputDevice();
 
@@ -35,6 +38,11 @@ private:
 	Sprite* hpBarFillSprite_ = nullptr; // HPバー
 	Sprite* hpIconSprite_ = nullptr;    // HPアイコン
 	Sprite* hpTextSprite_ = nullptr;    // HPテキスト
+
+	// 鍵表示関連
+	static const int MAX_KEYS = 10;     // 最大表示可能な鍵の数
+	Sprite* keyIcons_[MAX_KEYS] = {};   // 鍵アイコンの配列
+	int currentTotalKeys_ = 0;          // 現在のステージの鍵の総数
 
 	// 操作ガイド関連
 	Sprite* keyboardGuideSprite_ = nullptr;   // キーボード操作ガイド

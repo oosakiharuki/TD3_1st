@@ -96,6 +96,9 @@ public:
 	// ドアリストのアクセス
 	const std::vector<Door*>& GetDoorList() const { return doors_; }
 
+	// 鍵リストへのアクセス - 追加
+	const std::vector<Key*>& GetKeys() const { return keys_; }
+
 	// Goalへのアクセス（追加）
 	Goal* GetGoal() const { return goal_ ? goal_ : nullptr; }
 

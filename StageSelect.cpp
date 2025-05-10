@@ -3,6 +3,12 @@
 #include  <string>
 
 void StageSelect::Initialize() {
+	// デバッグ出力
+	OutputDebugStringA("StageSelect::Initialize() が実行されました\n");
+
+	sprite = new Sprite();
+	sprite->Initialize("StageSelectName.png");
+	sprite->SetPosition({ 0,-200 });
 
 	stageNum = GameData::selectedStage;
 
@@ -20,6 +26,9 @@ void StageSelect::Initialize() {
 	stageNumber->SetTextureSize({ 64,64 });
 	stageNumber->SetTextureLT({ selectLT * stageNum,0 });
 
+	// ロード状態確認
+	TextureManager::GetInstance()->CheckAllTextureLoaded();
+	ModelManager::GetInstance()->CheckAllModelsLoaded();
 	camera_ = new Camera();
 
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);

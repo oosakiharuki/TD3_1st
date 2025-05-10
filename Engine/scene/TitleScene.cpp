@@ -1,6 +1,10 @@
 #include "TitleScene.h"
+#include "FadeManager.h"
 
 void TitleScene::Initialize() {
+	// デバッグ出力
+	OutputDebugStringA("TitleScene::Initialize() が実行されました\n");
+
 	sprite = new Sprite();
 	sprite->Initialize("TitleName.png");
 	sprite->SetPosition({ 0,-200 });
@@ -12,6 +16,13 @@ void TitleScene::Initialize() {
 	bottonSprite = new Sprite();
 	bottonSprite->Initialize("ui/press_Botton.png");
 	bottonSprite->SetPosition({ 384 ,560 });
+
+	// ロード状態確認
+	TextureManager::GetInstance()->CheckAllTextureLoaded();
+	ModelManager::GetInstance()->CheckAllModelsLoaded();
+
+	// フェードイン開始
+	FadeManager::GetInstance()->StartFadeIn(0.03f);
 }
 
 void TitleScene::Update() {
@@ -24,8 +35,8 @@ void TitleScene::Update() {
 
 	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
 		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		// TitleからSelectに変更
-		sceneNo = Loading;
+		// 既にロード済みなので、直接Selectシーンに遷移
+		sceneNo = Select;
 	}
 }
 

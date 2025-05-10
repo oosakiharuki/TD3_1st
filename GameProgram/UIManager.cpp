@@ -17,6 +17,15 @@ UIManager::~UIManager() {
 		delete hpIconSprite_;
 	if (hpTextSprite_)
 		delete hpTextSprite_;
+	
+	// 鍵アイコン配列の解放
+	for (int i = 0; i < MAX_KEYS; i++) {
+		if (keyIcons_[i]) {
+			delete keyIcons_[i];
+			keyIcons_[i] = nullptr;
+		}
+	}
+	
 	if (keyboardGuideSprite_)
 		delete keyboardGuideSprite_;
 	if (controllerGuideSprite_)
@@ -52,6 +61,16 @@ void UIManager::Initialize() {
 	hpTextSprite_->SetPosition({ 70, WinApp::kClientHeight - 75 });
 	hpTextSprite_->SetSize({50, 30});
 
+	// 鍵アイコンの初期化（最大10個まで）
+	for (int i = 0; i < MAX_KEYS; i++) {
+		keyIcons_[i] = new Sprite();
+		keyIcons_[i]->Initialize("key.png");
+		// 鍵アイコンを横並びにする（HPバーの上に配置）
+		float xPos = 10.0f + (i * 15.0f); // 各鍵アイコンの間隔を35ピクセルに設定
+		keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 90 });
+		keyIcons_[i]->SetSize({60, 60});
+	}
+
 	// キーボード操作ガイド
 	keyboardGuideSprite_ = new Sprite();
 	keyboardGuideSprite_->Initialize("ui/keyboard_guide.png");
@@ -68,16 +87,25 @@ void UIManager::Initialize() {
 		tutorial = new Sprite();
 		tutorial->Initialize("ui/tutorial01.png");
 		tutorial->SetPosition({ 0, 0 });
-
 	}
+	
+	// 現在のステージの鍵の総数を初期化
+	currentTotalKeys_ = 0;
 }
 
 void UIManager::Update() {
-
 	hpBarBgSprite_->Update();
 	hpBarFillSprite_->Update();
 	hpIconSprite_->Update();
 	hpTextSprite_->Update();
+	
+	// 鍵アイコンの更新
+	for (int i = 0; i < MAX_KEYS; i++) {
+		if (keyIcons_[i]) {
+			keyIcons_[i]->Update();
+		}
+	}
+	
 	keyboardGuideSprite_->Update();
 	controllerGuideSprite_->Update();
 
@@ -96,7 +124,6 @@ void UIManager::Update() {
 }
 
 void UIManager::Draw(int playerHP) {
-
 	// HPバー背景描画
 	if (hpBarBgSprite_) {
 		hpBarBgSprite_->Draw();
@@ -146,7 +173,33 @@ void UIManager::Draw(int playerHP) {
 	
 	// 操作ガイド描画
 	DrawControlGuide();
+}
 
+void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
+	// ステージが変わったときに鍵の総数が変更されていれば、位置を再計算
+	if (currentTotalKeys_ != totalKeys) {
+		currentTotalKeys_ = totalKeys;
+		
+		// 鍵アイコンの位置を再計算（中央揃えにする）
+		float startX = 20.0f;
+		float iconWidth = 30.0f;
+		float iconSpacing = 5.0f;
+		float totalWidth = (iconWidth + iconSpacing) * totalKeys - iconSpacing;
+		
+		for (int i = 0; i < totalKeys; i++) {
+			float xPos = startX + i * (iconWidth + iconSpacing);
+			keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 110 });
+		}
+	}
+	
+	// remainingKeysの数だけ鍵アイコンを表示
+	for (int i = 0; i < totalKeys; i++) {
+		if (i < remainingKeys) {
+			// まだ取得していない鍵（表示する）
+			keyIcons_[i]->Draw();
+		}
+		// 取得済みの鍵は表示しない
+	}
 }
 
 void UIManager::DetectInputDevice() {

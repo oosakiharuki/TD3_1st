@@ -3,6 +3,8 @@
 #include "Framework.h"
 #include "IScene.h"
 #include "GameData.h"
+#include "TextureManager.h"
+#include "ModelManager.h"
 #include "Object3d.h"
 
 class StageSelect : public IScene {

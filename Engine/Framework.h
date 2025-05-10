@@ -15,6 +15,7 @@
 #include "D3DResorceLeakChecker.h"
 
 #include "Audio.h"
+#include "FadeManager.h"
 
 class Framework{
 public:

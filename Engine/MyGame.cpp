@@ -30,6 +30,9 @@ void MyGame::Draw() {
 
 	gameScene->Draw();
 
+	// フェードの描画（全ての描画の一番上から）
+	FadeManager::GetInstance()->Draw();
+
 #ifdef  USE_IMGUI
 	//ImGui描画処理
 	ImGuiManager::GetInstance()->Draw();
