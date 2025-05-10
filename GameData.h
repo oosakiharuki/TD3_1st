@@ -9,7 +9,7 @@ namespace GameData {
 namespace PlayerPosition {
 	
 	inline Vector3 stage[8] = { 
-		{ 0, 10, 0 },
+		{ 0, 10, -100 },
 		{ 0, 10, 0 },
 		{ 62.208f, 1.000f, -7.227f },
 		{ -37.0f, -18.512f, -51.500f },

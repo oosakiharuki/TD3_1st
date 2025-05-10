@@ -199,22 +199,22 @@ void UIManager::DrawControlGuide() {
 }
 
 void UIManager::TutorialPos(Vector3 playerPos) {
-	if (playerPos.z >= 10) {
+	if (playerPos.z >= -90) {
 		tutorial->SetTextureFile("ui/tutorial02.png");
 	}
-	if (playerPos.z >= 25) {
+	if (playerPos.z >= -80) {
 		tutorial->SetTextureFile("ui/tutorial03.png");
 	}
-	if (playerPos.z >= 50) {
+	if (playerPos.z >= -50) {
 		tutorial->SetTextureFile("ui/tutorial04.png");
 	}
-	if (playerPos.z >= 60) {
+	if (playerPos.z >= -30) {
 		tutorial->SetTextureFile("ui/tutorial05.png");
 	}
-	if (playerPos.z >= 80) {
+	if (playerPos.z >= 20) {
 		tutorial->SetTextureFile("ui/tutorial06.png");
 	}
-	if (playerPos.z >= 110) {
+	if (playerPos.z >= 50) {
 		isTutorialEnd = true;
 	}
 }

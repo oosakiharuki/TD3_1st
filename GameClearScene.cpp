@@ -32,6 +32,17 @@ void GameClearScene::Update() {
 		sceneNo = Game;
 	}
 
+	//ステージセレクトに戻るとき
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
+		Input::GetInstance()->TriggerKey(DIK_F1)) {
+		sceneNo = Select;
+	}
+
+	//タイトルに戻るとき
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
+		Input::GetInstance()->TriggerKey(DIK_F2)) {
+		sceneNo = Title;
+	}
 }
 
 void GameClearScene::Draw() {
