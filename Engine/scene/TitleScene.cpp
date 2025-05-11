@@ -23,6 +23,10 @@ void TitleScene::Initialize() {
 
 	// フェードイン開始
 	FadeManager::GetInstance()->StartFadeIn(0.03f);
+
+	//切り替え時長押しにならないように
+	state = Input::GetInstance()->GetState();
+	preState = Input::GetInstance()->GetPreState();
 }
 
 void TitleScene::Update() {
@@ -37,6 +41,9 @@ void TitleScene::Update() {
 		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		// 既にロード済みなので、直接Selectシーンに遷移
 		sceneNo = Select;
+		
+		//押した瞬間のボタン情報の取得
+		Input::GetInstance()->SetStates(state, preState);
 	}
 }
 

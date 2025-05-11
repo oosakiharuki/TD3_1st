@@ -37,7 +37,7 @@ void Player::Init(Camera* camera) {
 
 	JumpSound_ = audio_->LoadWave("sound/jump.wav");
 	SnapSound_ = audio_->LoadWave("sound/snap.wav");
-	//DamageSound_ = Audio::GetInstance()->LoadWave("sound/damage.wav");//読み取れんかった
+	DamageSound_ = audio_->LoadWave("sound/fall.wav");//読み取れんかった
 	FallSound_ = audio_->LoadWave("sound/fall.wav"); // 仮に落下音もジャンプ音と同じものを使用
 
 	particleMove_ = new Particle();
@@ -47,6 +47,10 @@ void Player::Init(Camera* camera) {
 	particleTransfar_ = new Particle();
 	particleTransfar_->Initialize("resource/Sprite/circle.png");
 	particleTransfar_->ChangeMode(BornParticle::Stop);
+
+	//切り替え時長押しにならないように
+	state = Input::GetInstance()->GetState();
+	preState = Input::GetInstance()->GetPreState();
 }
 
 void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -653,6 +657,8 @@ void Player::TakeDamage(int damageAmount) {
 		isFlashing = true;
 		flashTimer = 0.0f;
 		isVisible = true;
+
+		Audio::GetInstance()->SoundPlayWave(DamageSound_, 0.7f);// ダメージを食らったときのSE
 	}
 }
 

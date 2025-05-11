@@ -74,7 +74,7 @@ bool Input::TriggerKey(BYTE keyNumber) {
 
 bool Input::GetJoystickState(uint32_t num, XINPUT_STATE& state) {
 	DWORD dwResult;
-
+	
 	prevState = state;
 
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
@@ -99,7 +99,7 @@ bool Input::GetJoystickState(uint32_t num, XINPUT_STATE& state) {
 
 bool Input::GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state) {
 	DWORD dwResult;
-
+	
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 
 	// Simply get the state of the controller from XInput.
@@ -122,4 +122,10 @@ bool Input::GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state) {
 	}
 
 	return false;
+}
+
+//次のシーンにボタン情報を移行する
+void Input::SetStates(XINPUT_STATE state, XINPUT_STATE preState) {
+	copyState_ = state;
+	copyPreState_ = preState;
 }

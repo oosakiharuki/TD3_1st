@@ -22,6 +22,8 @@ public:
 
 	//void Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType type);
 
+	void ParticleListReset();
+
 private:
 	static ParticleManager* instance;
 

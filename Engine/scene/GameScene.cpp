@@ -16,6 +16,7 @@ void GameScene::Finalize() {
 	delete uiManager;
 
 	allObstacles_.clear();
+	ParticleManager::GetInstance()->ParticleListReset();//パーテイクルのコンテナをリセット
 }
 
 void GameScene::Initialize() {
@@ -108,6 +109,10 @@ void GameScene::Initialize() {
 
 	//パーテイクルのメモリ対策でリセット
 	ParticleNum::number = 0;
+
+	//前のシーンのボタン情報の取得
+	state = Input::GetInstance()->GetState();
+	preState = Input::GetInstance()->GetPreState();
 }
 
 void GameScene::Update() {

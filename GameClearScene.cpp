@@ -9,6 +9,10 @@ void GameClearScene::Initialize() {
 	backGround = new Sprite();
 	backGround->Initialize("GameClear_background.png");
 	backGround->SetPosition({ 0,0 });
+
+	//切り替え時長押しにならないように
+	state = Input::GetInstance()->GetState();
+	preState = Input::GetInstance()->GetPreState();
 }
 
 void GameClearScene::Update() {

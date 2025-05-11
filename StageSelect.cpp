@@ -6,10 +6,6 @@ void StageSelect::Initialize() {
 	// デバッグ出力
 	OutputDebugStringA("StageSelect::Initialize() が実行されました\n");
 
-	sprite = new Sprite();
-	sprite->Initialize("StageSelectName.png");
-	sprite->SetPosition({ 0,-200 });
-
 	stageNum = GameData::selectedStage;
 
 
@@ -37,6 +33,10 @@ void StageSelect::Initialize() {
 	//ステージの全体像
 	stageObject_ = new Object3d();
 	stageObject_->Initialize();
+
+	//切り替え時長押しにならないように
+	state = Input::GetInstance()->GetState();
+	preState = Input::GetInstance()->GetPreState();
 }
 
 void StageSelect::Update() {
@@ -50,7 +50,7 @@ void StageSelect::Update() {
 	//worldTransform_.translation_.x = 2.0f;
 	worldTransform_.rotation_.y += 0.01f;
 	worldTransform_.scale_ = { 0.005f,0.005f,0.005f };
-
+	
 
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
