@@ -133,6 +133,8 @@ void Door::Update() {
 			worldTransform_.translation_.z = position_.z + offsetPosition.z;
 
 			if (openAngle_ >= 1.5f) {
+				// ドアが開き終わったらオーディオを停止
+				Audio::GetInstance()->StopWave(doorOpenSound_);
 				isDoorOpened_ = true;
 				isAnimating_ = false;
 				worldTransform_.rotation_.y = openAngle_;
