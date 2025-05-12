@@ -28,11 +28,11 @@ void CannonEnemy::Init() {
 	particleMove_->ChangeMode(BornParticle::Stop);
 
 	worldTransform_.translation_ = position;
-	
-	// Audio初期化
+
+	// オーディオシングルトン取得
 	audio_ = Audio::GetInstance();
-	
-	// 複数の爆発音バッファを初期化
+
+	// 爆発音の複数バッファを初期化（同時再生用）
 	for (int i = 0; i < MAX_BOM_SOUNDS; i++) {
 		bomSounds_[i] = audio_->LoadWave("sound/bom.wav");
 	}
@@ -77,7 +77,7 @@ void CannonEnemy::Update() {
 				if (IsCollisionAABB(bulletAABB, blockAABB)) {
 					// 弾を消滅させる
 					bullet->OnCollision();
-					
+
 					// プレイヤーが大砲に乗っている場合、ブロックを壊す
 					if (isPlayer) {
 						block->SetActive(false);
@@ -122,7 +122,7 @@ void CannonEnemy::Update() {
 		position.y = (enemyAABB.min.y + enemyAABB.max.y) * 0.5f;
 		position.z = (enemyAABB.min.z + enemyAABB.max.z) * 0.5f;
 
-		/// 敵の攻撃ロジック
+		// 敵の攻撃ロジック
 		if (!isStan && player_) {
 			// プレイヤーのAABBとの距離を計算
 			AABB playerAABB = player_->GetAABB();
@@ -140,8 +140,9 @@ void CannonEnemy::Update() {
 			// プレイヤーが攻撃範囲内に入ったら発射
 			if (distance <= attackRadius) {
 				// 発射メソッドを呼び出し
-				Fire();			
-			}else{
+				Fire();
+			}
+			else {
 				//発射モーションリセット
 				worldTransform_.scale_ = { 1,1,1 };
 				fireTimer = fireInterval;
@@ -182,7 +183,7 @@ void CannonEnemy::Update() {
 			return true;
 		}
 		return false;
-	});
+		});
 	particleMove_->Update();
 	worldTransform_.UpdateMatrix();
 }
@@ -236,19 +237,16 @@ void CannonEnemy::Fire() {
 		bullets_.push_back(newBullet);
 
 		// 発射音を再生（複数バッファを順番に使用）（音量を小さく調整）
-		audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.7f, false);
-		
-		// 弾にサウンドデータを設定して関連付ける
-		// newBullet->SetSoundData(&bomSounds_[currentBomSoundIndex_]);
-		// コメントアウト：エラーが出る場合はこちらを使用
-		
+		audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.4f, false);
+
+
 		// 次のサウンドバッファに進む
 		currentBomSoundIndex_ = (currentBomSoundIndex_ + 1) % MAX_BOM_SOUNDS;
 
 		// 次の発射までのクールダウンを設定（3秒に延長）
 		fireTimer = fireInterval;
 		animertion = 0.0f;
-	}	
+	}
 
 	//発射モーション
 	worldTransform_.scale_ = Scale;
@@ -269,14 +267,11 @@ void CannonEnemy::PlayerFire() {
 	newBullet->Init(playerPosition, velocity);
 
 	bullets_.push_back(newBullet);
-	
-	// 発射音を再生（複数バッファを順番に使用）（音量を小さく調整）
-	audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.7f, false);
-	
-	// 弾にサウンドデータを設定して関連付ける
-	// newBullet->SetSoundData(&bomSounds_[currentBomSoundIndex_]);
-	// コメントアウト：エラーが出る場合はこちらを使用
-	
+
+	// 発射音を再生
+	audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.4f, false);
+
+
 	// 次のサウンドバッファに進む
 	currentBomSoundIndex_ = (currentBomSoundIndex_ + 1) % MAX_BOM_SOUNDS;
 }
@@ -297,13 +292,13 @@ void CannonEnemy::ContralPlayer() {
 	bullets_.remove_if([](Bom* bom) {
 		delete bom;
 		return true;
-	});
+		});
 
 	//発射モーションリセット
 	worldTransform_.scale_ = { 1,1,1 };
 	fireTimer = fireInterval;
 	animertion = 0.0f;
-	
+
 	worldTransform_.translation_ = { 0, -2, 0 };
 	worldTransform_.rotation_ = { 0, 0, 0 };
 	if (player_) {
