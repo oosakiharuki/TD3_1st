@@ -5,6 +5,7 @@
 #include "collision.h"
 
 #include "Mymath.h"
+#include "Audio.h"
 
 class Bom{
 public:
@@ -17,14 +18,24 @@ public:
 
 	AABB GetAABB();
 	void OnCollision();
+	
+	// サウンド関連の追加メソッド
+	void SetSoundData(SoundData* soundData);
+	Audio* GetAudio() const { return audio_; }
 
 private:
-	WorldTransform worldTransform_;
-	Object3d* model_ = nullptr;
-	Vector3 position_;
-	bool onGround_ = true;
+WorldTransform worldTransform_;
+Object3d* model_ = nullptr;
+Vector3 position_;
+bool onGround_ = true;
 
-	Vector3 velocity_;
-	float deadTimer = 3.0f;
-	bool isDead = false;
+// サウンド関連
+Audio* audio_ = nullptr; // オーディオインスタンス
+SoundData* soundData_ = nullptr; // 再生中のサウンドデータへのポインタ
+
+Vector3 velocity_;
+float deadTimer = 3.0f;
+bool isDead = false;
+	// 表示フラグを追加
+	bool isVisible = true;
 };

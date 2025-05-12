@@ -2,6 +2,7 @@
 #include "AABB.h"
 #include "Key.h"
 #include "Player.h"
+#include "../../Engine/audio/Audio.h"
 #include <vector>
 
 class Door {
@@ -47,6 +48,11 @@ public:
 	void SetPosition(const Vector3& position) {
 		position_ = position;
 		worldTransform_.translation_ = position;
+		// 位置を初期化するときはアニメーション状態をリセット
+		openAngle_ = 0.0f;
+		isAnimating_ = false;
+		isDoorOpened_ = false;
+		soundPlayed_ = false; // サウンド再生状態もリセット
 	}
 
 	void SetRotateY(const float& rotateY) {
@@ -61,6 +67,10 @@ private:
 	WorldTransform worldTransform_;
 	Object3d* model_ = nullptr;
 	Vector3 position_ = {1.5f, 0.0f, 48.592f}; // デフォルト位置（CSVから上書き可能）
+
+	// サウンド関連
+	SoundData doorOpenSound_;
+	bool soundPlayed_ = false;
 
 	// 参照
 	Player* player_ = nullptr;
