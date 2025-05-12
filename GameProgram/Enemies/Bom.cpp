@@ -1,7 +1,19 @@
 #include "Bom.h"
 
-Bom::Bom() {}
-Bom::~Bom() { delete model_; }
+Bom::Bom() {
+	// Audioインスタンスを取得
+	audio_ = Audio::GetInstance();
+	soundData_ = nullptr;
+}
+
+Bom::~Bom() { 
+	delete model_; 
+	
+	// 音を停止する
+	if (soundData_ != nullptr) {
+		audio_->StopWave(*soundData_);
+	}
+}
 
 void Bom::Init(Vector3 position, Vector3 velocity) {
 	worldTransform_.Initialize();
@@ -19,6 +31,10 @@ void Bom::Update() {
 	//プレイヤーが真上の時出さなくする
 	if (velocity_.x == 0.0f && velocity_.z == 0.0f) {
 		isDead = true;
+		// 音を止める
+		if (soundData_ != nullptr) {
+			audio_->StopWave(*soundData_);
+		}
 		return;
 	}
 	position_.x += velocity_.x;
@@ -32,13 +48,15 @@ void Bom::Update() {
 
 	if (deadTimer < 0) {
 		isDead = true;
+		// 音を止める
+		if (soundData_ != nullptr) {
+			audio_->StopWave(*soundData_);
+		}
 	}
 }
 
 void Bom::Draw() {
-
 	model_->Draw(worldTransform_);
-
 }
 
 AABB Bom::GetAABB() {
@@ -50,4 +68,14 @@ AABB Bom::GetAABB() {
 	return bomAABB;
 }
 
-void Bom::OnCollision() { isDead = true; }
+void Bom::OnCollision() { 
+	isDead = true; 
+	// 音を止める
+	if (soundData_ != nullptr) {
+		audio_->StopWave(*soundData_);
+	}
+}
+
+void Bom::SetSoundData(SoundData* soundData) {
+	soundData_ = soundData;
+}

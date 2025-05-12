@@ -28,6 +28,15 @@ void CannonEnemy::Init() {
 	particleMove_->ChangeMode(BornParticle::Stop);
 
 	worldTransform_.translation_ = position;
+	
+	// Audio初期化
+	audio_ = Audio::GetInstance();
+	
+	// 複数の爆発音バッファを初期化
+	for (int i = 0; i < MAX_BOM_SOUNDS; i++) {
+		bomSounds_[i] = audio_->LoadWave("sound/bom.wav");
+	}
+	currentBomSoundIndex_ = 0;
 }
 
 void CannonEnemy::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -206,6 +215,16 @@ void CannonEnemy::Fire() {
 
 		bullets_.push_back(newBullet);
 
+		// 発射音を再生（複数バッファを順番に使用）（音量を小さく調整）
+		audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.7f, false);
+		
+		// 弾にサウンドデータを設定して関連付ける
+		// newBullet->SetSoundData(&bomSounds_[currentBomSoundIndex_]);
+		// コメントアウト：エラーが出る場合はこちらを使用
+		
+		// 次のサウンドバッファに進む
+		currentBomSoundIndex_ = (currentBomSoundIndex_ + 1) % MAX_BOM_SOUNDS;
+
 		// 次の発射までのクールダウンを設定（3秒に延長）
 		fireTimer = fireInterval;
 		animertion = 0.0f;
@@ -230,6 +249,16 @@ void CannonEnemy::PlayerFire() {
 	newBullet->Init(playerPosition, velocity);
 
 	bullets_.push_back(newBullet);
+	
+	// 発射音を再生（複数バッファを順番に使用）（音量を小さく調整）
+	audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.7f, false);
+	
+	// 弾にサウンドデータを設定して関連付ける
+	// newBullet->SetSoundData(&bomSounds_[currentBomSoundIndex_]);
+	// コメントアウト：エラーが出る場合はこちらを使用
+	
+	// 次のサウンドバッファに進む
+	currentBomSoundIndex_ = (currentBomSoundIndex_ + 1) % MAX_BOM_SOUNDS;
 }
 
 // AABBを取得するメソッドを定義

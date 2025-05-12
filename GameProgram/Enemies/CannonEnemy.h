@@ -8,6 +8,7 @@
 
 #include "Bom.h"
 #include "Input.h"
+#include "Audio.h"
 
 class Player;
 class Particle;
@@ -50,6 +51,12 @@ private:
 	WorldTransform worldTransform_; // Fix the error by ensuring the type is defined
 	Object3d* model_ = nullptr;
 	Vector3 position = { 0, 5, 30 };
+	// サウンド関連
+	Audio* audio_ = nullptr;
+	// 複数の爆発音サウンドデータ（連射用）
+	static const int MAX_BOM_SOUNDS = 5;
+	SoundData bomSounds_[MAX_BOM_SOUNDS];
+	int currentBomSoundIndex_ = 0;
 	bool onGround_ = true;
 	float velocityY_ = 0.0f;
 
