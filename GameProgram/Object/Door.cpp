@@ -5,6 +5,9 @@
 
 #include <numbers>
 
+// Vector3の演算子を使用するために名前空間を使用
+using namespace MyMath;
+
 Door::Door() {}
 
 Door::~Door() { delete model_; }
@@ -12,10 +15,27 @@ Door::~Door() { delete model_; }
 void Door::Init() {
 	worldTransform_.Initialize();
 
-	// "cube" モデルを読み込み
+	// "door" モデルを読み込み
 	model_ = new Object3d();
 	model_->Initialize();
 	model_->SetModelFile("door");
+
+	// 初期状態の設定
+	openAngle_ = 0.0f;
+	isAnimating_ = false;
+	isDoorOpened_ = false;
+	
+	// 初期位置を設定
+	worldTransform_.translation_ = position_;
+	
+	// normal_の値に応じて初期回転を設定
+	if (normal_ == 90) {
+		worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2;
+	} else if (normal_ == 180) {
+		worldTransform_.rotation_.y = std::numbers::pi_v<float>;
+	} else if (normal_ == 270) {
+		worldTransform_.rotation_.y = -std::numbers::pi_v<float> / 2;
+	}
 
 	// 行列を更新
 	worldTransform_.UpdateMatrix();
@@ -64,6 +84,40 @@ void Door::Update() {
 		if (openAngle_ < 1.5f) {
 			openAngle_ += 0.05f;
 			worldTransform_.rotation_.y = openAngle_;
+
+			// ドアのヒンジ部分を軸に回転させるための処理
+			// ドアの幅の半分の値（X方向のオフセット）
+			float doorHalfWidth = 3.0f * worldTransform_.scale_.x;
+			
+			// 回転に応じた位置補正（回転前の位置に戻す）
+			Vector3 offsetPosition = {};
+			
+			// normal_の値に応じてオフセット方向を調整
+			if (normal_ == 0) {
+				// Z軸方向を向いているドア（デフォルト）
+				// X軸方向にオフセット（ドアの右端が回転軸）
+				offsetPosition.x = doorHalfWidth * (1.0f - cosf(openAngle_));
+				offsetPosition.z = doorHalfWidth * sinf(openAngle_);
+			} else if (normal_ == 90) {
+				// X軸方向を向いているドア（90度回転）
+				// Z軸方向にオフセット
+				offsetPosition.z = -doorHalfWidth * (1.0f - cosf(openAngle_));
+				offsetPosition.x = doorHalfWidth * sinf(openAngle_);
+			} else if (normal_ == 180) {
+				// Z軸の逆方向を向いているドア（180度回転）
+				offsetPosition.x = -doorHalfWidth * (1.0f - cosf(openAngle_));
+				offsetPosition.z = -doorHalfWidth * sinf(openAngle_);
+			} else if (normal_ == 270) {
+				// X軸の逆方向を向いているドア（270度回転）
+				offsetPosition.z = doorHalfWidth * (1.0f - cosf(openAngle_));
+				offsetPosition.x = -doorHalfWidth * sinf(openAngle_);
+			}
+			
+			// 位置を更新
+			// Vector3の加算を明示的に行う
+			worldTransform_.translation_.x = position_.x + offsetPosition.x;
+			worldTransform_.translation_.y = position_.y + offsetPosition.y;
+			worldTransform_.translation_.z = position_.z + offsetPosition.z;
 
 			if (openAngle_ >= 1.5f) {
 				isDoorOpened_ = true;

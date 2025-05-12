@@ -47,6 +47,10 @@ public:
 	void SetPosition(const Vector3& position) {
 		position_ = position;
 		worldTransform_.translation_ = position;
+		// 位置を初期化するときはアニメーション状態をリセット
+		openAngle_ = 0.0f;
+		isAnimating_ = false;
+		isDoorOpened_ = false;
 	}
 
 	void SetRotateY(const float& rotateY) {
