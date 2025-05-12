@@ -343,13 +343,13 @@ void LoadingScene::LoadStage4Resources() {
         "resource/Sprite/key.png",
         "resource/Sprite/get_key.png",
         "resource/Sprite/Goal.png",
-        "resource/Sprite/Cube.png",
         "resource/Sprite/ui/tutorial01.png",
         "resource/Sprite/ui/tutorial02.png",
         "resource/Sprite/ui/tutorial03.png",
         "resource/Sprite/ui/tutorial04.png",
         "resource/Sprite/ui/tutorial05.png",
         "resource/Sprite/ui/tutorial06.png"
+        //"resource/Sprite/ui/tutorial_key.png"
     };
     
     // 各テクスチャを順番にロード

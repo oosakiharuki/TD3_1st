@@ -167,12 +167,13 @@ void UIManager::Draw(int playerHP) {
 		hpTextSprite_->Draw();
 	}
 
+
+	// 操作ガイド描画
+	DrawControlGuide();
+
 	if (GameData::selectedStage == 0 && !isTutorialEnd) {
 		tutorial->Draw();
 	}
-	
-	// 操作ガイド描画
-	DrawControlGuide();
 }
 
 void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
@@ -264,10 +265,13 @@ void UIManager::TutorialPos(Vector3 playerPos) {
 	if (playerPos.z >= -30) {
 		tutorial->SetTextureFile("ui/tutorial05.png");
 	}
-	if (playerPos.z >= 20) {
+	if (playerPos.z >= 0) {
 		tutorial->SetTextureFile("ui/tutorial06.png");
 	}
-	if (playerPos.z >= 50) {
-		isTutorialEnd = true;
+	if (playerPos.z >= 60) {
+		tutorial->SetTextureFile("ui/tutorial_key.png");
+	}
+	if (playerPos.z >= 100) {
+		tutorial->SetTextureFile("ui/tutorial_goal.png");
 	}
 }
