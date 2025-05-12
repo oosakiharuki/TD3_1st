@@ -10,7 +10,10 @@ using namespace MyMath;
 
 Door::Door() {}
 
-Door::~Door() { delete model_; }
+Door::~Door() { 
+	delete model_;
+	// サウンドリソースの解放は不要（Audioクラスが管理）
+}
 
 void Door::Init() {
 	worldTransform_.Initialize();
@@ -24,6 +27,10 @@ void Door::Init() {
 	openAngle_ = 0.0f;
 	isAnimating_ = false;
 	isDoorOpened_ = false;
+	soundPlayed_ = false;
+
+	// ドアの開く音を読み込み
+	doorOpenSound_ = Audio::GetInstance()->LoadWave("sound/door_open.wav");
 	
 	// 初期位置を設定
 	worldTransform_.translation_ = position_;
@@ -82,6 +89,12 @@ void Door::Update() {
 	if (isAnimating_) {
 		// ドアを開く（Y軸回転：約90度＝1.5ラジアン）
 		if (openAngle_ < 1.5f) {
+			// アニメーション開始時にサウンド再生
+			if (!soundPlayed_) {
+				Audio::GetInstance()->SoundPlayWave(doorOpenSound_, 1.5f, false);
+				soundPlayed_ = true;
+			}
+
 			openAngle_ += 0.05f;
 			worldTransform_.rotation_.y = openAngle_;
 
