@@ -32,6 +32,9 @@ UIManager::~UIManager() {
 		delete controllerGuideSprite_;
 
 	delete tutorial;
+
+	if (pauseSprite_)
+		delete pauseSprite_;
 }
 
 void UIManager::Initialize() {
@@ -88,6 +91,12 @@ void UIManager::Initialize() {
 		tutorial->Initialize("ui/tutorial01.png");
 		tutorial->SetPosition({ 0, 0 });
 	}
+
+	pauseSprite_ = new Sprite();
+	pauseSprite_->Initialize("ui/black.png");
+	pauseSprite_->SetPosition({ 0, 0 });
+	pauseSprite_->SetSize({ 1280, 720 });
+	pauseSprite_->SetColor({ 0.0f, 0.0f, 0.0f, 0.5f });
 	
 	// 現在のステージの鍵の総数を初期化
 	currentTotalKeys_ = 0;
@@ -112,6 +121,9 @@ void UIManager::Update() {
 	if (GameData::selectedStage == 0) {
 		tutorial->Update();
 	}
+
+	// ポーズ画面の更新
+	pauseSprite_->Update();
 	
 	// 入力デバイスの検出
 	DetectInputDevice();
@@ -269,5 +281,11 @@ void UIManager::TutorialPos(Vector3 playerPos) {
 	}
 	if (playerPos.z >= 50) {
 		isTutorialEnd = true;
+	}
+}
+
+void UIManager::DrawPause() {
+	if (pauseSprite_) {
+		pauseSprite_->Draw();
 	}
 }

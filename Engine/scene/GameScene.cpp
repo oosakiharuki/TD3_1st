@@ -289,7 +289,7 @@ void GameScene::Draw() {
 	}
 
 	if (isPaused_) {
-		
+		uiManager->DrawPause();
 	}
 }
 
