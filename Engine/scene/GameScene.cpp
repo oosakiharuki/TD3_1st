@@ -81,6 +81,11 @@ void GameScene::Initialize() {
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
 
+	// キャノン敵にもブロックリストを設定
+	for (CannonEnemy* cannon : enemyLoader_->GetCannonEnemyList()) {
+		cannon->SetBlocks(blocks);
+	}
+
 	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
 	player_->SetGhostBlocks(ghostBlocks);
 
@@ -349,6 +354,11 @@ void GameScene::ChangeStage(int nextStage) {
 	// プレイヤーにブロックリストを設定（更新：単一ブロックではなくリスト全体を渡す）
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
+
+	// キャノン敵にもブロックリストを設定
+	for (CannonEnemy* cannon : enemyLoader_->GetCannonEnemyList()) {
+		cannon->SetBlocks(blocks);
+	}
 
 	// プレイヤーにゴーストブロックの追加
 	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();

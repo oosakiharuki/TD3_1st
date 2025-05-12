@@ -35,6 +35,8 @@ void Bom::Update() {
 		if (soundData_ != nullptr) {
 			audio_->StopWave(*soundData_);
 		}
+		// 即座に非表示にする
+		isVisible = false;
 		return;
 	}
 	position_.x += velocity_.x;
@@ -52,11 +54,16 @@ void Bom::Update() {
 		if (soundData_ != nullptr) {
 			audio_->StopWave(*soundData_);
 		}
+		// 即座に非表示にする
+		isVisible = false;
 	}
 }
 
 void Bom::Draw() {
-	model_->Draw(worldTransform_);
+	// 表示フラグがオンの場合のみ描画
+	if (isVisible) {
+		model_->Draw(worldTransform_);
+	}
 }
 
 AABB Bom::GetAABB() {
@@ -74,6 +81,8 @@ void Bom::OnCollision() {
 	if (soundData_ != nullptr) {
 		audio_->StopWave(*soundData_);
 	}
+	// 即座に非表示にする
+	isVisible = false;
 }
 
 void Bom::SetSoundData(SoundData* soundData) {

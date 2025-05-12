@@ -67,6 +67,26 @@ void CannonEnemy::Update() {
 		}
 	}
 
+	// 弾と壊せるブロックの衝突チェック
+	for (Block* block : blocks_) {
+		// ブロックがアクティブな場合のみ判定
+		if (block->IsActive()) {
+			AABB blockAABB = block->GetAABB();
+			for (Bom* bullet : bullets_) {
+				AABB bulletAABB = bullet->GetAABB();
+				if (IsCollisionAABB(bulletAABB, blockAABB)) {
+					// 弾を消滅させる
+					bullet->OnCollision();
+					
+					// プレイヤーが大砲に乗っている場合、ブロックを壊す
+					if (isPlayer) {
+						block->SetActive(false);
+					}
+				}
+			}
+		}
+	}
+
 	if (!isPlayer) {
 		// 重力処理
 		float gravity = 0.01f;

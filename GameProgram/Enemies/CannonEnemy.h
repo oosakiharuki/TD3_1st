@@ -9,6 +9,7 @@
 #include "Bom.h"
 #include "Input.h"
 #include "Audio.h"
+#include "Block.h"
 
 class Player;
 class Particle;
@@ -46,6 +47,9 @@ public:
 		position = pos;
 		worldTransform_.translation_ = pos;
 	}
+	
+	// 壊せるブロックのリストを設定
+	void SetBlocks(const std::vector<Block*>& blocks) { blocks_ = blocks; }
 
 private:
 	WorldTransform worldTransform_; // Fix the error by ensuring the type is defined
@@ -62,6 +66,9 @@ private:
 
 	// 障害物リスト
 	std::vector<AABB> obstacleList_;
+	
+	// 破壊可能なブロックのリスト
+	std::vector<Block*> blocks_;
 
 	XINPUT_STATE state, preState;
 	const float speed = 0.2f;
