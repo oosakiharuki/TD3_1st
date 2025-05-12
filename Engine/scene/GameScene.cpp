@@ -121,20 +121,34 @@ void GameScene::Update() {
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
-	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
-		audio_->StopWave(BGMSound);
-		sceneNo = Title;
+	// ポーズのトグル（ESCキーまたはStartボタン）
+	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE) ||
+		(state.Gamepad.wButtons & XINPUT_GAMEPAD_START && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_START))) {
+		isPaused_ = !isPaused_;
 	}
 
-	if (Input::GetInstance()->TriggerKey(DIK_F2)) { //シーンが切り替わる
-		audio_->StopWave(BGMSound);
-		sceneNo = GameClear;
-	}
+	// ポーズ中はUIのみ更新し、ゲーム処理をスキップ
+	if (isPaused_) {
+		uiManager->Update(); // 必要ならポーズ画面のUI更新
 
-	// プレイヤーのHPが0になった場合、GameOverSceneに移行
-	if (player_->GetHp() <= 0) {
-		audio_->StopWave(BGMSound);
-		sceneNo = GameOver; // GameOverSceneに遷移
+		if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
+			audio_->StopWave(BGMSound);
+			sceneNo = Title;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_F2)) { //シーンが切り替わる
+			audio_->StopWave(BGMSound);
+			sceneNo = Select;
+		}
+
+		// リスタート処理
+		if (Input::GetInstance()->PushKey(DIK_R)) {
+			Finalize();
+			audio_->StopWave(BGMSound);
+			Initialize();
+			isPaused_ = !isPaused_;
+		}
+
+		return;
 	}
 
 	// リスタート処理
@@ -272,6 +286,10 @@ void GameScene::Draw() {
 			// 鍵の情報をUIManagerに渡して表示
 			uiManager->DrawKeyCount(remainingKeys, totalKeys);
 		}
+	}
+
+	if (isPaused_) {
+		
 	}
 }
 

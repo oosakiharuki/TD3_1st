@@ -98,4 +98,6 @@ private:
 
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;
+
+	bool isPaused_ = false;
 };
