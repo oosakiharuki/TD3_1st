@@ -44,6 +44,8 @@ public:
 	// ステージを変更する
 	void ChangeStage(int nextStage);
 
+	static void HandlePauseSelection(int selection);
+
 private:
 	void AddObstacle(std::vector<std::vector<AABB>>& allObstacles, const Vector3& min, const Vector3& max);
 	void LoadStage(std::string objFile);
@@ -100,4 +102,5 @@ private:
 	bool isRequst = false;
 
 	bool isPaused_ = false;
+	int pauseCount_ = 1;
 };

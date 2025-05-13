@@ -35,6 +35,10 @@ UIManager::~UIManager() {
 
 	if (pauseSprite_)
 		delete pauseSprite_;
+	if (pauseRestartSprite_)
+		delete pauseRestartSprite_;
+	if (pauseSelectSprite_)
+		delete pauseSelectSprite_;
 }
 
 void UIManager::Initialize() {
@@ -97,6 +101,16 @@ void UIManager::Initialize() {
 	pauseSprite_->SetPosition({ 0, 0 });
 	pauseSprite_->SetSize({ 1280, 720 });
 	pauseSprite_->SetColor({ 0.0f, 0.0f, 0.0f, 0.5f });
+
+	pauseRestartSprite_ = new Sprite();
+	pauseRestartSprite_->Initialize("ui/pause_restart.png");
+	pauseRestartSprite_->SetPosition({ 0, 0 });
+	pauseRestartSprite_->SetSize({ 1280, 720 });
+
+	pauseSelectSprite_ = new Sprite();
+	pauseSelectSprite_->Initialize("ui/pause_select.png");
+	pauseSelectSprite_->SetPosition({ 0, 0 });
+	pauseSelectSprite_->SetSize({ 1280, 720 });
 	
 	// 現在のステージの鍵の総数を初期化
 	currentTotalKeys_ = 0;
@@ -124,6 +138,8 @@ void UIManager::Update() {
 
 	// ポーズ画面の更新
 	pauseSprite_->Update();
+	pauseRestartSprite_->Update();
+	pauseSelectSprite_->Update();
 	
 	// 入力デバイスの検出
 	DetectInputDevice();
@@ -287,5 +303,17 @@ void UIManager::TutorialPos(Vector3 playerPos) {
 void UIManager::DrawPause() {
 	if (pauseSprite_) {
 		pauseSprite_->Draw();
+	}
+}
+
+void UIManager::DrawPauseRestart() {
+	if (pauseRestartSprite_) {
+		pauseRestartSprite_->Draw();
+	}
+}
+
+void UIManager::DrawPauseSelect() {
+	if (pauseSelectSprite_) {
+		pauseSelectSprite_->Draw();
 	}
 }

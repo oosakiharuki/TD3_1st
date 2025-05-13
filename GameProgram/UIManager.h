@@ -34,6 +34,8 @@ public:
 
 	// ポーズ画面の表示
 	void DrawPause();
+	void DrawPauseRestart();
+	void DrawPauseSelect();
 
 private:
 	// HP表示関連
@@ -68,5 +70,7 @@ private:
 	bool isTutorialEnd = false;
 
 	// ポーズ画面
+	Sprite* pauseRestartSprite_ = nullptr;
+	Sprite* pauseSelectSprite_ = nullptr;
 	Sprite* pauseSprite_ = nullptr;
 };
