@@ -3,8 +3,8 @@
 
 void GameClearScene::Initialize() {
 	sprite = new Sprite();
-	sprite->Initialize("GameClearName.png");
-	sprite->SetPosition({ 0,-200 });
+	sprite->Initialize("winScene.png");
+	sprite->SetPosition({ 0,0 });
 
 	backGround = new Sprite();
 	backGround->Initialize("GameClear_background.png");
