@@ -232,6 +232,8 @@ void LoadingScene::LoadStage2Resources() {
         "goal",
         "key",
         "player",
+        "playerHead",
+        "playerFoot",
         "space",
         "Spring"
     };
