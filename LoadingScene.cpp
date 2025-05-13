@@ -2,10 +2,16 @@
 #include <thread>
 #include <chrono>
 #include "math/Vector4.h"
+#include "Engine/audio/Audio.h"
 
 void LoadingScene::Initialize() {
     // デバッグ出力
     OutputDebugStringA("LoadingScene::Initialize() が実行されました\n");
+    
+    // ロード音声の読み込みと再生
+    loadingSound = Audio::GetInstance()->LoadWave("sound/load.wav");
+    Audio::GetInstance()->SoundPlayWave(loadingSound, 0.5f, true); // ループ再生
+    isSoundStopped = false;
     
     // フェードマネージャーを初期化し、フェードイン開始
     FadeManager::GetInstance()->Initialize();
@@ -488,6 +494,13 @@ void LoadingScene::Update() {
         completed = isLoadingComplete;
     }
     
+    // ロード完了したら音声を停止
+    if (completed && !isSoundStopped) {
+        Audio::GetInstance()->StopWave(loadingSound);
+        isSoundStopped = true;
+        OutputDebugStringA("ロード完了: ロード音声停止\n");
+    }
+    
     if (completed) {
         // ロード完了時にフェードアウト開始
         static bool startedFadeOut = false;
@@ -534,6 +547,12 @@ void LoadingScene::Draw() {
 void LoadingScene::Finalize() {
     // スレッド関連のクリーンアップ
     OutputDebugStringA("LoadingScene::Finalize() - リソース解放開始\n");
+    
+    // 音声の停止（万が一まだ再生中の場合）
+    if (!isSoundStopped) {
+        Audio::GetInstance()->StopWave(loadingSound);
+        isSoundStopped = true;
+    }
     
     if (isAsyncLoadingStarted) {
         OutputDebugStringA("LoadingScene::Finalize() - 非同期ロードが開始されているので完全に終了するよう待機\n");
