@@ -17,18 +17,34 @@ using namespace MyMath;
 Player::Player() {}
 
 Player::~Player() {
-	delete PlayerModel_;
 	delete particleMove_;
 	delete particleTransfar_;
+	delete headModel_;
+	delete footModel_;
 }
 
 void Player::Init(Camera* camera) {
 	camera_ = camera;
 	worldTransform_.Initialize();
-	PlayerModel_ = new Object3d();
-	PlayerModel_->Initialize();
-	PlayerModel_->SetModelFile("player");
 	worldTransform_.translation_ = position;
+
+	//頭用のワールド座標
+	worldTransformH_.Initialize();
+	headModel_ = new Object3d();
+	headModel_->Initialize();
+	headModel_->SetModelFile("playerHead");
+	worldTransformH_.translation_ = position;
+
+	//足用のワールド座標
+	worldTransformF_.Initialize();
+	footModel_ = new Object3d();
+	footModel_->Initialize();
+	footModel_->SetModelFile("playerFoot");
+	worldTransformF_.translation_ = position;
+
+	//アニメーション初期化
+	InitializeFloatingGimmick();
+
 
 	// 初期位置を保存
 	initialPosition = position;
@@ -200,6 +216,8 @@ void Player::Update() {
 	cameraController_.SetPitch(cameraPitch);
 	cameraController_.SetYaw(cameraYaw);
 	worldTransform_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
+	worldTransformH_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
+	worldTransformF_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
 
 
 	//if (velocityY_ == 0.0f) {
@@ -410,33 +428,27 @@ void Player::Update() {
 	//particleMove_->ChangeMode(BornParticle::Stop);	
 	//particleTransfar_->ChangeMode(BornParticle::Stop);
 
-	if (EnemyContral) {
-		if (worldTransform_.translation_.x != position.x || worldTransform_.translation_.y != position.y + 2.0f  || worldTransform_.translation_.z != position.z) {
-			particleMove_->SetParticleCount(2);
-			particleMove_->SetFrequency(0.25f);
-			particleMove_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 2.0f,worldTransform_.translation_.z });
+	if (worldTransform_.translation_.x != position.x || velocityY_ != 0.0f || worldTransform_.translation_.z != position.z) {
+		particleMove_->SetParticleCount(2);
+		particleMove_->SetFrequency(0.25f);
 		
-			particleMove_->ChangeType(ParticleType::Normal);
-			particleMove_->ChangeMode(BornParticle::TimerMode);
+		if (EnemyContral) {
+			//操っている敵のほうにパーテイクルを出す
+			particleMove_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 2.0f,worldTransform_.translation_.z });
 		}
 		else {
-			particleMove_->ChangeMode(BornParticle::Stop);
+			particleMove_->SetTranslate(worldTransform_.translation_);
 		}
+
+		particleMove_->ChangeType(ParticleType::Normal);
+		particleMove_->ChangeMode(BornParticle::TimerMode);
+		isMoving = true;
 	}
 	else {
-		if (worldTransform_.translation_.x != position.x || worldTransform_.translation_.y != position.y|| worldTransform_.translation_.z != position.z) {
-			particleMove_->SetParticleCount(2);
-			particleMove_->SetFrequency(0.25f);
-			particleMove_->SetTranslate(worldTransform_.translation_);
-		
-			particleMove_->ChangeType(ParticleType::Normal);
-			particleMove_->ChangeMode(BornParticle::TimerMode);
-		}
-		else {
-			particleMove_->ChangeMode(BornParticle::Stop);
-		}
+		particleMove_->ChangeMode(BornParticle::Stop);
+		isMoving = false;
 	}
-
+	
 	
 	if (collisionEnemy) {
 		particleTransfar_->SetParticleCount(10);
@@ -451,8 +463,14 @@ void Player::Update() {
 		collisionEnemy = false;
 	}
 	worldTransform_.translation_ = position;
+	
+	worldTransformH_.translation_ = position;
+	worldTransformF_.translation_ = position;
+
+
 	if (EnemyContral) {
 		worldTransform_.translation_.y += 2.0f;
+		worldTransformH_.translation_.y += 0.8f;
 	}	
 	
 	particleMove_->Update();
@@ -492,7 +510,11 @@ void Player::Update() {
 	//速すぎてものが貫通しないようにする
 	velocityY_ = std::clamp(velocityY_, -20.0f, 20.0f);
 
+	UpdateFloatingGimmick();
+	
 	worldTransform_.UpdateMatrix();
+	worldTransformH_.UpdateMatrix();
+	worldTransformF_.UpdateMatrix();
 
 	cameraController_.Update(camera_, position);
 }
@@ -618,7 +640,13 @@ void Player::Draw() {
 	}
 
 	// 通常の描画（テクスチャハンドルは使わない）
-	PlayerModel_->Draw(worldTransform_);
+
+	//頭のモデル描画
+	headModel_->Draw(worldTransformH_);
+	//足のモデル描画
+	if (!EnemyContral) {
+		footModel_->Draw(worldTransformF_);
+	}
 }
 
 void Player::DrawP() {
@@ -739,4 +767,39 @@ void Player::CheckDamage() {
 	else {
 		isDamage = false;
 	}
+}
+
+
+/// <summary>
+/// アニメーションのプログラム
+/// </summary>
+
+void Player::InitializeFloatingGimmick() {
+	floatingParameter_ = 0.0f;
+}
+
+void Player::UpdateFloatingGimmick() {
+	const float fream = 60.0f;
+
+	const float step = 2.0f * 3.14f / fream;
+
+
+	floatingParameter_ += step;
+
+	floatingParameter_ = std::fmod(floatingParameter_, 2.0f * 3.14f);
+
+	//ふよふよす動き
+	const float wide = 0.1f;
+	worldTransformH_.translation_.y += std::sin(floatingParameter_) * wide;
+	worldTransformF_.translation_.y += std::sin(floatingParameter_) * wide;
+
+	//動いている時
+	if (isMoving) {
+		const float footRotate = 0.5f;
+		worldTransformF_.rotation_.y += std::sin(floatingParameter_) * footRotate;
+	}
+
+	const float footScale = 0.005f;
+	worldTransformF_.scale_.x += std::sin(floatingParameter_) * footScale;
+	worldTransformF_.scale_.z += std::sin(floatingParameter_) * footScale;
 }
