@@ -36,7 +36,10 @@ enum class TileMovementPreset {
 // CSVから読み込んだオブジェクトデータの構造体
 struct MapObjectData {
 	Vector3 position;
-	float rotate;
+	// ドアの回転をx, y, zの3軸に対応
+	Vector3 rotation = {0.0f, 0.0f, 0.0f};
+	// 後方互換性のために残す
+	float rotate = 0.0f;
 	MapObjectType type;
 	ColorType color;
 	Vector3 size;

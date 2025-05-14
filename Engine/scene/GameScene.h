@@ -48,6 +48,7 @@ private:
 	void AddObstacle(std::vector<std::vector<AABB>>& allObstacles, const Vector3& min, const Vector3& max);
 	void LoadStage(std::string objFile);
 	void UpdateStageAABB();
+	void UpdateImGui(); // ImGui用の更新関数を追加
 
 	// 現在のステージ番号
 	int currentStage_ = 0;
@@ -98,4 +99,21 @@ private:
 
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;
+
+	// ImGui用の回転値保存用変数
+	struct ObjectRotations {
+		// 3Dオブジェクトの回転値
+		struct {
+			float x = 0.0f;
+			float y = 0.0f;
+			float z = 0.0f;
+		} doorRotation;
+		
+		// 最後に操作したドアのID
+		int lastModifiedDoorId = -1;
+		
+		// 最後に変更した時間
+		float lastModifiedTime = 0.0f;
+	};
+	ObjectRotations objectRotations_;
 };

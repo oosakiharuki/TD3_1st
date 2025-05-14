@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "../../Engine/audio/Audio.h"
 #include <vector>
+#include <cmath> // M_PIを使用するために追加
 
 class Door {
 public:
@@ -53,10 +54,67 @@ public:
 		isAnimating_ = false;
 		isDoorOpened_ = false;
 		soundPlayed_ = false; // サウンド再生状態もリセット
+		
+		// モデルが初期化されていれば、回転と位置オフセットを再計算
+		if (model_) {
+			// X、Y、Z軸の回転を設定
+			worldTransform_.rotation_.x = rotationX_ * (3.14159265359f / 180.0f);
+			worldTransform_.rotation_.y = rotationY_ * (3.14159265359f / 180.0f);
+			worldTransform_.rotation_.z = rotationZ_ * (3.14159265359f / 180.0f);
+			
+			SetupPivotOffset();
+			worldTransform_.UpdateMatrix();
+		}
+	}
+
+	void SetRotateX(const float& rotateX) {
+		// X軸回転値を保存
+		rotationX_ = rotateX;
+		
+		// 初期化後であれば回転を適用
+		if (model_) {
+			// 回転を適用
+			worldTransform_.rotation_.x = rotationX_ * (3.14159265359f / 180.0f); // 度からラジアンに変換
+			
+			// 行列を更新
+			worldTransform_.UpdateMatrix();
+		}
 	}
 
 	void SetRotateY(const float& rotateY) {
-		normal_ = rotateY;
+		// Y軸回転値を保存
+		rotationY_ = rotateY;
+		
+		// 初期化後であれば回転を適用
+		if (model_) {
+			// 回転を適用
+			worldTransform_.rotation_.y = rotationY_ * (3.14159265359f / 180.0f); // 度からラジアンに変換
+			
+			// 回転中心を再計算
+			SetupPivotOffset();
+			
+			// 行列を更新
+			worldTransform_.UpdateMatrix();
+		}
+	}
+
+	void SetRotateZ(const float& rotateZ) {
+		// Z軸回転値を保存
+		rotationZ_ = rotateZ;
+		
+		// 初期化後であれば回転を適用
+		if (model_) {
+			// 回転を適用
+			worldTransform_.rotation_.z = rotationZ_ * (3.14159265359f / 180.0f); // 度からラジアンに変換
+			
+			// 行列を更新
+			worldTransform_.UpdateMatrix();
+		}
+	}
+
+	// 現在の回転値を取得するメソッド
+	Vector3 GetRotation() const {
+		return { rotationX_, rotationY_, rotationZ_ };
 	}
 
 	void SetSize(const Vector3& size) {
@@ -67,6 +125,9 @@ private:
 	WorldTransform worldTransform_;
 	Object3d* model_ = nullptr;
 	Vector3 position_ = {1.5f, 0.0f, 48.592f}; // デフォルト位置（CSVから上書き可能）
+	
+	// ドアの回転中心を端（ヒンジ側）に設定する関数
+	void SetupPivotOffset();
 
 	// サウンド関連
 	SoundData doorOpenSound_;
@@ -90,5 +151,7 @@ private:
 	// すべてのキーが取得されているかチェック
 	bool AreAllKeysObtained() const;
 
-	float normal_ = 0.0f;
+	float rotationX_ = 0.0f;
+	float rotationY_ = 0.0f;
+	float rotationZ_ = 0.0f;
 };

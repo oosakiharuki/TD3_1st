@@ -1,9 +1,13 @@
 #include "Door.h"
 #ifdef _DEBUG
 #include "ImGuiManager.h"
+#include <iostream>
 #endif
 
-#include <numbers>
+#include <cmath>
+
+// Pi定数
+const float PI = 3.14159265358979323846f;
 
 // Vector3の演算子を使用するために名前空間を使用
 using namespace MyMath;
@@ -35,17 +39,24 @@ void Door::Init() {
 	// 初期位置を設定
 	worldTransform_.translation_ = position_;
 	
-	// normal_の値に応じて初期回転を設定
-	if (normal_ == 90) {
-		worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2;
-	} else if (normal_ == 180) {
-		worldTransform_.rotation_.y = std::numbers::pi_v<float>;
-	} else if (normal_ == 270) {
-		worldTransform_.rotation_.y = -std::numbers::pi_v<float> / 2;
-	}
+	// 利用する回転値をデバッグ出力
+	#ifdef _DEBUG
+	std::cout << "Door init with rotation: " << rotationY_ << " degrees" << std::endl;
+	#endif
+	
+	// rotationY_の値（度数法）をラジアンに変換して直接適用
+	worldTransform_.rotation_.y = rotationY_ * (PI / 180.0f);
+
+	// 回転中心をヒンジ側に設定
+	SetupPivotOffset();
 
 	// 行列を更新
 	worldTransform_.UpdateMatrix();
+
+	// 再度回転値が正しく設定されているか確認
+	#ifdef _DEBUG
+	std::cout << "Door init complete, rotation set to: " << worldTransform_.rotation_.y << " radians" << std::endl;
+	#endif
 }
 
 // すべてのキーが取得されているかチェックするヘルパーメソッド
@@ -95,49 +106,27 @@ void Door::Update() {
 				soundPlayed_ = true;
 			}
 
+			// 前回の角度を保存
+			float prevAngle = openAngle_;
+			// 角度を更新
 			openAngle_ += 0.05f;
-			worldTransform_.rotation_.y = openAngle_;
+			// 回転角度の変化量
+			float deltaAngle = openAngle_ - prevAngle;
+			
+			// 元の回転値を保存
+			float currentRotY = worldTransform_.rotation_.y;
+			
+			// ドアを実際に回転させる（元の回転にアニメーションの回転を加算）
+			worldTransform_.rotation_.y = currentRotY + deltaAngle;
 
-			// ドアのヒンジ部分を軸に回転させるための処理
-			// ドアの幅の半分の値（X方向のオフセット）
-			float doorHalfWidth = 3.0f * worldTransform_.scale_.x;
-			
-			// 回転に応じた位置補正（回転前の位置に戻す）
-			Vector3 offsetPosition = {};
-			
-			// normal_の値に応じてオフセット方向を調整
-			if (normal_ == 0) {
-				// Z軸方向を向いているドア（デフォルト）
-				// X軸方向にオフセット（ドアの右端が回転軸）
-				offsetPosition.x = doorHalfWidth * (1.0f - cosf(openAngle_));
-				offsetPosition.z = doorHalfWidth * sinf(openAngle_);
-			} else if (normal_ == 90) {
-				// X軸方向を向いているドア（90度回転）
-				// Z軸方向にオフセット
-				offsetPosition.z = -doorHalfWidth * (1.0f - cosf(openAngle_));
-				offsetPosition.x = doorHalfWidth * sinf(openAngle_);
-			} else if (normal_ == 180) {
-				// Z軸の逆方向を向いているドア（180度回転）
-				offsetPosition.x = -doorHalfWidth * (1.0f - cosf(openAngle_));
-				offsetPosition.z = -doorHalfWidth * sinf(openAngle_);
-			} else if (normal_ == 270) {
-				// X軸の逆方向を向いているドア（270度回転）
-				offsetPosition.z = doorHalfWidth * (1.0f - cosf(openAngle_));
-				offsetPosition.x = -doorHalfWidth * sinf(openAngle_);
-			}
-			
-			// 位置を更新
-			// Vector3の加算を明示的に行う
-			worldTransform_.translation_.x = position_.x + offsetPosition.x;
-			worldTransform_.translation_.y = position_.y + offsetPosition.y;
-			worldTransform_.translation_.z = position_.z + offsetPosition.z;
+			// 回転軸は既にSetupPivotOffsetで端に設定されているため、
+			// 位置の調整は必要ない
 
 			if (openAngle_ >= 1.5f) {
 				// ドアが開き終わったらオーディオを停止
 				Audio::GetInstance()->StopWave(doorOpenSound_);
 				isDoorOpened_ = true;
 				isAnimating_ = false;
-				worldTransform_.rotation_.y = openAngle_;
 			}
 		}
 	}
@@ -164,6 +153,26 @@ void Door::Update() {
 #endif
 }
 
+void Door::SetupPivotOffset() {
+	// ドアの幅の半分（ドアモデルのローカル座標系での値）
+	float doorHalfWidth = 3.0f * worldTransform_.scale_.x;
+	
+	// オフセット位置の計算（ドアのヒンジ側が原点になるように）
+	Vector3 pivotOffset = {};
+	
+	// rotationY_値（度数法）に応じて回転と位置オフセットを計算
+	float rotationRadians = rotationY_ * (PI / 180.0f);
+	
+	// X方向のオフセット（回転に応じて計算）
+	pivotOffset.x = -doorHalfWidth * cosf(rotationRadians);
+	// Z方向のオフセット
+	pivotOffset.z = -doorHalfWidth * sinf(rotationRadians);
+	
+	// 位置を調整（元の位置 + オフセット）
+	worldTransform_.translation_.x = position_.x + pivotOffset.x;
+	worldTransform_.translation_.z = position_.z + pivotOffset.z;
+}
+
 void Door::Draw() { model_->Draw(worldTransform_); }
 
 AABB Door::GetAABB(){
@@ -174,21 +183,18 @@ AABB Door::GetAABB(){
 	Vector3 localCenter = {0.0f, 3.0f, 0.0f};
 	Vector3 halfExtents = { 3.0f, 3.0f, 1.0f };
 
-	if (!isDoorOpened_) {
-		if (normal_ == 90) {
-			halfExtents = { 1.0f, 3.0f, 3.0f };
-			worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2;
-		}
-		if (normal_ == 270) {
-			halfExtents = { 1.0f, 3.0f, 3.0f };
-			worldTransform_.rotation_.y = - std::numbers::pi_v<float> / 2;
-		}
-		if (normal_ == 180) {
-			worldTransform_.rotation_.y = std::numbers::pi_v<float>;
-		}
+	// 回転角度に応じて調整
+	// 90度および270度回転の場合はX,Zの半径を入れ替え
+	float normalAngle = rotationY_;
+	// 角度を0ー359の範囲に正規化
+	while (normalAngle < 0) normalAngle += 360.0f;
+	while (normalAngle >= 360.0f) normalAngle -= 360.0f;
+	
+	if ((normalAngle > 45 && normalAngle < 135) || (normalAngle > 225 && normalAngle < 315)) {
+		// ほぼ90度または270度の場合、XとZを入れ替え
+		halfExtents = { 1.0f, 3.0f, 3.0f };
 	}
 	
-
 	// スケールを要素ごとに乗算
 	Vector3 scaledCenter = {localCenter.x * worldTransform_.scale_.x, localCenter.y * worldTransform_.scale_.y, localCenter.z * worldTransform_.scale_.z};
 
