@@ -86,7 +86,7 @@ void UIManager::Initialize() {
 	if (GameData::selectedStage == 0) {
 		tutorial = new Sprite();
 		tutorial->Initialize("ui/tutorial01.png");
-		tutorial->SetPosition({ 0, 0 });
+		tutorial->SetPosition({ 0,-50 });
 	}
 	
 	// 現在のステージの鍵の総数を初期化
@@ -182,14 +182,14 @@ void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
 		currentTotalKeys_ = totalKeys;
 		
 		// 鍵アイコンの位置を再計算（中央揃えにする）
-		float startX = 20.0f;
+		float startX = 5.0f; // 15
 		float iconWidth = 30.0f;
 		float iconSpacing = 5.0f;
 		float totalWidth = (iconWidth + iconSpacing) * totalKeys - iconSpacing;
 		
 		for (int i = 0; i < totalKeys; i++) {
 			float xPos = startX + i * (iconWidth + iconSpacing);
-			keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 110 });
+			keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 140 });
 		}
 	}
 	
