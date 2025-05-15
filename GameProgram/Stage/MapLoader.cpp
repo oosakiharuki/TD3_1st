@@ -141,42 +141,11 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 		else if (token == "door") {
 			data.type = MapObjectType::Door;
 
-			// X軸の回転値を読み込む
 			if (std::getline(iss, token, ',')) {
-				try {
-					data.rotation.x = std::stof(token);
-				} catch (...) {
-					data.rotation.x = 0.0f;
-				}
+				data.rotate = std::stof(token);
 			}
 			else {
-				data.rotation.x = 0.0f;
-			}
-
-			// Y軸の回転値を読み込む
-			if (std::getline(iss, token, ',')) {
-				try {
-					data.rotation.y = std::stof(token);
-					// 後方互換性のためにrotateも設定
-					data.rotate = data.rotation.y;
-				} catch (...) {
-					data.rotation.y = 0.0f;
-				}
-			}
-			else {
-				data.rotation.y = 0.0f;
-			}
-
-			// Z軸の回転値を読み込む
-			if (std::getline(iss, token, ',')) {
-				try {
-					data.rotation.z = std::stof(token);
-				} catch (...) {
-					data.rotation.z = 0.0f;
-				}
-			}
-			else {
-				data.rotation.z = 0.0f;
+				data.rotate = 0.0f;
 			}
 		}
 		else if (token == "block") {
@@ -367,10 +336,7 @@ void MapLoader::CreateObjects(Player* player) {
 			Door* door = new Door();
 			door->Init();
 			door->SetPosition(objectData.position);
-			// 3軸回転を設定
-			door->SetRotateX(objectData.rotation.x);
-			door->SetRotateY(objectData.rotation.y);
-			door->SetRotateZ(objectData.rotation.z);
+			door->SetRotateY(objectData.rotate);
 			door->SetPlayer(player);
 			doors_.push_back(door);
 		}
