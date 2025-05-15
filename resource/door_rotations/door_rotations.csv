@@ -1,0 +1,9 @@
+# Door Rotations
+# Format: doorID, initialRotation, targetRotation, rotationSpeed
+# doorIDはマップローダーでドアを生成したときのインデックスに対応します
+# initialRotationは初期回転角度（度数法）
+# targetRotationは目標回転角度（度数法）
+# rotationSpeedは回転速度（度数法/フレーム）
+0, 0, 90, 2.0
+1, 0, -90, 1.5
+2, 90, 180, 2.5

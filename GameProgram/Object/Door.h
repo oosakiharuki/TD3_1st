@@ -4,6 +4,9 @@
 #include "Player.h"
 #include "../../Engine/audio/Audio.h"
 #include <vector>
+#include <map>
+#include <tuple>
+#include <string>
 
 class Door {
 public:
@@ -48,8 +51,25 @@ public:
 	void SetPosition(const Vector3& position) {
 		position_ = position;
 		worldTransform_.translation_ = position;
-		// 位置を初期化するときはアニメーション状態をリセット
-		openAngle_ = 0.0f;
+
+		// 引き続きnormal_値に応じて初期回転を設定
+		// モデルの向きを維持
+		float normalRad = 0.0f;
+		if (normal_ == 90) {
+			normalRad = 3.14159265358979323846f / 2; // 90度
+		}
+		else if (normal_ == 180) {
+			normalRad = 3.14159265358979323846f;     // 180度
+		}
+		else if (normal_ == 270) {
+			normalRad = -3.14159265358979323846f / 2; // 270度 (-90度)
+		}
+		
+		// 初期角度を指定
+		worldTransform_.rotation_.y = normalRad;
+		openAngle_ = normalRad;
+
+		// アニメーション状態をリセット
 		isAnimating_ = false;
 		isDoorOpened_ = false;
 		soundPlayed_ = false; // サウンド再生状態もリセット
@@ -61,6 +81,19 @@ public:
 
 	void SetSize(const Vector3& size) {
 		worldTransform_.scale_ = size;
+	}
+
+	// 回転設定をCSVから読み込む
+	static bool LoadRotationsFromCSV(const std::string& filePath);
+
+	// ドアのIDを設定
+	void SetDoorID(int id) { doorID_ = id; }
+
+	// ドアの開閉角度と速度を直接設定
+	void SetDoorOpenParams(float openAngle, float speed) {
+		targetRotation_ = openAngle;
+		rotationSpeed_ = speed;
+		useCustomRotation_ = true;
 	}
 
 private:
@@ -91,4 +124,14 @@ private:
 	bool AreAllKeysObtained() const;
 
 	float normal_ = 0.0f;
+
+	// 回転データ管理用
+	int doorID_ = -1; // ドアのID（-1は未設定）
+	float initialRotation_ = 0.0f;  // 初期回転角度（度数法）
+	float targetRotation_ = 90.0f;  // 目標回転角度（度数法）
+	float rotationSpeed_ = 2.0f;    // 回転速度（度数法/フレーム）
+	bool useCustomRotation_ = false; // カスタム回転パラメータを使用するかどうか
+
+	// 全ドアの回転データを保持する静的コンテナ
+	static std::map<int, std::tuple<float, float, float>> doorRotations_; // doorID -> (initialRotation, targetRotation, rotationSpeed)
 };
