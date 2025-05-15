@@ -56,13 +56,13 @@ public:
 		// モデルの向きを維持
 		float normalRad = 0.0f;
 		if (normal_ == 90) {
-			normalRad = 3.14159265358979323846f / 2; // 90度
+			normalRad = static_cast<float>(3.14159265358979323846) / 2.0f; // 90度
 		}
 		else if (normal_ == 180) {
-			normalRad = 3.14159265358979323846f;     // 180度
+			normalRad = static_cast<float>(3.14159265358979323846);     // 180度
 		}
 		else if (normal_ == 270) {
-			normalRad = -3.14159265358979323846f / 2; // 270度 (-90度)
+			normalRad = -static_cast<float>(3.14159265358979323846) / 2.0f; // 270度 (-90度)
 		}
 		
 		// 初期角度を指定
@@ -75,8 +75,27 @@ public:
 		soundPlayed_ = false; // サウンド再生状態もリセット
 	}
 
+	// 回転設定メソッド
+	void SetRotateX(const float& rotateX) {
+		worldTransform_.rotation_.x = rotateX * (static_cast<float>(3.14159265358979323846) / 180.0f);
+	}
+
 	void SetRotateY(const float& rotateY) {
 		normal_ = rotateY;
+		worldTransform_.rotation_.y = rotateY * (static_cast<float>(3.14159265358979323846) / 180.0f);
+	}
+
+	void SetRotateZ(const float& rotateZ) {
+		worldTransform_.rotation_.z = rotateZ * (static_cast<float>(3.14159265358979323846) / 180.0f);
+	}
+
+	// 現在の回転を取得
+	Vector3 GetRotation() const {
+		return {
+			worldTransform_.rotation_.x * (180.0f / static_cast<float>(3.14159265358979323846)),
+			worldTransform_.rotation_.y * (180.0f / static_cast<float>(3.14159265358979323846)),
+			worldTransform_.rotation_.z * (180.0f / static_cast<float>(3.14159265358979323846))
+		};
 	}
 
 	void SetSize(const Vector3& size) {

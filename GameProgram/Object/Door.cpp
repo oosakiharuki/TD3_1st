@@ -44,16 +44,16 @@ void Door::Init() {
 	doorOpenSound_ = Audio::GetInstance()->LoadWave("sound/door_open.wav");
 
 	// 初期回転角度をnormal_値に基づいてラジアンに変換
-	float normalRad = 0.0f;
+	float normalRad = static_cast<float>(M_PI) / 2.0f;
 	
 	if (normal_ == 90) {
-		normalRad = M_PI / 2; // 90度
+		normalRad = static_cast<float>(M_PI) / 2.0f; // 90度
 	}
 	else if (normal_ == 180) {
-		normalRad = M_PI;     // 180度
+		normalRad = static_cast<float>(M_PI);     // 180度
 	}
 	else if (normal_ == 270) {
-		normalRad = -M_PI / 2; // 270度 (-90度)
+		normalRad = -static_cast<float>(M_PI) / 2.0f; // 270度 (-90度)
 	}
 	
 	// 初期角度の設定
@@ -173,7 +173,7 @@ void Door::Update() {
 			// 度数法からラジアンに変換
 			// normal_値に合わせて目標角度を計算
 			float currentRotationRad = worldTransform_.rotation_.y; // 現在の角度（ラジアン）
-			float targetRotationRad = openAngle_ + (targetRotation_ * (M_PI / 180.0f)); // 目標角度
+			float targetRotationRad = openAngle_ + (targetRotation_ * (static_cast<float>(M_PI) / 180.0f)); // 目標角度
 			
 			// アニメーション終了条件の確認
             if (fabsf(worldTransform_.rotation_.y - targetRotationRad) < 0.01f) {
@@ -197,7 +197,7 @@ void Door::Update() {
 			}
 
 			// 回転速度をラジアンに変換
-			float speedRad = rotationSpeed_ * (M_PI / 180.0f);
+			float speedRad = rotationSpeed_ * (static_cast<float>(M_PI) / 180.0f);
 			
 			// 角度を更新（目標角度に近づける）
 			if (targetRotationRad > worldTransform_.rotation_.y) {
@@ -288,7 +288,7 @@ void Door::Update() {
 		ImGui::Text("Rotation Speed: %.2f degrees/frame", rotationSpeed_);
 		
 		// 現在の回転角度（ラジアンから度数法に変換）
-		float currentDegrees = worldTransform_.rotation_.y * (180.0f / M_PI);
+		float currentDegrees = worldTransform_.rotation_.y * (180.0f / static_cast<float>(M_PI));
 		ImGui::Text("Current Rotation: %.2f degrees", currentDegrees);
 		
 		// アニメーション情報
