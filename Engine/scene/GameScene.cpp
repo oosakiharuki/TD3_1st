@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "ParticleNumber.h"
 #include "ImGuiManager.h"
+#include <filesystem>
 
 GameScene::GameScene() {}
 
@@ -23,6 +24,12 @@ void GameScene::Finalize() {
 void GameScene::Initialize() {
 
 	currentStage_ = GameData::selectedStage;
+	
+	// デバッグ出力 - GameSceneの初期化時のステージ番号
+	{
+		std::string initDebugMsg = "GameScene Initialize: Stage " + std::to_string(currentStage_) + "\n";
+		OutputDebugStringA(initDebugMsg.c_str());
+	}
 
 	camera_ = new Camera();
 	
@@ -108,9 +115,47 @@ void GameScene::Initialize() {
 	uiManager = new UIManager();
 	uiManager->Initialize();
 
-	// ステージ1のBGM読み込みと再生
+	// 現在のステージに応じたBGM読み込みと再生
 	audio_ = Audio::GetInstance();
-	BGMSound = audio_->LoadWave("sound/stage1.wav");
+	
+	// BGMファイル名の作成
+	std::string bgmFile;
+	
+	// ステージ番号に基づいてBGMを切り替え
+	switch (currentStage_) {
+	case 1:
+		bgmFile = "sound/stage1.wav";
+		break;
+	case 2:
+		bgmFile = "sound/stage2.wav";
+		break;
+	case 3:
+		bgmFile = "sound/stage3.wav";
+		break;
+	case 4:
+		bgmFile = "sound/stage1.wav"; // stage4.wavがない場合の代替
+		break;
+	case 5:
+		bgmFile = "sound/stage2.wav"; // stage5.wavがない場合の代替
+		break;
+	case 6:
+		bgmFile = "sound/stage3.wav"; // stage6.wavがない場合の代替
+		break;
+	case 7:
+		bgmFile = "sound/stage1.wav"; // stage7.wavがない場合の代替
+		break;
+	default:
+		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM
+		break;
+	}
+	
+	// デバッグ出力 - 現在のステージとBGMファイル
+	{
+		std::string bgmDebugMsg = "BGM Load: Stage " + std::to_string(currentStage_) + ", File: " + bgmFile + "\n";
+		OutputDebugStringA(bgmDebugMsg.c_str());
+	}
+	
+	BGMSound = audio_->LoadWave(bgmFile.c_str());
 	audio_->SoundPlayWave(BGMSound, 0.25f, true);
 
 	//パーテイクルのメモリ対策でリセット
@@ -290,7 +335,50 @@ void GameScene::ChangeStage(int nextStage) {
 	Command.str("");
 	Command.clear();
 
+	// 前のステージのBGMを停止
+	audio_->StopWave(BGMSound);
+
 	currentStage_ = nextStage;
+	
+	// 新しいステージのBGMを読み込んで再生
+	std::string bgmFile;
+	
+	// ステージ番号に基づいてBGMを切り替え
+	switch (currentStage_) {
+	case 1:
+		bgmFile = "sound/stage1.wav";
+		break;
+	case 2:
+		bgmFile = "sound/stage2.wav";
+		break;
+	case 3:
+		bgmFile = "sound/stage3.wav";
+		break;
+	case 4:
+		bgmFile = "sound/stage1.wav"; // stage4.wavがない場合の代替
+		break;
+	case 5:
+		bgmFile = "sound/stage2.wav"; // stage5.wavがない場合の代替
+		break;
+	case 6:
+		bgmFile = "sound/stage3.wav"; // stage6.wavがない場合の代替
+		break;
+	case 7:
+		bgmFile = "sound/stage1.wav"; // stage7.wavがない場合の代替
+		break;
+	default:
+		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM
+		break;
+	}
+	
+	// デバッグ出力 - 現在のステージとBGMファイル
+	{
+		std::string changeDebugMsg = "BGM Change: Stage " + std::to_string(currentStage_) + ", File: " + bgmFile + "\n";
+		OutputDebugStringA(changeDebugMsg.c_str());
+	}
+	
+	BGMSound = audio_->LoadWave(bgmFile.c_str());
+	audio_->SoundPlayWave(BGMSound, 0.25f, true);
 
 	//前ステージの削除
 	delete stage;
