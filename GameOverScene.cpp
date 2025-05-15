@@ -2,11 +2,11 @@
 
 void GameOverScene::Initialize() {
 	sprite = new Sprite();
-	sprite->Initialize("GameOverName.png");
+	sprite->Initialize("scene/GameOverName.png");
 	sprite->SetPosition({ 0,-200 });
 
 	backGround = new Sprite();
-	backGround->Initialize("GameOver_background.png");
+	backGround->Initialize("scene/BackGround.png");
 	backGround->SetPosition({ 0,0 });
 
 	//切り替え時長押しにならないように

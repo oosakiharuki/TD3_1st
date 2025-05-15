@@ -151,6 +151,16 @@ void GameScene::Update() {
 			sceneNo = Select;
 		}
 
+		if (Input::GetInstance()->TriggerKey(DIK_F1)) {
+			audio_->StopWave(BGMSound);
+			sceneNo = GameClear;
+		}
+
+		if (Input::GetInstance()->TriggerKey(DIK_F2)) {
+			audio_->StopWave(BGMSound);
+			sceneNo = GameOver;
+		}
+
 		return;
 	}
 

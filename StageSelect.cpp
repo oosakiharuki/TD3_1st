@@ -11,15 +11,36 @@ void StageSelect::Initialize() {
 
 	//背景
 	backGround = new Sprite();
-	backGround->Initialize("StageSelectName.png");
+	backGround->Initialize("scene/background.png");
 	backGround->SetPosition({ 0,0 });
+
+	// 黒背景
+	shadow = new Sprite();
+	shadow->Initialize("ui/black.png");
+	shadow->SetPosition({ 0,0 });
+	shadow->SetColor({ 0.0f, 0.0f, 0.0f, 0.8f });
+
+	// ステージセレクトの名前
+	StageSelectName = new Sprite();
+	StageSelectName->Initialize("scene/StageSelectName.png");
+	StageSelectName->SetPosition({ 0,0 });
 
 	//ステージのナンバー
 	stageNumber = new Sprite();
-	stageNumber->Initialize("StageNumber.png");
-	stageNumber->SetPosition({ 100,200 });	
+	stageNumber->Initialize("scene/StageNumber.png");
+	stageNumber->SetPosition({ 200,350 });	
 
-	stageNumber->SetTextureSize({ 64,64 });
+	// 選択バー
+	selectBar = new Sprite();
+	selectBar->Initialize("scene/selectBar.png");
+	selectBar->SetPosition({ 100,350 });
+
+	// ボタン
+	buttonSprite = new Sprite();
+	buttonSprite->Initialize("ui/press_Button.png");
+	buttonSprite->SetPosition({ 384 ,560 });
+
+	stageNumber->SetTextureSize({ 96,96 });
 	stageNumber->SetTextureLT({ selectLT * stageNum,0 });
 
 	// ロード状態確認
@@ -41,15 +62,19 @@ void StageSelect::Initialize() {
 
 void StageSelect::Update() {
 	backGround->Update();
+	shadow->Update();
+	StageSelectName->Update();
 	stageNumber->Update();
+	selectBar->Update();
+	buttonSprite->Update();
 
 
 	//ステージごとのモデル
 	stageObject_->SetModelFile("stage" + std::to_string(stageNum));
 	//回して見やすくする
-	//worldTransform_.translation_.x = 2.0f;
+	worldTransform_.translation_.x = -0.3f;
 	worldTransform_.rotation_.y += 0.01f;
-	worldTransform_.scale_ = { 0.005f,0.005f,0.005f };
+	worldTransform_.scale_ = { 0.005f,0.007f,0.005f };
 	
 
 	Input::GetInstance()->GetJoystickState(0, state);
@@ -132,7 +157,11 @@ void StageSelect::Draw() {
 	SpriteCommon::GetInstance()->Command();
 
 	backGround->Draw();
+	shadow->Draw();
+	StageSelectName->Draw();
 	stageNumber->Draw();
+	selectBar->Draw();
+	buttonSprite->Draw();
 
 	Object3dCommon::GetInstance()->Command();
 

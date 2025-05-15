@@ -17,11 +17,16 @@ public:
 private:
 
 	Sprite* backGround;
+	Sprite* shadow;
+	Sprite* StageSelectName;
 	Sprite* stageNumber;
+	Sprite* selectBar;
+	Sprite* buttonSprite;
+
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 
 	uint32_t stageNum = 0;
-	float selectLT = 64;
+	float selectLT = 96;
 
 	float steackCount = 0.0f;
 	float steackMax = 0.25f;

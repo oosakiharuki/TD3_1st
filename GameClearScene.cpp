@@ -3,11 +3,11 @@
 
 void GameClearScene::Initialize() {
 	sprite = new Sprite();
-	sprite->Initialize("GameClearName.png");
+	sprite->Initialize("scene/GameClearName.png");
 	sprite->SetPosition({ 0,-200 });
 
 	backGround = new Sprite();
-	backGround->Initialize("GameClear_background.png");
+	backGround->Initialize("scene/background.png");
 	backGround->SetPosition({ 0,0 });
 
 	//切り替え時長押しにならないように

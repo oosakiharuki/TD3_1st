@@ -6,15 +6,15 @@ void TitleScene::Initialize() {
 	OutputDebugStringA("TitleScene::Initialize() が実行されました\n");
 
 	sprite = new Sprite();
-	sprite->Initialize("TitleName.png");
+	sprite->Initialize("scene/TitleName.png");
 	sprite->SetPosition({ 0,-200 });
 
 	backGround = new Sprite();
-	backGround->Initialize("title_background.png");
+	backGround->Initialize("scene/background.png");
 	backGround->SetPosition({ 0,0 });
 
 	bottonSprite = new Sprite();
-	bottonSprite->Initialize("ui/press_Botton.png");
+	bottonSprite->Initialize("ui/press_Button.png");
 	bottonSprite->SetPosition({ 384 ,560 });
 
 	// ロード状態確認
