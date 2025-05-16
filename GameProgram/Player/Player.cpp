@@ -523,14 +523,20 @@ void Player::Update() {
 void Player::CheckFallOut() {
 	// Y座標が閾値を下回った場合
 	if (position.y < fallThreshold) {
-		// 初期位置にリセット
-		ResetToInitialPosition();
 
-		// ダメージを与える（通常の2倍）
-		TakeDamage(fallDamage);
+		if (!EnemyContral) {
+			// 初期位置にリセット
+			ResetToInitialPosition();
 
-		// 落下音を再生
-		audio_->SoundPlayWave(FallSound_, 0.7f);
+			// ダメージを与える（通常の2倍）
+			TakeDamage(fallDamage);
+
+			// 落下音を再生
+			audio_->SoundPlayWave(FallSound_, 0.7f);
+		}
+		//のりうつりを解除
+		velocityY_ = 0.0f;
+		EnemyContral = false;
 	}
 }
 

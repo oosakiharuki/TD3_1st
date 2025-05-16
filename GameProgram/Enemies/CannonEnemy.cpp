@@ -159,6 +159,17 @@ void CannonEnemy::Update() {
 			worldTransform_.rotation_.y = atan2(direction.x, direction.z);
 		}
 
+		// 落下判定用
+		const float fallThreshold = -60.0f;
+
+		// バネとプレイヤーと大きさが若干違うので
+		// ステージブロックの先に行くと落ちる
+		// なので落ちたらスタート地点に戻るようにした
+		if (position.y < fallThreshold) {
+			position = RespownPosition;
+		}
+
+
 		worldTransform_.translation_ = position;
 	}
 

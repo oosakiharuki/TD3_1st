@@ -46,6 +46,8 @@ public:
 	void SetPosition(const Vector3& pos) {
 		position = pos;
 		worldTransform_.translation_ = pos;
+		//リスポーン地点設定
+		RespownPosition = pos;
 	}
 	
 	// 壊せるブロックのリストを設定
@@ -55,6 +57,7 @@ private:
 	WorldTransform worldTransform_; // Fix the error by ensuring the type is defined
 	Object3d* model_ = nullptr;
 	Vector3 position = { 0, 5, 30 };
+	Vector3 RespownPosition; //リスポーン地点
 	// サウンド関連
 	Audio* audio_ = nullptr;
 	// 複数の爆発音サウンドデータ（連射用）

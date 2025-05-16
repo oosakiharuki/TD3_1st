@@ -49,6 +49,7 @@ private:
 	WorldTransform worldTransform_;
 	Object3d* model_ = nullptr;
 	Vector3 position = {0, 0, -20};
+	Vector3 RespownPosition; //リスポーン地点
 	bool onGround_ = true;
 	float velocityY_ = 0.0f;
 
