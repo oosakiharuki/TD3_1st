@@ -292,6 +292,10 @@ void GameScene::Draw() {
 		it->DrawP();
 	}
 
+	for (Block* block : mapLoader_->GetBlockList()) {
+		block->DrawP();
+	}
+
 	if (mapLoader_) {
 		mapLoader_->DrawP();
 	}

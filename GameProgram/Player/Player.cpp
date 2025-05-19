@@ -562,7 +562,9 @@ void Player::CheckCollision() {
 				for (Bom* bom : cannon->GetBom()) {
 					AABB bomAABB = bom->GetAABB();
 					if (block_->IsActive() && IsCollisionAABB(bomAABB, blockAABB) && cannon->GetPlayerCtrl()) {
-						block_->SetActive(false);
+						block_->SetParticlePosition(bom->GetWorldPosition());
+						block_->OnCollision();
+						bom->OnCollision();
 					}
 				}
 			}

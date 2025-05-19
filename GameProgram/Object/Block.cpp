@@ -5,7 +5,10 @@ using namespace MyMath;
 
 Block::Block() {}
 
-Block::~Block() { delete model_; }
+Block::~Block() { 
+	delete model_;
+	delete particle;
+}
 
 void Block::Init() {
 
@@ -18,9 +21,16 @@ void Block::Init() {
 	model_->SetModelFile("cube");
 	// 行列の更新
 	worldTransform.UpdateMatrix();
+
+	particle = new Particle();
+	particle->Initialize("resource/Sprite/circle.png");
+	particle->ChangeMode(BornParticle::Stop);
+	particle->ChangeType(ParticleType::Normal);
 }
 
 void Block::Update() {
+	particle->Update();
+
 	worldTransform.UpdateMatrix();
 }
 
@@ -30,6 +40,10 @@ void Block::Draw() {
 		model_->Draw(worldTransform);
 	}
 	// 非アクティブなら描画しない (ここでreturnを入れるなら上のifブロックの外に出す)
+}
+
+void Block::DrawP() {
+	particle->Draw();
 }
 
 AABB Block::GetAABB() const {
@@ -48,4 +62,17 @@ void Block::SetSize(const Vector3& size) {
 	worldTransform.scale_ = size;
 	size_ = size;
 	worldTransform.UpdateMatrix();
+}
+
+void Block::OnCollision() {
+	hp--;
+
+	particle->SetParticleCount(6);
+	particle->SetTranslate(particlePosition);
+	particle->ChangeMode(BornParticle::MomentMode);
+
+
+	if (hp <= 0) {
+		isActive_ = false;
+	}
 }

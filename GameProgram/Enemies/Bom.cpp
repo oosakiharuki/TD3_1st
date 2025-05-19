@@ -8,7 +8,7 @@ Bom::Bom() {
 
 Bom::~Bom() { 
 	delete model_; 
-	
+
 	// 音を停止する
 	if (soundData_ != nullptr) {
 		audio_->StopWave(*soundData_);
