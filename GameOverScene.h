@@ -11,7 +11,9 @@ public:
 	void Finalize() override;
 
 private:
-	Sprite* sprite;
-	Sprite* backGround;
+	Sprite* gameOverContinue;
+	Sprite* gameOverTitle;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
+
+	int gameOverCount_ = 1;
 };

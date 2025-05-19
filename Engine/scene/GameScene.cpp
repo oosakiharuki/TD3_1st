@@ -130,11 +130,11 @@ void GameScene::Update() {
 	if (isPaused_) {
 		uiManager->Update(); // 必要ならポーズ画面のUI更新
 
-		if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			pauseCount_--;
 			if (pauseCount_ < 1) pauseCount_ = 1;
 		}
-		if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+		if (Input::GetInstance()->TriggerKey(DIK_S)) {
 			pauseCount_++;
 			if (pauseCount_ > 2) pauseCount_ = 2;
 		}
