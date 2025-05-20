@@ -25,13 +25,11 @@ void GameOverScene::Update() {
 		if (gameOverCount_ > 2) gameOverCount_ = 2;
 	}
 
-	if (gameOverCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
-		//audio_->StopWave(BGMSound);
+	if (gameOverCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		sceneNo = Game;
 	}
 
-	if (gameOverCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
-		//audio_->StopWave(BGMSound);
+	if (gameOverCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		sceneNo = Title;
 	}
 

@@ -3,10 +3,6 @@
 
 void GameClearScene::Initialize() {
 
-	sprite = new Sprite();
-	sprite->Initialize("winScene.png");
-	sprite->SetPosition({ 0,0 });
-
 	backGround = new Sprite();
 	backGround->Initialize("scene/background.png");
 	backGround->SetPosition({ 0,0 });
@@ -35,13 +31,12 @@ void GameClearScene::Update() {
 		if (gameClearCount_ > 2) gameClearCount_ = 2;
 	}
 
-	if (gameClearCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
-		//audio_->StopWave(BGMSound);
+	if (gameClearCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		GameData::selectedStage++;
 		sceneNo = Game;
 	}
 
-	if (gameClearCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
-		//audio_->StopWave(BGMSound);
+	if (gameClearCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		sceneNo = Title;
 	}
 

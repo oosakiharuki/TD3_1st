@@ -176,6 +176,7 @@ void GameScene::Update() {
 	// ポーズのトグル（ESCキーまたはStartボタン）
 	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
 		isPaused_ = !isPaused_;
+	}
 
 	// ImGuiの更新
 	UpdateImGui();
@@ -198,14 +199,14 @@ void GameScene::Update() {
 			if (pauseCount_ > 2) pauseCount_ = 2;
 		}
 
-		if (pauseCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+		if (pauseCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			Finalize();
 			audio_->StopWave(BGMSound);
 			Initialize();
 			isPaused_ = !isPaused_;
 		}
 
-		if (pauseCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+		if (pauseCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			audio_->StopWave(BGMSound);
 			sceneNo = Select;
 		}
@@ -245,6 +246,12 @@ void GameScene::Update() {
 		return; // ゴールクリア状態なら更新処理をスキップ
 	}
 
+	// プレイヤーのHPが0になった場合、GameOverSceneに移行
+	if (player_->GetHp() <= 0) {
+		audio_->StopWave(BGMSound);
+		sceneNo = GameOver; // GameOverSceneに遷移
+	}
+
 	player_->Update();
 
 	// EnemyLoaderの更新
@@ -266,7 +273,7 @@ void GameScene::Update() {
 	//	// 次のステージ番号を計算
 	//	int nextStage = currentStage_ + 1;
 	//	GameData::selectedStage += 1;
-	
+
 	//	// 次のステージに応じてプレイヤーの座標を設定
 	//	Vector3 newPosition;
 	//	newPosition = PlayerPosition::stage[nextStage];
