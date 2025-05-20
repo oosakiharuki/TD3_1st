@@ -171,5 +171,9 @@ void StageSelect::Draw() {
 void StageSelect::Finalize() {
 	delete backGround;
 	delete stageNumber;
+	delete shadow;
+	delete StageSelectName;
+	delete selectBar;
+	delete buttonSprite;
 	delete stageObject_;
 }
