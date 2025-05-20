@@ -11,8 +11,11 @@ public:
 	void Finalize();
 
 private:
-	Sprite* sprite;
+	Sprite* gameClearNextStage;
+	Sprite* gameClearTitle;
 	Sprite* backGround;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
+
+	int gameClearCount_ = 1;
 };
 

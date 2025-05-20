@@ -137,4 +137,8 @@ private:
     //リスポーン地点
     WorldTransform worldTransformRespown_;
     Object3d* modelRespown_ = nullptr; // 目印用のオブジェクト
+
+    float hoverTimer_ = 0.0f;
+    float hoverAmplitude_ = 0.2f; // 上下振れ幅（調整可能）
+    float hoverFrequency_ = 2.0f; // 振動の速さ（Hz単位）
 };

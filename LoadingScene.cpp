@@ -22,7 +22,7 @@ void LoadingScene::Initialize() {
     
     // 背景の読み込み
     background = new Sprite();
-    background->Initialize("title_background.png");
+    background->Initialize("scene/background.png");
     background->SetPosition({ 0,0 });
 
     // ロードテキストの設定 - 画面中央に配置
@@ -115,8 +115,8 @@ void LoadingScene::LoadEssentialResources() {
     if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/loading/loading_icon.png")) {
         TextureManager::GetInstance()->LoadTexture("resource/Sprite/loading/loading_icon.png");
     }
-    if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/title_background.png")) {
-        TextureManager::GetInstance()->LoadTexture("resource/Sprite/title_background.png");
+    if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/scene/background.png")) {
+        TextureManager::GetInstance()->LoadTexture("resource/Sprite/scene/background.png");
     }
     if (!TextureManager::GetInstance()->CheckTextureExist("resource/Sprite/ui/hp_bar_bg.png")) {
         TextureManager::GetInstance()->LoadTexture("resource/Sprite/ui/hp_bar_bg.png");
@@ -209,10 +209,10 @@ void LoadingScene::LoadStage1Resources() {
     
     // タイトル・ゲームオーバー関連テクスチャをロード
     std::vector<std::string> textureQueue = {
-        "resource/Sprite/TitleName.png",
-        "resource/Sprite/ui/press_Botton.png",
-        "resource/Sprite/GameOverName.png",
-        "resource/Sprite/GameOver_background.png"
+        "resource/Sprite/ui/press_Button.png",
+        "resource/Sprite/scene/TitleName.png",
+        "resource/Sprite/scene/GameOverName.png",
+        "resource/Sprite/scene/background.png"
     };
     
     // 各テクスチャを順番にロード
@@ -260,9 +260,9 @@ void LoadingScene::LoadStage2Resources() {
     
     // ステージセレクト関連テクスチャをロード
     std::vector<std::string> textureQueue = {
-        "resource/Sprite/StageSelectName.png",
-        "resource/Sprite/StageSelect_background.png",
-        "resource/Sprite/stageNumber.png",
+        "resource/Sprite/scene/StageSelectName.png",
+        "resource/Sprite/scene/background.png",
+        "resource/Sprite/scene/stageNumber.png",
         "resource/Sprite/ui/hp_bar_bg.png",
         "resource/Sprite/ui/hp_bar_fill.png",
         "resource/Sprite/ui/hp_icon.png",

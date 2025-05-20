@@ -23,7 +23,7 @@ void Goal::Init() {
 	//TextureManager::GetInstance()->LoadTexture("resource/Sprite/winScene.png");
 
 	sprite = new Sprite();
-	sprite->Initialize("winScene.png");
+	sprite->Initialize("scene/winScene.png");
 	sprite->SetPosition({0, 0});
 
 	// 行列を更新

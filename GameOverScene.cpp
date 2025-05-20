@@ -1,13 +1,13 @@
 #include "GameOverScene.h"
 
 void GameOverScene::Initialize() {
-	sprite = new Sprite();
-	sprite->Initialize("GameOverName.png");
-	sprite->SetPosition({ 0,-200 });
+	gameOverContinue = new Sprite();
+	gameOverContinue->Initialize("scene/GameOver_Continue.png");
+	gameOverContinue->SetPosition({ 0,0 });
 
-	backGround = new Sprite();
-	backGround->Initialize("GameOver_background.png");
-	backGround->SetPosition({ 0,0 });
+	gameOverTitle = new Sprite();
+	gameOverTitle->Initialize("scene/GameOver_Title.png");
+	gameOverTitle->SetPosition({ 0,0 });
 
 	//切り替え時長押しにならないように
 	state = Input::GetInstance()->GetState();
@@ -15,27 +15,45 @@ void GameOverScene::Initialize() {
 }
 
 void GameOverScene::Update() {
-	sprite->Update();
-	backGround->Update();
+
+	if (Input::GetInstance()->TriggerKey(DIK_W)) {
+		gameOverCount_--;
+		if (gameOverCount_ < 1) gameOverCount_ = 1;
+	}
+	if (Input::GetInstance()->TriggerKey(DIK_S)) {
+		gameOverCount_++;
+		if (gameOverCount_ > 2) gameOverCount_ = 2;
+	}
+
+	if (gameOverCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+		//audio_->StopWave(BGMSound);
+		sceneNo = Game;
+	}
+
+	if (gameOverCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+		//audio_->StopWave(BGMSound);
+		sceneNo = Title;
+	}
+
+	gameOverContinue->Update();
+	gameOverTitle->Update();
 
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
-
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
-		Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		// GameOverからTitleに変更
-		sceneNo = Title;
-	}
 }
 
 void GameOverScene::Draw() {
 	SpriteCommon::GetInstance()->Command();
 
-	backGround->Draw();
-	sprite->Draw();
+	if (gameOverCount_ == 1) {
+		gameOverContinue->Draw();
+	}
+	else if (gameOverCount_ == 2) {
+		gameOverTitle->Draw();
+	}
 }
 
 void GameOverScene::Finalize() {
-	delete sprite;
-	delete backGround;
+	delete gameOverContinue;
+	delete gameOverTitle;
 }

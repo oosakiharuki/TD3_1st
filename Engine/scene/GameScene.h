@@ -44,6 +44,8 @@ public:
 	// ステージを変更する
 	void ChangeStage(int nextStage);
 
+	static void HandlePauseSelection(int selection);
+
 private:
 	void AddObstacle(std::vector<std::vector<AABB>>& allObstacles, const Vector3& min, const Vector3& max);
 	void LoadStage(std::string objFile);
@@ -99,6 +101,10 @@ private:
 
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;
+
+
+	bool isPaused_ = false;
+	int pauseCount_ = 1;
 
 	// ImGui用の回転値保存用変数
 	struct ObjectRotations {

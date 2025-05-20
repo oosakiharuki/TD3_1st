@@ -32,6 +32,11 @@ public:
 
 	void TutorialPos(Vector3 playerPos);
 
+	// ポーズ画面の表示
+	void DrawPause();
+	void DrawPauseRestart();
+	void DrawPauseSelect();
+
 private:
 	// HP表示関連
 	Sprite* hpBarBgSprite_ = nullptr;   // HP背景
@@ -63,4 +68,9 @@ private:
 	Sprite* tutorial = nullptr;
 
 	bool isTutorialEnd = false;
+
+	// ポーズ画面
+	Sprite* pauseRestartSprite_ = nullptr;
+	Sprite* pauseSelectSprite_ = nullptr;
+	Sprite* pauseSprite_ = nullptr;
 };

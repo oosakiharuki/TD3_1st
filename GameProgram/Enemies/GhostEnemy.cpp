@@ -228,6 +228,10 @@ void GhostEnemy::Update() {
 		worldTransform_.translation_.x = std::clamp(worldTransform_.translation_.x, worldTransformRespown_.translation_.x - 30, worldTransformRespown_.translation_.x + 30);
 		worldTransform_.translation_.z = std::clamp(worldTransform_.translation_.z, worldTransformRespown_.translation_.z - 30, worldTransformRespown_.translation_.z + 30);
 
+		// ホバーリング（上下ゆらゆら）
+		hoverTimer_ += deltaTime;
+		float hoverOffset = std::sin(hoverTimer_ * 2.0f * 3.14159f * hoverFrequency_) * hoverAmplitude_;
+		worldTransform_.translation_.y = position.y + hoverOffset;
 	}
 
 #ifdef _DEBUG
