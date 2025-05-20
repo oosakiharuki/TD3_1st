@@ -28,6 +28,15 @@ void CannonEnemy::Init() {
 	particleMove_->ChangeMode(BornParticle::Stop);
 
 	worldTransform_.translation_ = position;
+
+	// オーディオシングルトン取得
+	audio_ = Audio::GetInstance();
+
+	// 爆発音の複数バッファを初期化（同時再生用）
+	for (int i = 0; i < MAX_BOM_SOUNDS; i++) {
+		bomSounds_[i] = audio_->LoadWave("sound/bom.wav");
+	}
+	currentBomSoundIndex_ = 0;
 }
 
 void CannonEnemy::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -57,6 +66,26 @@ void CannonEnemy::Update() {
 			}
 		}
 	}
+
+	//// 弾と壊せるブロックの衝突チェック
+	//for (Block* block : blocks_) {
+	//	// ブロックがアクティブな場合のみ判定
+	//	if (block->IsActive()) {
+	//		AABB blockAABB = block->GetAABB();
+	//		for (Bom* bullet : bullets_) {
+	//			AABB bulletAABB = bullet->GetAABB();
+	//			if (IsCollisionAABB(bulletAABB, blockAABB)) {
+	//				// 弾を消滅させる
+	//				bullet->OnCollision();
+
+	//				// プレイヤーが大砲に乗っている場合、ブロックを壊す
+	//				if (isPlayer) {
+	//					block->SetActive(false);
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 	if (!isPlayer) {
 		// 重力処理
@@ -93,7 +122,7 @@ void CannonEnemy::Update() {
 		position.y = (enemyAABB.min.y + enemyAABB.max.y) * 0.5f;
 		position.z = (enemyAABB.min.z + enemyAABB.max.z) * 0.5f;
 
-		/// 敵の攻撃ロジック
+		// 敵の攻撃ロジック
 		if (!isStan && player_) {
 			// プレイヤーのAABBとの距離を計算
 			AABB playerAABB = player_->GetAABB();
@@ -111,8 +140,9 @@ void CannonEnemy::Update() {
 			// プレイヤーが攻撃範囲内に入ったら発射
 			if (distance <= attackRadius) {
 				// 発射メソッドを呼び出し
-				Fire();			
-			}else{
+				Fire();
+			}
+			else {
 				//発射モーションリセット
 				worldTransform_.scale_ = { 1,1,1 };
 				fireTimer = fireInterval;
@@ -128,6 +158,17 @@ void CannonEnemy::Update() {
 			// atan2を使ってY軸の回転角度を計算
 			worldTransform_.rotation_.y = atan2(direction.x, direction.z);
 		}
+
+		// 落下判定用
+		const float fallThreshold = -60.0f;
+
+		// バネとプレイヤーと大きさが若干違うので
+		// ステージブロックの先に行くと落ちる
+		// なので落ちたらスタート地点に戻るようにした
+		if (position.y < fallThreshold) {
+			position = RespownPosition;
+		}
+
 
 		worldTransform_.translation_ = position;
 	}
@@ -153,7 +194,7 @@ void CannonEnemy::Update() {
 			return true;
 		}
 		return false;
-	});
+		});
 	particleMove_->Update();
 	worldTransform_.UpdateMatrix();
 }
@@ -206,10 +247,17 @@ void CannonEnemy::Fire() {
 
 		bullets_.push_back(newBullet);
 
+		// 発射音を再生（複数バッファを順番に使用）（音量を小さく調整）
+		audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.4f, false);
+
+
+		// 次のサウンドバッファに進む
+		currentBomSoundIndex_ = (currentBomSoundIndex_ + 1) % MAX_BOM_SOUNDS;
+
 		// 次の発射までのクールダウンを設定（3秒に延長）
 		fireTimer = fireInterval;
 		animertion = 0.0f;
-	}	
+	}
 
 	//発射モーション
 	worldTransform_.scale_ = Scale;
@@ -230,6 +278,13 @@ void CannonEnemy::PlayerFire() {
 	newBullet->Init(playerPosition, velocity);
 
 	bullets_.push_back(newBullet);
+
+	// 発射音を再生
+	audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.4f, false);
+
+
+	// 次のサウンドバッファに進む
+	currentBomSoundIndex_ = (currentBomSoundIndex_ + 1) % MAX_BOM_SOUNDS;
 }
 
 // AABBを取得するメソッドを定義
@@ -248,13 +303,13 @@ void CannonEnemy::ContralPlayer() {
 	bullets_.remove_if([](Bom* bom) {
 		delete bom;
 		return true;
-	});
+		});
 
 	//発射モーションリセット
 	worldTransform_.scale_ = { 1,1,1 };
 	fireTimer = fireInterval;
 	animertion = 0.0f;
-	
+
 	worldTransform_.translation_ = { 0, -2, 0 };
 	worldTransform_.rotation_ = { 0, 0, 0 };
 	if (player_) {

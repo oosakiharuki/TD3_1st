@@ -93,7 +93,7 @@ void UIManager::Initialize() {
 	if (GameData::selectedStage == 0) {
 		tutorial = new Sprite();
 		tutorial->Initialize("ui/tutorial01.png");
-		tutorial->SetPosition({ 0, 0 });
+		tutorial->SetPosition({ 0,-50 });
 	}
 
 	pauseSprite_ = new Sprite();
@@ -195,12 +195,13 @@ void UIManager::Draw(int playerHP) {
 		hpTextSprite_->Draw();
 	}
 
+
+	// 操作ガイド描画
+	DrawControlGuide();
+
 	if (GameData::selectedStage == 0 && !isTutorialEnd) {
 		tutorial->Draw();
 	}
-	
-	// 操作ガイド描画
-	DrawControlGuide();
 }
 
 void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
@@ -209,14 +210,14 @@ void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
 		currentTotalKeys_ = totalKeys;
 		
 		// 鍵アイコンの位置を再計算（中央揃えにする）
-		float startX = 20.0f;
+		float startX = 5.0f; // 15
 		float iconWidth = 30.0f;
 		float iconSpacing = 5.0f;
 		float totalWidth = (iconWidth + iconSpacing) * totalKeys - iconSpacing;
 		
 		for (int i = 0; i < totalKeys; i++) {
 			float xPos = startX + i * (iconWidth + iconSpacing);
-			keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 110 });
+			keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 140 });
 		}
 	}
 	
@@ -292,11 +293,14 @@ void UIManager::TutorialPos(Vector3 playerPos) {
 	if (playerPos.z >= -30) {
 		tutorial->SetTextureFile("ui/tutorial05.png");
 	}
-	if (playerPos.z >= 20) {
+	if (playerPos.z >= 0) {
 		tutorial->SetTextureFile("ui/tutorial06.png");
 	}
-	if (playerPos.z >= 50) {
-		isTutorialEnd = true;
+	if (playerPos.z >= 60) {
+		tutorial->SetTextureFile("ui/tutorial_key.png");
+	}
+	if (playerPos.z >= 100) {
+		tutorial->SetTextureFile("ui/tutorial_goal.png");
 	}
 }
 

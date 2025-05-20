@@ -40,7 +40,7 @@ public:
 private:
 	// HP表示関連
 	Sprite* hpBarBgSprite_ = nullptr;   // HP背景
-	Sprite* hpBarFillSprite_ = nullptr; // HPバー
+	Sprite* hpBarFillSprite_ = nullptr; // HPバー 
 	Sprite* hpIconSprite_ = nullptr;    // HPアイコン
 	Sprite* hpTextSprite_ = nullptr;    // HPテキスト
 

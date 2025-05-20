@@ -1,5 +1,7 @@
 #include "GameScene.h"
 #include "ParticleNumber.h"
+#include "ImGuiManager.h"
+#include <filesystem>
 
 GameScene::GameScene() {}
 
@@ -22,6 +24,12 @@ void GameScene::Finalize() {
 void GameScene::Initialize() {
 
 	currentStage_ = GameData::selectedStage;
+	
+	// デバッグ出力 - GameSceneの初期化時のステージ番号
+	{
+		std::string initDebugMsg = "GameScene Initialize: Stage " + std::to_string(currentStage_) + "\n";
+		OutputDebugStringA(initDebugMsg.c_str());
+	}
 
 	camera_ = new Camera();
 	
@@ -81,6 +89,11 @@ void GameScene::Initialize() {
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
 
+	// キャノン敵にもブロックリストを設定
+	for (CannonEnemy* cannon : enemyLoader_->GetCannonEnemyList()) {
+		cannon->SetBlocks(blocks);
+	}
+
 	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
 	player_->SetGhostBlocks(ghostBlocks);
 
@@ -102,9 +115,47 @@ void GameScene::Initialize() {
 	uiManager = new UIManager();
 	uiManager->Initialize();
 
-	// ステージ1のBGM読み込みと再生
+	// 現在のステージに応じたBGM読み込みと再生
 	audio_ = Audio::GetInstance();
-	BGMSound = audio_->LoadWave("sound/stage1.wav");
+	
+	// BGMファイル名の作成
+	std::string bgmFile;
+	
+	// ステージ番号に基づいてBGMを切り替え
+	switch (currentStage_) {
+	case 1:
+		bgmFile = "sound/stage1.wav";
+		break;
+	case 2:
+		bgmFile = "sound/stage2.wav";
+		break;
+	case 3:
+		bgmFile = "sound/stage3.wav";
+		break;
+	case 4:
+		bgmFile = "sound/stage4.wav"; // stage4.wavがない場合の代替
+		break;
+	case 5:
+		bgmFile = "sound/stage5.wav"; // stage5.wavがない場合の代替
+		break;
+	case 6:
+		bgmFile = "sound/stage7.wav"; // stage6.wavがない場合の代替
+		break;
+	case 7:
+		bgmFile = "sound/stage7.wav"; // stage7.wavがない場合の代替
+		break;
+	default:
+		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM
+		break;
+	}
+	
+	// デバッグ出力 - 現在のステージとBGMファイル
+	{
+		std::string bgmDebugMsg = "BGM Load: Stage " + std::to_string(currentStage_) + ", File: " + bgmFile + "\n";
+		OutputDebugStringA(bgmDebugMsg.c_str());
+	}
+	
+	BGMSound = audio_->LoadWave(bgmFile.c_str());
 	audio_->SoundPlayWave(BGMSound, 0.25f, true);
 
 	//パーテイクルのメモリ対策でリセット
@@ -121,9 +172,17 @@ void GameScene::Update() {
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
+
 	// ポーズのトグル（ESCキーまたはStartボタン）
 	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
 		isPaused_ = !isPaused_;
+
+	// ImGuiの更新
+	UpdateImGui();
+
+	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
+		audio_->StopWave(BGMSound);
+		sceneNo = Title;
 	}
 
 	// ポーズ中はUIのみ更新し、ゲーム処理をスキップ
@@ -265,6 +324,10 @@ void GameScene::Draw() {
 		it->DrawP();
 	}
 
+	for (Block* block : mapLoader_->GetBlockList()) {
+		block->DrawP();
+	}
+
 	if (mapLoader_) {
 		mapLoader_->DrawP();
 	}
@@ -319,7 +382,50 @@ void GameScene::ChangeStage(int nextStage) {
 	Command.str("");
 	Command.clear();
 
+	// 前のステージのBGMを停止
+	audio_->StopWave(BGMSound);
+
 	currentStage_ = nextStage;
+	
+	// 新しいステージのBGMを読み込んで再生
+	std::string bgmFile;
+	
+	// ステージ番号に基づいてBGMを切り替え
+	switch (currentStage_) {
+	case 1:
+		bgmFile = "sound/stage1.wav";
+		break;
+	case 2:
+		bgmFile = "sound/stage2.wav";
+		break;
+	case 3:
+		bgmFile = "sound/stage3.wav";
+		break;
+	case 4:
+		bgmFile = "sound/stage1.wav"; // stage4.wavがない場合の代替
+		break;
+	case 5:
+		bgmFile = "sound/stage2.wav"; // stage5.wavがない場合の代替
+		break;
+	case 6:
+		bgmFile = "sound/stage3.wav"; // stage6.wavがない場合の代替
+		break;
+	case 7:
+		bgmFile = "sound/stage1.wav"; // stage7.wavがない場合の代替
+		break;
+	default:
+		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM
+		break;
+	}
+	
+	// デバッグ出力 - 現在のステージとBGMファイル
+	{
+		std::string changeDebugMsg = "BGM Change: Stage " + std::to_string(currentStage_) + ", File: " + bgmFile + "\n";
+		OutputDebugStringA(changeDebugMsg.c_str());
+	}
+	
+	BGMSound = audio_->LoadWave(bgmFile.c_str());
+	audio_->SoundPlayWave(BGMSound, 0.25f, true);
 
 	//前ステージの削除
 	delete stage;
@@ -388,6 +494,11 @@ void GameScene::ChangeStage(int nextStage) {
 	const std::vector<Block*>& blocks = mapLoader_->GetBlockList();
 	player_->SetBlocks(blocks);
 
+	// キャノン敵にもブロックリストを設定
+	for (CannonEnemy* cannon : enemyLoader_->GetCannonEnemyList()) {
+		cannon->SetBlocks(blocks);
+	}
+
 	// プレイヤーにゴーストブロックの追加
 	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
 	player_->SetGhostBlocks(ghostBlocks);
@@ -442,6 +553,153 @@ void GameScene::LoadStage(std::string objFile) {
 	//		}
 	//	}
 	//}
+}
+
+void GameScene::UpdateImGui() {
+#ifdef _DEBUG
+	// 経過時間を更新(ハイライト表示用)
+	if (objectRotations_.lastModifiedTime > 0) {
+		objectRotations_.lastModifiedTime -= 1.0f / 60.0f; // 1秒間ハイライト表示
+	}
+
+	// ImGuiウィンドウを作成
+	ImGui::Begin("Object Rotations");
+
+	// ドアの回転を調整
+	if (ImGui::CollapsingHeader("Doors")) {
+		// 全てのドアのXYZ軸回転を制御するスライダー
+		ImGui::Text("Global Door Rotation Controls:");
+		bool anyRotationChanged = false;
+		
+		// X軸回転を調整
+		if (ImGui::SliderFloat("X Rotation (All Doors)", &objectRotations_.doorRotation.x, 0.0f, 360.0f)) {
+			// 全てのドアに適用
+			const std::vector<Door*>& doors = mapLoader_->GetDoorList();
+			for (Door* door : doors) {
+				if (door) {
+					door->SetRotateX(objectRotations_.doorRotation.x);
+				}
+			}
+			anyRotationChanged = true;
+		}
+
+		// Y軸回転を調整
+		if (ImGui::SliderFloat("Y Rotation (All Doors)", &objectRotations_.doorRotation.y, 0.0f, 360.0f)) {
+			// 全てのドアに適用
+			const std::vector<Door*>& doors = mapLoader_->GetDoorList();
+			for (Door* door : doors) {
+				if (door) {
+					door->SetRotateY(objectRotations_.doorRotation.y);
+				}
+			}
+			anyRotationChanged = true;
+		}
+
+		// Z軸回転を調整
+		if (ImGui::SliderFloat("Z Rotation (All Doors)", &objectRotations_.doorRotation.z, 0.0f, 360.0f)) {
+			// 全てのドアに適用
+			const std::vector<Door*>& doors = mapLoader_->GetDoorList();
+			for (Door* door : doors) {
+				if (door) {
+					door->SetRotateZ(objectRotations_.doorRotation.z);
+				}
+			}
+			anyRotationChanged = true;
+		}
+
+		if (anyRotationChanged) {
+			// 全てのドアの変更をハイライトする
+			objectRotations_.lastModifiedDoorId = -1; // -1は全ドアを意味する
+			objectRotations_.lastModifiedTime = 1.0f; // 1秒間ハイライト
+		}
+
+		ImGui::Separator();
+		ImGui::Text("Individual Door Rotation Controls:");
+
+		// 各ドアの個別回転
+		const std::vector<Door*>& doors = mapLoader_->GetDoorList();
+		for (int i = 0; i < doors.size(); i++) {
+			if (doors[i]) {
+				// ハイライトカラーを設定
+				bool isHighlighted = (objectRotations_.lastModifiedDoorId == i) && 
+								   (objectRotations_.lastModifiedTime > 0);
+
+				// ハイライト表示
+				if (isHighlighted) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.3f, 0.3f, 1.0f));
+					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.5f, 0.1f, 0.1f, 0.5f));
+				}
+
+				ImGui::PushID(i * 3);
+				ImGui::Text("Door %d:", i+1);
+				
+				// 現在の回転値を取得
+				Vector3 rotation = doors[i]->GetRotation();
+				
+				// X軸回転
+				bool rotXChanged = false;
+				ImGui::PushID(0);
+				if (ImGui::SliderFloat("X##Door", &rotation.x, 0.0f, 360.0f)) {
+					doors[i]->SetRotateX(rotation.x);
+					objectRotations_.lastModifiedDoorId = i;
+					objectRotations_.lastModifiedTime = 1.0f;
+					rotXChanged = true;
+				}
+				ImGui::PopID();
+				
+				// Y軸回転
+				bool rotYChanged = false;
+				ImGui::PushID(1);
+				if (ImGui::SliderFloat("Y##Door", &rotation.y, 0.0f, 360.0f)) {
+					doors[i]->SetRotateY(rotation.y);
+					objectRotations_.lastModifiedDoorId = i;
+					objectRotations_.lastModifiedTime = 1.0f;
+					rotYChanged = true;
+				}
+				ImGui::PopID();
+				
+				// Z軸回転
+				bool rotZChanged = false;
+				ImGui::PushID(2);
+				if (ImGui::SliderFloat("Z##Door", &rotation.z, 0.0f, 360.0f)) {
+					doors[i]->SetRotateZ(rotation.z);
+					objectRotations_.lastModifiedDoorId = i;
+					objectRotations_.lastModifiedTime = 1.0f;
+					rotZChanged = true;
+				}
+				ImGui::PopID();
+
+				// 変更があった場合はグローバル値も更新
+				if (rotXChanged) objectRotations_.doorRotation.x = rotation.x;
+				if (rotYChanged) objectRotations_.doorRotation.y = rotation.y;
+				if (rotZChanged) objectRotations_.doorRotation.z = rotation.z;
+				
+				ImGui::PopID(); // i * 3
+
+				// ハイライトを元に戻す
+				if (isHighlighted) {
+					ImGui::PopStyleColor(2);
+				}
+				
+				// ドアの位置情報を表示
+				AABB aabb = doors[i]->GetAABB();
+				Vector3 center = {
+					(aabb.min.x + aabb.max.x) * 0.5f,
+					(aabb.min.y + aabb.max.y) * 0.5f,
+					(aabb.min.z + aabb.max.z) * 0.5f
+				};
+				ImGui::Text("Position: X=%.2f Y=%.2f Z=%.2f", center.x, center.y, center.z);
+				ImGui::Separator();
+			}
+		}
+	}
+
+	// TODO: 他のオブジェクトにもSetRotateX/Y/Zメソッドを追加する必要があります
+	// 下記のクラスにはこれらのメソッドが実装されていません
+	// Block, Key, GhostBlock, Enemy/GhostEnemy, CannonEnemy, SpringEnemy, Player, Goal
+
+	ImGui::End();
+#endif
 }
 
 void GameScene::UpdateStageAABB() {

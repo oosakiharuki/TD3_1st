@@ -141,11 +141,28 @@ bool MapLoader::ParseCSVLine(const std::string& line, MapObjectData& data) {
 		else if (token == "door") {
 			data.type = MapObjectType::Door;
 
+			// モデルの向き（normal_値）
 			if (std::getline(iss, token, ',')) {
 				data.rotate = std::stof(token);
 			}
 			else {
 				data.rotate = 0.0f;
+			}
+
+			// 開閉角度
+			if (std::getline(iss, token, ',')) {
+				data.doorOpenAngle = std::stof(token);
+			}
+			else {
+				data.doorOpenAngle = 90.0f; // デフォルト90度
+			}
+
+			// 回転速度
+			if (std::getline(iss, token, ',')) {
+				data.doorSpeed = std::stof(token);
+			}
+			else {
+				data.doorSpeed = 2.0f; // デフォルト2.0度/フレーム
 			}
 		}
 		else if (token == "block") {
@@ -311,6 +328,9 @@ void MapLoader::CreateObjects(Player* player) {
 	// キーのIDカウンターを初期化
 	int keyIdCounter = 0;
 
+	// ドアのIDカウンターを初期化
+	int doorIdCounter = 0;
+
 	// ゴールを見つけたかどうかのフラグ
 	bool foundGoal = false;
 
@@ -333,11 +353,25 @@ void MapLoader::CreateObjects(Player* player) {
 			keys_.push_back(key);
 		}
 		else if (objectData.type == MapObjectType::Door) {
-			Door* door = new Door();
-			door->Init();
-			door->SetPosition(objectData.position);
-			door->SetRotateY(objectData.rotate);
-			door->SetPlayer(player);
+		Door* door = new Door();
+		
+		// IDの設定
+		if (objectData.id > 0) {
+		door->SetDoorID(objectData.id);
+		} else {
+		door->SetDoorID(doorIdCounter++);
+		}
+		
+		// 初期化前にnormal_値を設定 - この順番が重要
+		door->SetRotateY(objectData.rotate);
+		
+		// 開閉パラメータを設定
+		door->SetDoorOpenParams(objectData.doorOpenAngle, objectData.doorSpeed);
+		
+		// ドアの初期化
+		door->Init();
+		door->SetPosition(objectData.position);
+		 door->SetPlayer(player);
 			doors_.push_back(door);
 		}
 		else if (objectData.type == MapObjectType::Block) {

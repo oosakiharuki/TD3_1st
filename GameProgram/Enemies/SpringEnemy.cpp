@@ -33,6 +33,8 @@ void SpringEnemy::AddObstacle(const AABB& obstacle) { obstacleList_.push_back(ob
 void SpringEnemy::SetPosition(const Vector3& pos) {
 	position = pos;
 	worldTransform_.translation_ = position;
+	//リスポーン地点設定
+	RespownPosition = position;
 	// 位置を設定したら必ず行列を更新する
 	worldTransform_.UpdateMatrix();
 }
@@ -91,8 +93,8 @@ void SpringEnemy::Update() {
 		// コリジョン用AABB
 		float halfW = 0.7f, halfH = 1.2f, halfD = 0.7f;
 		AABB enemyAABB;
-		enemyAABB.min = {position.x - halfW, position.y - halfH, position.z - halfD};
-		enemyAABB.max = {position.x + halfW, position.y + halfH, position.z + halfD};
+		enemyAABB.min = { position.x - halfW, position.y - halfH, position.z - halfD };
+		enemyAABB.max = { position.x + halfW, position.y + halfH, position.z + halfD };
 
 		// 地面との衝突のみチェック（横方向の衝突は無視）
 		for (auto& obstacleAABB : obstacleList_) {
@@ -113,9 +115,19 @@ void SpringEnemy::Update() {
 		position.x = (enemyAABB.min.x + enemyAABB.max.x) * 0.5f;
 		position.y = (enemyAABB.min.y + enemyAABB.max.y) * 0.5f;
 		position.z = (enemyAABB.min.z + enemyAABB.max.z) * 0.5f;
+		
+		// 落下判定用
+		const float fallThreshold = -60.0f;
+
+		// バネとプレイヤーと大きさが若干違うので
+		// ステージブロックの先に行くと落ちる
+		// なので落ちたらスタート地点に戻るようにした
+		if (position.y < fallThreshold) {
+			position = RespownPosition;
+		}
 
 		worldTransform_.translation_ = position;
-	}	
+	}
 
 
 	// 圧縮アニメーション処理

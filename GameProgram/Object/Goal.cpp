@@ -52,7 +52,7 @@ void Goal::Draw() { model_->Draw(worldTransform_); }
 void Goal::Text() {
 	// isClearがtrueでスプライトが正常に初期化されている場合のみ描画
 	if (isClear && sprite != nullptr) {
-		sprite->Draw();
+		//sprite->Draw();
 	}
 }
 
