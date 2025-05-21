@@ -2,6 +2,11 @@
 #include "GameData.h"
 
 void GameClearScene::Initialize() {
+
+	sprite = new Sprite();
+	sprite->Initialize("winScene.png");
+	sprite->SetPosition({ 0,0 });
+
 	backGround = new Sprite();
 	backGround->Initialize("scene/background.png");
 	backGround->SetPosition({ 0,0 });

@@ -1,12 +1,32 @@
-# Blender 4.1.1 MTL File: 'None'
+# Blender 4.4.0 MTL File: 'None'
 # www.blender.org
 
-newmtl マテリアル
+newmtl 20281_Tulip_entry_door_knob_V_2
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd Tulip_entry_door_knob_v3_L1.123c7344f623-c9b1-4bf4-bd66-76a1fee54a4f/Tulip_entry_door_knob_v3_L1.123c7344f623-c9b1-4bf4-bd66-76a1fee54a4f/Blank image.jpg
+
+newmtl 20281_Tulip_entry_door_knob_V_2.001
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd Tulip_entry_door_knob_v3_L1.123c7344f623-c9b1-4bf4-bd66-76a1fee54a4f/Tulip_entry_door_knob_v3_L1.123c7344f623-c9b1-4bf4-bd66-76a1fee54a4f/Blank image.jpg
+
+newmtl Material
 Ns 250.000000
 Ka 1.000000 1.000000 1.000000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
-Ni 1.500000
+Ni 1.450000
 d 1.000000
 illum 2
-map_Kd monsterBall.png
+map_Kd doortexture.png

@@ -82,11 +82,6 @@ void Particle::Initialize(std::string textureFile) {
 	emitter.frequencyTime = 0.0f;
 
 
-	transform.translate = { 0.0f,0.0f,0.0f };
-	transform.rotate = { 0.0f,0.0f,0.0f };
-	transform.scale = { 1.0f,1.0f,1.0f };
-
-
 	transformL = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	//場
@@ -107,7 +102,7 @@ void Particle::Update() {
 
 		if (emitter.frequency <= emitter.frequencyTime) {
 			//発生処理
-			Emit(transform.translate, count, particleType);
+			Emit(particleType);
 			//particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
 			emitter.frequencyTime -= emitter.frequency;
 		}
@@ -115,7 +110,7 @@ void Particle::Update() {
 	case BornParticle::MomentMode:
 
 		//発生処理
-		Emit(transform.translate, count, particleType);
+		Emit(particleType);
 		//particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
 		bornP = BornParticle::Stop;
 
@@ -232,10 +227,7 @@ bool Particle::IsCollision(const AABB& aabb, const Vector3& point) {
 }
 
 
-void Particle::Emit(const Vector3& position, uint32_t count, ParticleType type) {
-
-	emitter.transform.translate = position;
-	emitter.count = count;
+void Particle::Emit(ParticleType type) {
 
 	//
 	std::random_device seedGenerator;

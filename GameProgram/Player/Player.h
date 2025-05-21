@@ -97,6 +97,15 @@ public:
 
 	void DrawP();
 
+
+
+	void InitializeFloatingGimmick();
+
+	void UpdateFloatingGimmick();
+
+
+
+
 private:
 	Vector3 position = { 0, 10, -10 };
 	Vector3 initialPosition = { 0, 10, -10 }; // 初期位置保存用
@@ -106,7 +115,20 @@ private:
 
 	WorldTransform worldTransform_;
 	Camera* camera_ = nullptr;
-	Object3d* PlayerModel_ = nullptr;
+
+	//Object3d* PlayerModel_ = nullptr;
+	Object3d* headModel_ = nullptr;
+	Object3d* footModel_ = nullptr;
+
+	WorldTransform worldTransformH_;
+	WorldTransform worldTransformF_;
+
+
+
+	float floatingParameter_ = 0.0f;
+	bool isMoving = false;
+
+
 	CameraController cameraController_;
 
 	bool onGround_ = true;

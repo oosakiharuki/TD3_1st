@@ -51,15 +51,15 @@ public:
 	//void SetModel(Model* model) { this->model = model; }
 	//void SetModelFile(const std::string& filePath);
 
-	void SetScale(const Vector3& scale) { transform.scale = scale; }
-	const Vector3& GetScale() const { return transform.scale; }
+	void SetScale(const Vector3& scale) { emitter.transform.scale = scale; }
+	const Vector3& GetScale() const { return emitter.transform.scale; }
 
 	//未完
 	//void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
 	//const Vector3& GetRotate() const { return transform.rotate; }
 
-	const Vector3& GetTranslate()const { return transform.translate; }
-	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+	const Vector3& GetTranslate()const { return emitter.transform.translate; }
+	void SetTranslate(const Vector3& translate) { emitter.transform.translate = translate; }
 
 	void SetFrequency(const float time) { emitter.frequency = time; }
 
@@ -77,10 +77,10 @@ public:
 	void ChangeMode(BornParticle mode) { bornP = mode; }
 	void ChangeType(ParticleType type) { particleType = type; }
 
-	void SetParticleCount(uint32_t countnum) { count = countnum; }
+	void SetParticleCount(uint32_t countnum) { emitter.count = countnum; }
 
 
-	void Emit(const Vector3& position, uint32_t count, ParticleType type);
+	void Emit(ParticleType type);
 
 private:
 	ParticleCommon* particleCommon = nullptr;
@@ -118,9 +118,6 @@ private:
 	//Particles particles[kNumMaxInstance];
 	std::list<Particles> particles;
 	uint32_t numInstance = 0;
-
-	Transform transform;
-	uint32_t count = 1;
 
 	Transform transformL;
 

@@ -46,6 +46,9 @@ struct MapObjectData {
 	float moveRange = 15.0f;
 	float initialY = 92.0f;
 	TileMovementPreset movePreset = TileMovementPreset::Normal;
+	// Doorの回転パラメータ
+	float doorOpenAngle = 90.0f; // ドアの開閉角度（度数法）
+	float doorSpeed = 2.0f;     // ドアの回転速度（度/フレーム）
 };
 
 class MapLoader {

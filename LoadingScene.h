@@ -11,6 +11,7 @@
 #include <future>
 #include <vector>
 #include <string>
+#include "Engine/audio/Audio.h" // 音声処理用
 
 class LoadingScene : public IScene {
 public:
@@ -34,14 +35,14 @@ private:
     Sprite* background = nullptr;   // 背景画像
     Sprite* progressBar = nullptr;  // 進行度バー
     Sprite* progressBarBg = nullptr; // 進行度バーの背景
-    
+
     // かわいいキラキラエフェクト用
     static const int kMaxStars = 10;
     Sprite* stars[kMaxStars] = { nullptr };
     float starRotations[kMaxStars] = { 0.0f };
     float starScales[kMaxStars] = { 0.0f };
     float starAlphas[kMaxStars] = { 0.0f };
-    
+
     float rotationAngle = 0.0f;     // アイコン回転角度
     float posX = 0.0f;            // アイコンのX座標
     float posY = 0.0f;            // アイコンのY座標
@@ -49,7 +50,7 @@ private:
     const float loadingSpeed = 0.05f;  // ロード速度（0.015fから高速化）
     std::atomic<bool> isLoadingComplete = false;  // ロード完了フラグ
     std::atomic<int> loadingStage = 0;           // ロードステージ（段階的にロードを行う）
-    
+
     // 非同期ローディング用
     std::thread loadingThread;
     std::mutex loadingMutex;
@@ -64,5 +65,9 @@ private:
 
     // 各ステージの進行状況
     const int totalStages = 4;
-    float stageProgress[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    float stageProgress[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+    // 音声関連
+    SoundData loadingSound; // ローディング中のBGM
+    bool isSoundStopped = false; // 音声停止フラグ
 };

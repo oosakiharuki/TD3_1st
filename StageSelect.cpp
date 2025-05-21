@@ -129,6 +129,11 @@ void StageSelect::Update() {
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE) ||
 		((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A))) {
 		GameData::selectedStage = stageNum;
+		
+		// デバッグ出力 - ステージ選択時のステージ番号
+		std::string debugMsg = "Stage Selected: " + std::to_string(GameData::selectedStage) + "\n";
+		OutputDebugStringA(debugMsg.c_str());
+		
 		sceneNo = Game;
 	}
 
@@ -171,5 +176,9 @@ void StageSelect::Draw() {
 void StageSelect::Finalize() {
 	delete backGround;
 	delete stageNumber;
+	delete shadow;
+	delete StageSelectName;
+	delete selectBar;
+	delete buttonSprite;
 	delete stageObject_;
 }
