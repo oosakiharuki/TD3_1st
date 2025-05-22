@@ -12,7 +12,7 @@ public:
 
 private:
 	Sprite* gameClearNextStage;
-	Sprite* gameClearTitle;
+	Sprite* gameClearSelect;
 	Sprite* backGround;
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 

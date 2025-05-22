@@ -11,9 +11,9 @@ void GameClearScene::Initialize() {
 	gameClearNextStage->Initialize("scene/GameClear_NextStage.png");
 	gameClearNextStage->SetPosition({ 0,0 });
 
-	gameClearTitle = new Sprite();
-	gameClearTitle->Initialize("scene/GameClear_Title.png");
-	gameClearTitle->SetPosition({ 0,0 });
+	gameClearSelect = new Sprite();
+	gameClearSelect->Initialize("scene/GameClear_Select.png");
+	gameClearSelect->SetPosition({ 0,0 });
 
 	//切り替え時長押しにならないように
 	state = Input::GetInstance()->GetState();
@@ -37,11 +37,11 @@ void GameClearScene::Update() {
 	}
 
 	if (gameClearCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		sceneNo = Title;
+		sceneNo = Select;
 	}
 
 	gameClearNextStage->Update();
-	gameClearTitle->Update();
+	gameClearSelect->Update();
 	backGround->Update();
 
 	Input::GetInstance()->GetJoystickState(0, state);
@@ -57,12 +57,12 @@ void GameClearScene::Draw() {
 		gameClearNextStage->Draw();
 	}
 	else if (gameClearCount_ == 2) {
-		gameClearTitle->Draw();
+		gameClearSelect->Draw();
 	}
 }
 
 void GameClearScene::Finalize() {
 	delete gameClearNextStage;
-	delete gameClearTitle;
+	delete gameClearSelect;
 	delete backGround;
 }
