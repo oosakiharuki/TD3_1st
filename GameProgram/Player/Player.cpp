@@ -19,6 +19,7 @@ Player::Player() {}
 Player::~Player() {
 	delete particleMove_;
 	delete particleTransfar_;
+	delete particleDeath_;
 	delete headModel_;
 	delete footModel_;
 }
@@ -59,10 +60,18 @@ void Player::Init(Camera* camera) {
 	particleMove_ = new Particle();
 	particleMove_->Initialize("resource/Sprite/circle.png");
 	particleMove_->ChangeMode(BornParticle::Stop);
+	particleMove_->ChangeType(ParticleType::Normal);
 
 	particleTransfar_ = new Particle();
 	particleTransfar_->Initialize("resource/Sprite/circle.png");
 	particleTransfar_->ChangeMode(BornParticle::Stop);
+	particleTransfar_->ChangeType(ParticleType::Plane);
+
+	particleDeath_ = new Particle();
+	particleDeath_->Initialize("resource/Sprite/circle.png");
+	particleDeath_->ChangeMode(BornParticle::Stop);
+	particleDeath_->ChangeType(ParticleType::Normal);
+
 
 	//切り替え時長押しにならないように
 	state = Input::GetInstance()->GetState();
@@ -74,209 +83,211 @@ void Player::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_
 void Player::AddObstacle(const AABB& obstacle) { obstacleList_.push_back(obstacle); }
 
 void Player::Update() {
+	if (!deadPlayer) {
 #pragma region 入力処理
-	Input::GetInstance()->GetJoystickState(0, state);
-	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+		Input::GetInstance()->GetJoystickState(0, state);
+		Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
-	// キーボードとGamePad左スティックの入力を合算して移動処理する
-	float keyboardSpeed = 0.55f;
-	Vector3 inputVec = { 0.0f, 0.0f, 0.0f };
+		// キーボードとGamePad左スティックの入力を合算して移動処理する
+		float keyboardSpeed = 0.55f;
+		Vector3 inputVec = { 0.0f, 0.0f, 0.0f };
 
-	// キーボード入力 (WASD)
-	if (Input::GetInstance()->PushKey(DIK_W)) {
-		inputVec.z += keyboardSpeed;
-	}
-	if (Input::GetInstance()->PushKey(DIK_S)) {
-		inputVec.z -= keyboardSpeed;
-	}
-	if (Input::GetInstance()->PushKey(DIK_A)) {
-		inputVec.x -= keyboardSpeed;
-	}
-	if (Input::GetInstance()->PushKey(DIK_D)) {
-		inputVec.x += keyboardSpeed;
-	}
+		// キーボード入力 (WASD)
+		if (Input::GetInstance()->PushKey(DIK_W)) {
+			inputVec.z += keyboardSpeed;
+		}
+		if (Input::GetInstance()->PushKey(DIK_S)) {
+			inputVec.z -= keyboardSpeed;
+		}
+		if (Input::GetInstance()->PushKey(DIK_A)) {
+			inputVec.x -= keyboardSpeed;
+		}
+		if (Input::GetInstance()->PushKey(DIK_D)) {
+			inputVec.x += keyboardSpeed;
+		}
 
-	// GamePad左スティック入力
-	const float deadZone = 0.2f;
-	if (Input::GetInstance()->GetJoystickState(0, state)) {
-		float gpX = static_cast<float>(state.Gamepad.sThumbLX) / 32768.0f;
-		float gpZ = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f;
-		if (fabs(gpX) < deadZone)
-			gpX = 0.0f;
-		if (fabs(gpZ) < deadZone)
-			gpZ = 0.0f;
-		inputVec.x += gpX;
-		inputVec.z += gpZ;
-	}
+		// GamePad左スティック入力
+		const float deadZone = 0.2f;
+		if (Input::GetInstance()->GetJoystickState(0, state)) {
+			float gpX = static_cast<float>(state.Gamepad.sThumbLX) / 32768.0f;
+			float gpZ = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f;
+			if (fabs(gpX) < deadZone)
+				gpX = 0.0f;
+			if (fabs(gpZ) < deadZone)
+				gpZ = 0.0f;
+			inputVec.x += gpX;
+			inputVec.z += gpZ;
+		}
 
-	// 入力処理とプレイヤーの目標移動速度を計算
-	Vector3 targetVelocity = {0.0f, 0.0f, 0.0f};
-	if (Length(inputVec) > 0) {
-		Vector3 move = Normalize(inputVec) * speed;
-		float yawRad = cameraYaw * (3.14159265f / 180.0f);
+		// 入力処理とプレイヤーの目標移動速度を計算
+		Vector3 targetVelocity = { 0.0f, 0.0f, 0.0f };
+		if (Length(inputVec) > 0) {
+			Vector3 move = Normalize(inputVec) * speed;
+			float yawRad = cameraYaw * (3.14159265f / 180.0f);
 
-		// カメラ向きに合わせて回転
-		Vector3 rotatedMove;
-		rotatedMove.x = move.x * cosf(yawRad) + move.z * sinf(yawRad);
-		rotatedMove.z = -move.x * sinf(yawRad) + move.z * cosf(yawRad);
-		rotatedMove.y = 0.0f;
+			// カメラ向きに合わせて回転
+			Vector3 rotatedMove;
+			rotatedMove.x = move.x * cosf(yawRad) + move.z * sinf(yawRad);
+			rotatedMove.z = -move.x * sinf(yawRad) + move.z * cosf(yawRad);
+			rotatedMove.y = 0.0f;
 
-		// 目標速度を設定
-		targetVelocity = rotatedMove;
+			// 目標速度を設定
+			targetVelocity = rotatedMove;
 
-		// 目標の回転角を計算
-		float targetRotateY = std::atan2(rotatedMove.x, rotatedMove.z);
-		
-		// 回転もスムーズにする
-		const float rotationSmoothFactor = 0.2f;
-		RotateY = LeapShortAngle(RotateY, targetRotateY, rotationSmoothFactor);
-	}
+			// 目標の回転角を計算
+			float targetRotateY = std::atan2(rotatedMove.x, rotatedMove.z);
 
-	// スムージング係数（当たりをゆるくしつつ、動きは速めに）
-	const float moveSmoothFactor = 0.3f;
-	
-	// 現在の速度から目標速度へ徐々に変化
-	velocity.x = velocity.x + (targetVelocity.x - velocity.x) * moveSmoothFactor;
-	velocity.z = velocity.z + (targetVelocity.z - velocity.z) * moveSmoothFactor;
+			// 回転もスムーズにする
+			const float rotationSmoothFactor = 0.2f;
+			RotateY = LeapShortAngle(RotateY, targetRotateY, rotationSmoothFactor);
+		}
 
-	// 速度が非常に小さい場合はゼロにする（浮動小数点の問題回避）
-	const float stopThreshold = 0.001f;
-	if (Length(velocity) < stopThreshold) {
-		velocity.x = 0.0f;
-		velocity.z = 0.0f;
-	}
+		// スムージング係数（当たりをゆるくしつつ、動きは速めに）
+		const float moveSmoothFactor = 0.3f;
 
-	// 計算された速度で移動
-	position.x += velocity.x;
-	position.z += velocity.z;
+		// 現在の速度から目標速度へ徐々に変化
+		velocity.x = velocity.x + (targetVelocity.x - velocity.x) * moveSmoothFactor;
+		velocity.z = velocity.z + (targetVelocity.z - velocity.z) * moveSmoothFactor;
+
+		// 速度が非常に小さい場合はゼロにする（浮動小数点の問題回避）
+		const float stopThreshold = 0.001f;
+		if (Length(velocity) < stopThreshold) {
+			velocity.x = 0.0f;
+			velocity.z = 0.0f;
+		}
+
+		// 計算された速度で移動
+		position.x += velocity.x;
+		position.z += velocity.z;
 
 #pragma endregion
 
 #pragma region 状態切替
-	// 状態切替
-	if (Input::GetInstance()->TriggerKey(DIK_1)) {
-		currentState = State::Normal;
-	}
-	if (Input::GetInstance()->TriggerKey(DIK_2)) {
-		currentState = State::Bomb;
-	}
-	if (Input::GetInstance()->TriggerKey(DIK_3)) {
-		currentState = State::Ghost;
-	}
+		// 状態切替
+		if (Input::GetInstance()->TriggerKey(DIK_1)) {
+			currentState = State::Normal;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_2)) {
+			currentState = State::Bomb;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_3)) {
+			currentState = State::Ghost;
+		}
 #pragma endregion
 
 #pragma region カメラ操作
-	// コントローラとキーボード両方で回さないようにするフラグ
-	bool isKeyBorad = false;
+		// コントローラとキーボード両方で回さないようにするフラグ
+		bool isKeyBorad = false;
 
-	// キーボードによるカメラ回転X
-	if (Input::GetInstance()->PushKey(DIK_LEFT)) {
-		cameraYaw -= 2.5f;
-		isKeyBorad = true;
-	}
-	if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
-		cameraYaw += 2.5f;
-		isKeyBorad = true;
-	}
-
-	// キーボードによるカメラ回転Y
-	if (Input::GetInstance()->PushKey(DIK_DOWN)) {
-		cameraPitch += 1.5f;
-		isKeyBorad = true;
-	}
-	if (Input::GetInstance()->PushKey(DIK_UP)) {
-		cameraPitch -= 1.5f;
-		isKeyBorad = true;
-	}
-
-	// GamePad右スティックによるカメラ回転処理
-	float xCamera = 0.0f, zCamera = 0.0f;
-	if (Input::GetInstance()->GetJoystickState(0, state) && !isKeyBorad) {
-
-		// 右スティックの入力
-		xCamera = static_cast<float>(state.Gamepad.sThumbRX) / 32768.0f; // -1.0f～1.0f
-		zCamera = static_cast<float>(state.Gamepad.sThumbRY) / 32768.0f; // -1.0f～1.0f
-
-		// デッドゾーン処理
-		if (abs(xCamera) < deadZone) {
-			xCamera = 0.0f;
-			if (fabs(zCamera) < deadZone)
-				zCamera = 0.0f;
+		// キーボードによるカメラ回転X
+		if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+			cameraYaw -= 2.5f;
+			isKeyBorad = true;
+		}
+		if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+			cameraYaw += 2.5f;
+			isKeyBorad = true;
 		}
 
-		// カメラ向き
-		// Y軸
-		cameraYaw += xCamera * 2.5f;
-		// X軸
-		cameraPitch += zCamera * 2.5f;
-	}
+		// キーボードによるカメラ回転Y
+		if (Input::GetInstance()->PushKey(DIK_DOWN)) {
+			cameraPitch += 1.5f;
+			isKeyBorad = true;
+		}
+		if (Input::GetInstance()->PushKey(DIK_UP)) {
+			cameraPitch -= 1.5f;
+			isKeyBorad = true;
+		}
 
-	cameraPitch = std::clamp(cameraPitch, 0.0f, 80.0f);
+		// GamePad右スティックによるカメラ回転処理
+		float xCamera = 0.0f, zCamera = 0.0f;
+		if (Input::GetInstance()->GetJoystickState(0, state) && !isKeyBorad) {
 
-	cameraController_.SetPitch(cameraPitch);
-	cameraController_.SetYaw(cameraYaw);
-	worldTransform_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
-	worldTransformH_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
-	worldTransformF_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
+			// 右スティックの入力
+			xCamera = static_cast<float>(state.Gamepad.sThumbRX) / 32768.0f; // -1.0f～1.0f
+			zCamera = static_cast<float>(state.Gamepad.sThumbRY) / 32768.0f; // -1.0f～1.0f
+
+			// デッドゾーン処理
+			if (abs(xCamera) < deadZone) {
+				xCamera = 0.0f;
+				if (fabs(zCamera) < deadZone)
+					zCamera = 0.0f;
+			}
+
+			// カメラ向き
+			// Y軸
+			cameraYaw += xCamera * 2.5f;
+			// X軸
+			cameraPitch += zCamera * 2.5f;
+		}
+
+		cameraPitch = std::clamp(cameraPitch, 0.0f, 80.0f);
+
+		cameraController_.SetPitch(cameraPitch);
+		cameraController_.SetYaw(cameraYaw);
+		worldTransform_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
+		worldTransformH_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
+		worldTransformF_.rotation_.y = LeapShortAngle(worldTransform_.rotation_.y, RotateY, 0.2f);
 
 
-	//if (velocityY_ == 0.0f) {
-	//	onGround_ = true;
-	//}
-	//else {
-	//	onGround_ = false;
-	//}
+		//if (velocityY_ == 0.0f) {
+		//	onGround_ = true;
+		//}
+		//else {
+		//	onGround_ = false;
+		//}
 
 #pragma endregion
 
 #pragma region ジャンプ・移動処理
 	// ジャンプ・移動時の各種処理
-	if (!onGround_) {
-		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !EnemyContral && !isTransfar) {
-			velocityY_ -= 1.2f;
-			isTransfar = true;
+		if (!onGround_) {
+			if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !EnemyContral && !isTransfar) {
+				velocityY_ -= 1.2f;
+				isTransfar = true;
+			}
+			else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && !EnemyContral && !isTransfar) {
+				velocityY_ -= 1.2f;
+				isTransfar = true;
+			}
 		}
-		else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && !EnemyContral && !isTransfar) {
-			velocityY_ -= 1.2f;
-			isTransfar = true;
+		else {
+			isTransfar = false;
 		}
-	}
-	else {
-		isTransfar = false;
-	}
 
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && velocityY_ == 0.0f) {
-		velocityY_ = 0.3f;
-		onGround_ = false;
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A) && velocityY_ == 0.0f) {
+			velocityY_ = 0.3f;
+			onGround_ = false;
 
-		// ジャンプ音を再生
-		audio_->SoundPlayWave(JumpSound_, 0.7f);
-	}
-	else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && velocityY_ == 0.0f) {
-		velocityY_ = 0.3f;
-		onGround_ = false;
+			// ジャンプ音を再生
+			audio_->SoundPlayWave(JumpSound_, 0.7f);
+		}
+		else if (Input::GetInstance()->TriggerKey(DIK_SPACE) && velocityY_ == 0.0f) {
+			velocityY_ = 0.3f;
+			onGround_ = false;
 
-		// ジャンプ音を再生
-		audio_->SoundPlayWave(JumpSound_, 0.7f);
-	}
+			// ジャンプ音を再生
+			audio_->SoundPlayWave(JumpSound_, 0.7f);
+		}
 
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B) && velocityY_ == 0.0f && EnemyContral) {
-		velocityY_ = 0.0f;
-		EnemyContral = false;
-		onEnemy = true;
-	}
-	else if (Input::GetInstance()->TriggerKey(DIK_K) && velocityY_ == 0.0f && EnemyContral) {
-		velocityY_ = 0.0f;
-		EnemyContral = false;
-		onEnemy = true;
-	}
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B) && velocityY_ == 0.0f && EnemyContral) {
+			velocityY_ = 0.0f;
+			EnemyContral = false;
+			onEnemy = true;
+		}
+		else if (Input::GetInstance()->TriggerKey(DIK_K) && velocityY_ == 0.0f && EnemyContral) {
+			velocityY_ = 0.0f;
+			EnemyContral = false;
+			onEnemy = true;
+		}
 #pragma endregion
 
 #pragma region 物理演算と衝突処理
-	// 重力と垂直移動
-	float gravity = 0.01f;
-	velocityY_ -= gravity;
-	position.y += velocityY_;
+		// 重力と垂直移動
+		float gravity = 0.01f;
+		velocityY_ -= gravity;
+		position.y += velocityY_;
+	}
 
 	// プレイヤーのAABB更新
 	float halfW = 1.0f, halfH = 1.0f, halfD = 1.0f;
@@ -431,7 +442,7 @@ void Player::Update() {
 	if (worldTransform_.translation_.x != position.x || velocityY_ != 0.0f || worldTransform_.translation_.z != position.z) {
 		particleMove_->SetParticleCount(2);
 		particleMove_->SetFrequency(0.25f);
-		
+
 		if (EnemyContral) {
 			//操っている敵のほうにパーテイクルを出す
 			particleMove_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 2.0f,worldTransform_.translation_.z });
@@ -439,8 +450,6 @@ void Player::Update() {
 		else {
 			particleMove_->SetTranslate(worldTransform_.translation_);
 		}
-
-		particleMove_->ChangeType(ParticleType::Normal);
 		particleMove_->ChangeMode(BornParticle::TimerMode);
 		isMoving = true;
 	}
@@ -448,22 +457,21 @@ void Player::Update() {
 		particleMove_->ChangeMode(BornParticle::Stop);
 		isMoving = false;
 	}
-	
-	
+
+
 	if (collisionEnemy) {
 		particleTransfar_->SetParticleCount(10);
 		particleTransfar_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 1.0f,worldTransform_.translation_.z });
-		particleTransfar_->ChangeType(ParticleType::Plane);
 		particleTransfar_->ChangeMode(BornParticle::MomentMode);
 	}
 
 
 	if (EnemyContral && collisionEnemy) {
-		position.y -= 2.0f;	
+		position.y -= 2.0f;
 		collisionEnemy = false;
 	}
 	worldTransform_.translation_ = position;
-	
+
 	worldTransformH_.translation_ = position;
 	worldTransformF_.translation_ = position;
 
@@ -471,10 +479,11 @@ void Player::Update() {
 	if (EnemyContral) {
 		worldTransform_.translation_.y += 2.0f;
 		worldTransformH_.translation_.y += 0.8f;
-	}	
-	
+	}
+
 	particleMove_->Update();
 	particleTransfar_->Update();
+	particleDeath_->Update();
 
 #pragma endregion
 
@@ -484,12 +493,35 @@ void Player::Update() {
 
 	//　攻撃されたら
 	CheckDamage();
+	
 
 	//ゴールの旗に当たったか
 	CheckCollisionWithGoal();
 
 	// 落下判定チェック
-	CheckFallOut();
+	CheckFallOut();	
+	
+	//hpがゼロの時にデスパーティクル発動
+	if (hp <= 0) {
+		const float deltaTimer = 1.0f / 60.0f;
+
+		deathTimer -= deltaTimer;
+		if (deathTimer > 0) {
+
+			if (!deadPlayer) {
+				//派手に散るパーテイクル
+				particleDeath_->ChangeMode(BornParticle::MomentMode);
+				particleDeath_->SetParticleCount(100);
+				particleDeath_->SetTranslate(worldTransform_.translation_);
+			}
+			deadPlayer = true;
+		}
+		else {
+			deadPlayer = false;
+			deathTimer = 0.0f;
+		}
+	}
+
 #pragma endregion
 
 #pragma region デバッグ表示
@@ -511,7 +543,7 @@ void Player::Update() {
 	velocityY_ = std::clamp(velocityY_, -20.0f, 20.0f);
 
 	UpdateFloatingGimmick();
-	
+
 	worldTransform_.UpdateMatrix();
 	worldTransformH_.UpdateMatrix();
 	worldTransformF_.UpdateMatrix();
@@ -522,17 +554,20 @@ void Player::Update() {
 // 落下チェック関数
 void Player::CheckFallOut() {
 	// Y座標が閾値を下回った場合
-	if (position.y < fallThreshold) {
+	if (position.y < fallThreshold && hp > 0) {
 
 		if (!EnemyContral) {
-			// 初期位置にリセット
-			ResetToInitialPosition();
 
 			// ダメージを与える（通常の2倍）
 			TakeDamage(fallDamage);
 
 			// 落下音を再生
 			audio_->SoundPlayWave(FallSound_, 0.7f);
+
+			if (hp > 0) {
+				// 初期位置にリセット
+				ResetToInitialPosition();
+			}
 		}
 		//のりうつりを解除
 		velocityY_ = 0.0f;
@@ -648,18 +683,20 @@ void Player::Draw() {
 	}
 
 	// 通常の描画（テクスチャハンドルは使わない）
-
-	//頭のモデル描画
-	headModel_->Draw(worldTransformH_);
-	//足のモデル描画
-	if (!EnemyContral) {
-		footModel_->Draw(worldTransformF_);
+	if (!deadPlayer && deathTimer >= 2.0f) {
+		//頭のモデル描画
+		headModel_->Draw(worldTransformH_);
+		//足のモデル描画
+		if (!EnemyContral) {
+			footModel_->Draw(worldTransformF_);
+		}
 	}
 }
 
 void Player::DrawP() {
 	particleMove_->Draw();
 	particleTransfar_->Draw();
+	particleDeath_->Draw();
 }
 
 void Player::SetGhostEnemies(const std::vector<GhostEnemy*>& enemies) { ghostEnemies_ = enemies; }

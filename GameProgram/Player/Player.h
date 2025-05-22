@@ -80,7 +80,7 @@ public:
 	enum class State {
 		Normal, // 通常状態
 		Bomb,   // ブロックを壊せる状態
-		Ghost   // ブロックをすり抜ける状態
+		Ghost,  // ブロックをすり抜ける状態
 	};
 
 	void DrawUI();
@@ -103,7 +103,7 @@ public:
 
 	void UpdateFloatingGimmick();
 
-
+	bool GetDeadPlayer() { return deadPlayer; }
 
 
 private:
@@ -137,6 +137,7 @@ private:
 	bool isDamage = false;
 	bool EnemyContral = false;
 	bool collisionEnemy = false;
+	bool deadPlayer = false; // 死んでいるアニメーション時に使う
 
 	float velocityY_ = 0.0f;
 	int hp = 200;
@@ -190,6 +191,9 @@ private:
 
 	Particle* particleMove_ = nullptr;
 	Particle* particleTransfar_ = nullptr;
+	Particle* particleDeath_ = nullptr;
 
 	float RotateY = 0.0f;
+
+	float deathTimer = 2.0f;
 };

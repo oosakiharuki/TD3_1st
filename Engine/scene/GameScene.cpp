@@ -246,13 +246,15 @@ void GameScene::Update() {
 		return; // ゴールクリア状態なら更新処理をスキップ
 	}
 
+	player_->Update();
+
 	// プレイヤーのHPが0になった場合、GameOverSceneに移行
-	if (player_->GetHp() <= 0) {
+	//デスパーティクルが終了した時も追加
+	if (player_->GetHp() <= 0 && !player_->GetDeadPlayer()) {
 		audio_->StopWave(BGMSound);
 		sceneNo = GameOver; // GameOverSceneに遷移
 	}
 
-	player_->Update();
 
 	// EnemyLoaderの更新
 	if (enemyLoader_) {
