@@ -25,13 +25,13 @@ void GhostBlock::Draw() {
     switch (colorType)
     {
     case ColorType::Blue:
-        model_->Draw(worldTransform_, "resource/Sprite/BlueGhost.png");
+        model_->Draw(worldTransform_, "resource/Sprite/Blue.png");
         break;
     case ColorType::Green:
-        model_->Draw(worldTransform_, "resource/Sprite/GreenGhost.png");
+        model_->Draw(worldTransform_, "resource/Sprite/Green.png");
         break;
     case ColorType::Red:
-        model_->Draw(worldTransform_, "resource/Sprite/RedGhost.png");
+        model_->Draw(worldTransform_, "resource/Sprite/Red.png");
         break;
     default:
         break;
