@@ -90,7 +90,7 @@ private:
 
 	// 攻撃関連のパラメータ
 	float attackRadius = 30.0f;     // 攻撃検知範囲（これを小さくすると検知範囲が縮小）
-	float fireTimer = 0.0f;         // 現在の発射タイマー
+	float fireTimer = 3.0f;         // 現在の発射タイマー
 	float fireInterval = 3.0f;      // 発射間隔（秒）- 3秒に変更
 
 	float animertion = 0.0f;

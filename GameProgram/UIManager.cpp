@@ -24,6 +24,11 @@ UIManager::~UIManager() {
 			delete keyIcons_[i];
 			keyIcons_[i] = nullptr;
 		}
+
+		if (No_keyIcons_[i]) {
+			delete No_keyIcons_[i];
+			No_keyIcons_[i] = nullptr;
+		}
 	}
 	
 	if (keyboardGuideSprite_)
@@ -71,11 +76,17 @@ void UIManager::Initialize() {
 	// 鍵アイコンの初期化（最大10個まで）
 	for (int i = 0; i < MAX_KEYS; i++) {
 		keyIcons_[i] = new Sprite();
-		keyIcons_[i]->Initialize("key.png");
+		keyIcons_[i]->Initialize("key_Icon.png");
 		// 鍵アイコンを横並びにする（HPバーの上に配置）
 		float xPos = 10.0f + (i * 15.0f); // 各鍵アイコンの間隔を35ピクセルに設定
 		keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 90 });
 		keyIcons_[i]->SetSize({60, 60});
+
+		No_keyIcons_[i] = new Sprite();
+		No_keyIcons_[i]->Initialize("noKey_Icon.png");
+		// 鍵アイコンを横並びにする（HPバーの上に配置）
+		No_keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 90 });
+		No_keyIcons_[i]->SetSize({ 60, 60 });
 	}
 
 	// キーボード操作ガイド
@@ -126,6 +137,10 @@ void UIManager::Update() {
 	for (int i = 0; i < MAX_KEYS; i++) {
 		if (keyIcons_[i]) {
 			keyIcons_[i]->Update();
+		}
+		
+		if (No_keyIcons_[i]) {
+			No_keyIcons_[i]->Update();
 		}
 	}
 	
@@ -218,6 +233,7 @@ void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
 		for (int i = 0; i < totalKeys; i++) {
 			float xPos = startX + i * (iconWidth + iconSpacing);
 			keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 140 });
+			No_keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 140 });
 		}
 	}
 	
@@ -225,6 +241,10 @@ void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
 	for (int i = 0; i < totalKeys; i++) {
 		if (i < remainingKeys) {
 			// まだ取得していない鍵（表示する）
+			No_keyIcons_[i]->Draw();
+		}
+		else {
+			// 取得した鍵（表示する）
 			keyIcons_[i]->Draw();
 		}
 		// 取得済みの鍵は表示しない

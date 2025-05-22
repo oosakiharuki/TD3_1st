@@ -47,6 +47,7 @@ private:
 	// 鍵表示関連
 	static const int MAX_KEYS = 10;     // 最大表示可能な鍵の数
 	Sprite* keyIcons_[MAX_KEYS] = {};   // 鍵アイコンの配列
+	Sprite* No_keyIcons_[MAX_KEYS] = {}; // 持ってない鍵アイコンの配列
 	int currentTotalKeys_ = 0;          // 現在のステージの鍵の総数
 
 	// 操作ガイド関連
