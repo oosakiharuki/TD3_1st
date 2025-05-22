@@ -29,7 +29,7 @@ public:
     // AABBを取得するメソッドを追加
     AABB GetAABB() const;
 
-    void SetParent(const WorldTransform* parent) { worldTransform_.parent_ = parent; }
+    void SetParent(const WorldTransform* parent) { worldTransformModel_.parent_ = parent; }
     void ContralPlayer();
     void ReMove(const Vector3& position_);
     bool GetPlayerCtrl() { return isPlayer; }
@@ -141,4 +141,5 @@ private:
     float hoverTimer_ = 0.0f;
     float hoverAmplitude_ = 0.2f; // 上下振れ幅（調整可能）
     float hoverFrequency_ = 2.0f; // 振動の速さ（Hz単位）
+    WorldTransform worldTransformModel_;
 };

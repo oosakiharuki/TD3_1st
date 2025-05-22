@@ -41,6 +41,7 @@ void GhostEnemy::Init() {
 	worldTransform_.translation_ = position;
 
 	worldTransformRespown_.Initialize();
+	worldTransformModel_.Initialize();
 }
 
 void GhostEnemy::SetObstacleList(const std::vector<AABB>& obstacles) { obstacleList_.insert(obstacleList_.end(), obstacles.begin(), obstacles.end()); }
@@ -167,7 +168,7 @@ void GhostEnemy::Update() {
 			direction = Normalize(direction);
 
 			// Y軸の回転角度を計算
-			worldTransform_.rotation_.y = atan2(direction.x, -direction.z);
+			worldTransform_.rotation_.y = atan2(-direction.x, -direction.z);
 
 			// 一定速度でプレイヤーに向かうベクトルを設定
 			velocity = toPlayer * kChaseSpeed;
@@ -205,7 +206,7 @@ void GhostEnemy::Update() {
 
 			if (Length(toDestination) > 0.001f) {
 				Vector3 direction = Normalize(toDestination);
-				worldTransform_.rotation_.y = atan2(direction.x, -direction.z);
+				worldTransform_.rotation_.y = atan2(-direction.x, -direction.z);
 			}
 		}
 		else {
@@ -228,10 +229,15 @@ void GhostEnemy::Update() {
 		worldTransform_.translation_.x = std::clamp(worldTransform_.translation_.x, worldTransformRespown_.translation_.x - 30, worldTransformRespown_.translation_.x + 30);
 		worldTransform_.translation_.z = std::clamp(worldTransform_.translation_.z, worldTransformRespown_.translation_.z - 30, worldTransformRespown_.translation_.z + 30);
 
+		//Ý軸以外読み取る
+		worldTransformModel_.translation_.x = worldTransform_.translation_.x;
+		worldTransformModel_.translation_.z = worldTransform_.translation_.z;
+		worldTransformModel_.rotation_ = worldTransform_.rotation_;
+
 		// ホバーリング（上下ゆらゆら）
 		hoverTimer_ += deltaTime;
 		float hoverOffset = std::sin(hoverTimer_ * 2.0f * 3.14159f * hoverFrequency_) * hoverAmplitude_;
-		worldTransform_.translation_.y = position.y + hoverOffset;
+		worldTransformModel_.translation_.y = position.y + hoverOffset;
 	}
 
 #ifdef _DEBUG
@@ -259,6 +265,7 @@ void GhostEnemy::Update() {
 #endif
 
 	worldTransform_.UpdateMatrix();
+	worldTransformModel_.UpdateMatrix();
 	worldTransformRespown_.UpdateMatrix();
 }
 
@@ -286,7 +293,7 @@ void GhostEnemy::UpdateRandomMovement(float deltaTime) {
 	Vector3 moveDirection = Normalize(toDestination);
 
 	// 移動方向を向く
-	worldTransform_.rotation_.y = atan2(moveDirection.x, -moveDirection.z);
+	worldTransform_.rotation_.y = atan2(-moveDirection.x, -moveDirection.z);
 
 	// 移動
 	worldTransform_.translation_.x += moveDirection.x * randomMoveSpeed_;
@@ -462,15 +469,15 @@ void GhostEnemy::Draw() {
 	switch (colorType)
 	{
 	case ColorType::Blue:
-		model_->Draw(worldTransform_);	
+		model_->Draw(worldTransformModel_);	
 		modelRespown_->Draw(worldTransformRespown_, "resource/Sprite/BlueGhost.png");
 		break;
 	case ColorType::Green:
-		model_->Draw(worldTransform_, "resource/Sprite/GreenGhost.png");
+		model_->Draw(worldTransformModel_, "resource/Sprite/GreenGhost.png");
 		modelRespown_->Draw(worldTransformRespown_, "resource/Sprite/GreenGhost.png");
 		break;
 	case ColorType::Red:
-		model_->Draw(worldTransform_, "resource/Sprite/RedGhost.png");
+		model_->Draw(worldTransformModel_, "resource/Sprite/RedGhost.png");
 		modelRespown_->Draw(worldTransformRespown_, "resource/Sprite/RedGhost.png");
 		break;
 	default:
@@ -491,6 +498,7 @@ void GhostEnemy::ContralPlayer() {
 	isPlayer = true;
 	worldTransform_.translation_ = { 0, -2, 0 };
 	worldTransform_.rotation_ = { 0, 3, 0 };
+	worldTransformModel_ = worldTransform_;
 	if (player_) {
 		player_->SetState(Player::State::Ghost);
 	}
@@ -502,7 +510,8 @@ void GhostEnemy::ReMove(const Vector3& position_) {
 		timerS = 0.0f;
 		isStan = true;
 		isPlayer = false;
-		worldTransform_.parent_ = nullptr;
+		worldTransformModel_.parent_ = nullptr;
+		worldTransformModel_ = worldTransform_;
 		if (player_) {
 			player_->SetState(Player::State::Normal);
 		}

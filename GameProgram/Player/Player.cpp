@@ -631,13 +631,10 @@ void Player::CheckCollision() {
 		case State::Ghost:
 			for (auto* it : ghostEnemies_) {
 				if (ghostBlock_->IsActive() && IsCollisionAABB(playerAABB, ghostBlockAABB) && it->GetPlayerCtrl()) {
-					if (ghostBlock_->GetColor() == it->GetColor()) {
-						velocity.x = 0;
-					}
-					else {
+					//ゴーストが違う色の場合通れない / 同じは通れる
+					if (ghostBlock_->GetColor() != it->GetColor()) {
 						ResolveAABBCollision(playerAABB, ghostBlockAABB, velocityY_, onGround_);
 					}
-
 				}
 			}
 			break;
