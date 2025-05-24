@@ -12,7 +12,6 @@
 #include "Block.h"
 #include "CannonEnemy.h"
 #include "Door.h"
-#include "Enemy.h"
 #include "EnemyLoader.h"
 #include "GhostBlock.h"
 #include "Goal.h"

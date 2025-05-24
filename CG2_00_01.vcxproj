@@ -65,7 +65,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d;$(ProjectDir)Engine\3d;$(ProjectDir)Engine\base;$(ProjectDir)Engine\math;$(ProjectDir)Engine\input;$(ProjectDir)Engine\audio;$(ProjectDir)Engine\scene;$(ProjectDir)Engine;$(ProjectDir)GameProgram;$(ProjectDir)GameProgram\Enemies;$(ProjectDir)GameProgram\Object;$(ProjectDir)GameProgram\Player;$(ProjectDir)GameProgram\Stage</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d;$(ProjectDir)Engine\3d;$(ProjectDir)Engine\base;$(ProjectDir)Engine\math;$(ProjectDir)Engine\input;$(ProjectDir)Engine\audio;$(ProjectDir)Engine\scene;$(ProjectDir)Engine;$(ProjectDir)GameProgram;$(ProjectDir)GameProgram\Enemies;$(ProjectDir)GameProgram\Object;$(ProjectDir)GameProgram\Player;$(ProjectDir)GameProgram\Stage;$(ProjectDir)GameProgram\System</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,7 +89,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d;$(ProjectDir)Engine\3d;$(ProjectDir)Engine\base;$(ProjectDir)Engine\math;$(ProjectDir)Engine\input;$(ProjectDir)Engine\audio;$(ProjectDir)Engine\scene;$(ProjectDir)Engine;$(ProjectDir)GameProgram;$(ProjectDir)GameProgram\Enemies;$(ProjectDir)GameProgram\Object;$(ProjectDir)GameProgram\Player;$(ProjectDir)GameProgram\Stage</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Engine\2d;$(ProjectDir)Engine\3d;$(ProjectDir)Engine\base;$(ProjectDir)Engine\math;$(ProjectDir)Engine\input;$(ProjectDir)Engine\audio;$(ProjectDir)Engine\scene;$(ProjectDir)Engine;$(ProjectDir)GameProgram;$(ProjectDir)GameProgram\Enemies;$(ProjectDir)GameProgram\Object;$(ProjectDir)GameProgram\Player;$(ProjectDir)GameProgram\Stage;$(ProjectDir)GameProgram\System</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -138,14 +138,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\scene\TitleScene.cpp" />
     <ClCompile Include="Engine\3d\WorldTransform.cpp" />
     <ClCompile Include="FadeManager.cpp" />
-    <ClCompile Include="GameClearScene.cpp" />
-    <ClCompile Include="GameOverScene.cpp" />
-    <ClCompile Include="GameProgram\AABB.cpp" />
-    <ClCompile Include="GameProgram\CameraController.cpp" />
-    <ClCompile Include="GameProgram\Collision.cpp" />
+    <ClCompile Include="Engine\scene\GameClearScene.cpp" />
+    <ClCompile Include="Engine\scene\GameOverScene.cpp" />
+    <ClCompile Include="GameProgram\System\AABB.cpp" />
+    <ClCompile Include="GameProgram\Player\CameraController.cpp" />
+    <ClCompile Include="GameProgram\System\Collision.cpp" />
     <ClCompile Include="GameProgram\Enemies\Bom.cpp" />
     <ClCompile Include="GameProgram\Enemies\CannonEnemy.cpp" />
-    <ClCompile Include="GameProgram\Enemies\Enemy.cpp" />
     <ClCompile Include="GameProgram\Enemies\GhostEnemy.cpp" />
     <ClCompile Include="GameProgram\Enemies\SpringEnemy.cpp" />
     <ClCompile Include="GameProgram\Object\Block.cpp" />
@@ -159,10 +158,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="GameProgram\Stage\MapChip.cpp" />
     <ClCompile Include="GameProgram\Stage\MapLoader.cpp" />
     <ClCompile Include="GameProgram\Stage\StageManager.cpp" />
-    <ClCompile Include="GameProgram\UIManager.cpp" />
+    <ClCompile Include="GameProgram\System\UIManager.cpp" />
     <ClCompile Include="LoadingScene.cpp" />
-    <ClCompile Include="MoveTile.cpp" />
-    <ClCompile Include="StageSelect.cpp" />
+    <ClCompile Include="GameProgram\Object\MoveTile.cpp" />
+    <ClCompile Include="Engine\scene\StageSelect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\2d\ImGuiManager.h" />
@@ -202,15 +201,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\scene\TitleScene.h" />
     <ClInclude Include="Engine\3d\WorldTransform.h" />
     <ClInclude Include="FadeManager.h" />
-    <ClInclude Include="GameClearScene.h" />
-    <ClInclude Include="GameData.h" />
-    <ClInclude Include="GameOverScene.h" />
-    <ClInclude Include="GameProgram\AABB.h" />
-    <ClInclude Include="GameProgram\CameraController.h" />
-    <ClInclude Include="GameProgram\Collision.h" />
+    <ClInclude Include="Engine\scene\GameClearScene.h" />
+    <ClInclude Include="GameProgram\System\GameData.h" />
+    <ClInclude Include="Engine\scene\GameOverScene.h" />
+    <ClInclude Include="GameProgram\System\AABB.h" />
+    <ClInclude Include="GameProgram\Player\CameraController.h" />
+    <ClInclude Include="GameProgram\System\Collision.h" />
     <ClInclude Include="GameProgram\Enemies\Bom.h" />
     <ClInclude Include="GameProgram\Enemies\CannonEnemy.h" />
-    <ClInclude Include="GameProgram\Enemies\Enemy.h" />
     <ClInclude Include="GameProgram\Enemies\GhostEnemy.h" />
     <ClInclude Include="GameProgram\Enemies\GhostColor.h" />
     <ClInclude Include="GameProgram\Enemies\SpringEnemy.h" />
@@ -225,10 +223,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="GameProgram\Stage\MapChip.h" />
     <ClInclude Include="GameProgram\Stage\MapLoader.h" />
     <ClInclude Include="GameProgram\Stage\StageManager.h" />
-    <ClInclude Include="GameProgram\UIManager.h" />
+    <ClInclude Include="GameProgram\System\UIManager.h" />
     <ClInclude Include="LoadingScene.h" />
-    <ClInclude Include="MoveTile.h" />
-    <ClInclude Include="StageSelect.h" />
+    <ClInclude Include="GameProgram\Object\MoveTile.h" />
+    <ClInclude Include="Engine\scene\StageSelect.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
