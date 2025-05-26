@@ -69,6 +69,7 @@ private:
 	Sprite* tutorial = nullptr;
 
 	bool isTutorialEnd = false;
+	bool isTextureEnd[6] = { false };//次の説明で変れないように
 
 	// ポーズ画面
 	Sprite* pauseRestartSprite_ = nullptr;

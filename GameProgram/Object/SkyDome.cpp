@@ -14,7 +14,7 @@ void Skydome::Initialize() {
 }
 
 void Skydome::Update() {
-
+	model_->LightSwitch(false);
 	//worldTransform_.rotation_.y += 0.008f; // 回転速度は調整可能
 	// 行列計算
 	worldTransform_.UpdateMatrix();

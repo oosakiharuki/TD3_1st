@@ -301,26 +301,32 @@ void UIManager::DrawControlGuide() {
 }
 
 void UIManager::TutorialPos(Vector3 playerPos) {
-	if (playerPos.z >= -90) {
+	if (playerPos.z >= -90 && !isTextureEnd[0]) {
 		tutorial->SetTextureFile("ui/tutorial02.png");
 	}
-	if (playerPos.z >= -80) {
+	if (playerPos.z >= -80 && !isTextureEnd[1]) {
 		tutorial->SetTextureFile("ui/tutorial03.png");
+		isTextureEnd[0] = true;
 	}
-	if (playerPos.z >= -50) {
+	if (playerPos.z >= -50 && !isTextureEnd[2]) {
 		tutorial->SetTextureFile("ui/tutorial04.png");
+		isTextureEnd[1] = true;
 	}
-	if (playerPos.z >= -30) {
+	if (playerPos.z >= -30 && !isTextureEnd[3]) {
 		tutorial->SetTextureFile("ui/tutorial05.png");
+		isTextureEnd[2] = true;
 	}
-	if (playerPos.z >= 0) {
+	if (playerPos.z >= 0 && !isTextureEnd[4]) {
 		tutorial->SetTextureFile("ui/tutorial06.png");
+		isTextureEnd[3] = true;
 	}
-	if (playerPos.z >= 60) {
+	if (playerPos.z >= 60 && !isTextureEnd[5]) {
 		tutorial->SetTextureFile("ui/tutorial_key.png");
+		isTextureEnd[4] = true;
 	}
 	if (playerPos.z >= 100) {
 		tutorial->SetTextureFile("ui/tutorial_goal.png");
+		isTextureEnd[5] = true;
 	}
 }
 
