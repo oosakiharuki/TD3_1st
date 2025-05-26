@@ -17,7 +17,7 @@ public:
 		emitter.frequencyTime = 0.0f;
 	}
 
-	Particles MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
+	Particles MakeNewParticle(std::mt19937& randomEngine, const Emitter& emitter);
 	Particles MakeNewParticlePlane(std::mt19937& randomEngine, const Vector3& translate);
 
 	std::list<Particles> MakeEmit(const Emitter& emitter, std::mt19937& randomEngine, ParticleType Type);

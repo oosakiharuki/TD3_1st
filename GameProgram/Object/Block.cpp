@@ -22,14 +22,17 @@ void Block::Init() {
 	// 行列の更新
 	worldTransform.UpdateMatrix();
 
+	//ブロックに攻撃した時のパーテイクル
 	particle = new Particle();
-	particle->Initialize("resource/Sprite/circle.png");
+	particle->Initialize("resource/Sprite/break_block.png");
 	particle->ChangeMode(BornParticle::Stop);
 	particle->ChangeType(ParticleType::Normal);
 }
 
 void Block::Update() {
 	particle->Update();
+	particle->SetScale({ 0.8f,0.8f ,0.8f });
+
 
 	worldTransform.UpdateMatrix();
 }
@@ -67,10 +70,9 @@ void Block::SetSize(const Vector3& size) {
 void Block::OnCollision() {
 	hp--;
 
-	particle->SetParticleCount(6);
+	particle->SetParticleCount(3);
 	particle->SetTranslate(particlePosition);
 	particle->ChangeMode(BornParticle::MomentMode);
-
 
 	if (hp <= 0) {
 		isActive_ = false;

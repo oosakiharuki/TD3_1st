@@ -10,11 +10,11 @@ void Skydome::Initialize() {
 	model_->SetModelFile("space");
 
 	worldTransform_.Initialize();
-	worldTransform_.rotation_.y = std::numbers::pi_v<float> / -2.0f;
+	//worldTransform_.rotation_.y = std::numbers::pi_v<float> / -2.0f;
 }
 
 void Skydome::Update() {
-
+	model_->LightSwitch(false);
 	//worldTransform_.rotation_.y += 0.008f; // 回転速度は調整可能
 	// 行列計算
 	worldTransform_.UpdateMatrix();

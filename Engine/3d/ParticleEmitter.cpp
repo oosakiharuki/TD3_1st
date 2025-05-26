@@ -14,18 +14,18 @@ ParticleEmitter* ParticleEmitter::GetInstance() {
 	return instance;
 }
 
-Particles ParticleEmitter::MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate) {
+Particles ParticleEmitter::MakeNewParticle(std::mt19937& randomEngine, const Emitter& emitter) {
 	//random
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);//position用
 	//std::uniform_real_distribution<float> distColor(0.0f, 1.0f);//color用
 	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
 
 	Particles particle;
-	particle.transform.scale = { 1.0f,1.0f,1.0f };
+	particle.transform.scale = emitter.transform.scale;
 	particle.transform.rotate = { 0.0f,0.0f,0.0f };
 
 	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
-	particle.transform.translate = translate;
+	particle.transform.translate = emitter.transform.translate;
 
 	particle.velocity = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
 	//particle.color = { distColor(randomEngine),distColor(randomEngine),distColor(randomEngine),1.0f };
@@ -63,7 +63,7 @@ std::list<Particles> ParticleEmitter::MakeEmit(const Emitter& emitter, std::mt19
 	{
 	case ParticleType::Normal:
 		for (uint32_t count = 0; count < emitter.count; ++count) {
-			particles.push_back(MakeNewParticle(randomEngine, emitter.transform.translate));
+			particles.push_back(MakeNewParticle(randomEngine, emitter));
 		}
 		break;
 	case ParticleType::Plane:
