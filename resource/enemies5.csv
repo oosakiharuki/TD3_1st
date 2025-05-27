@@ -1,4 +1,4 @@
--50.0,2,48.0,spring
--55.0,2,48.0,spring
-20.0, 2.0, -43.0,cannon
--15.0,2.0,25.0,ghost,Blue
+10,1.5,2,ghost,Blue
+-47,16.5,134,ghost,Green
+60,16.5,134,ghost,Red
+10,2,90,spring

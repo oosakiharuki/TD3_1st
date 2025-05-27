@@ -124,17 +124,17 @@ void StageSelect::Update() {
 			steackCount = 0.01f; // 離した後、次に押すときスムーズに切り替わる
 		}
 
-		//ステージの数字が大きいほうに進む
-		if (isPlus && stageNum < 7 && steackCount <= 0) {
-			stageNum += 1;
-			steackCount = steackMax;
-		}
-
-		//ステージの数字が小さいほうに進む
-		if (isMinus && stageNum > 0 && steackCount <= 0) {
-			stageNum -= 1;
-			steackCount = steackMax;
-		}
+	//ステージの数字が大きいほうに進む
+	if (isPlus && stageNum < 5 && steackCount <= 0) {
+		stageNum += 1;
+		steackCount = steackMax;
+	}
+	
+	//ステージの数字が小さいほうに進む
+	if (isMinus && stageNum > 0 && steackCount <= 0) {
+		stageNum -= 1;
+		steackCount = steackMax;
+	}
 
 		stageNumber->SetTextureLT({ selectLT * stageNum,0 });
 

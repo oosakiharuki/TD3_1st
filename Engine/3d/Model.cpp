@@ -173,5 +173,3 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 
 	return modelData;
 }
-
-
