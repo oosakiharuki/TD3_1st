@@ -1,4 +1,6 @@
 #include "Framework.h"
+#include "ResourceManager.h"
+#include "PerformanceMonitor.h"
 
 void Framework::Initialize() {
 
@@ -45,11 +47,20 @@ void Framework::Initialize() {
 	audio_ = Audio::GetInstance();
 	audio_->Initialize();
 
+	// リソースマネージャーの初期化
+	ResourceManager::GetInstance()->Initialize();
+	
+	// パフォーマンスモニターの初期化
+	PerformanceMonitor::GetInstance()->SetTargetFPS(60.0f);
+
 	// フェードマネージャーの初期化は行わない
 	// 各シーンの初期化時にテクスチャがロードされた後に行う
 }
 
 void Framework::Update() {
+	// パフォーマンス計測開始
+	PerformanceMonitor::GetInstance()->BeginFrame();
+	
 	if (winApp_->ProcessMessage()) {
 		isRequst = true;
 	}
@@ -60,6 +71,9 @@ void Framework::Update() {
 		// フェードマネージャーの更新
 		FadeManager::GetInstance()->Update();
 	}
+	
+	// パフォーマンス計測終了
+	PerformanceMonitor::GetInstance()->EndFrame();
 }
 
 void Framework::Finalize() {
@@ -93,6 +107,12 @@ void Framework::Finalize() {
 
 	// フェードマネージャーの終了処理
 	FadeManager::GetInstance()->Finalize();
+	
+	// リソースマネージャーの終了処理
+	ResourceManager::GetInstance()->Finalize();
+	
+	// パフォーマンスモニターの終了処理
+	PerformanceMonitor::GetInstance()->Finalize();
 }
 
 

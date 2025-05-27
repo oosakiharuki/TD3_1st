@@ -99,8 +99,9 @@ private:
 
 	UIManager* uiManager = nullptr;
 
-	//ゲームループ終了(while文から抜ける)
-	bool isRequst = false;
+	//ステージクリア、ゲームオーバー
+	bool isClear = false;
+	bool isOver = false;
 
 
 	bool isPaused_ = false;

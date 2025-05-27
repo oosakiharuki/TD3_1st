@@ -22,22 +22,53 @@ void GameClearScene::Initialize() {
 
 void GameClearScene::Update() {
 
-	if (Input::GetInstance()->TriggerKey(DIK_W)) {
-		gameClearCount_--;
-		if (gameClearCount_ < 1) gameClearCount_ = 1;
-	}
-	if (Input::GetInstance()->TriggerKey(DIK_S)) {
-		gameClearCount_++;
-		if (gameClearCount_ > 2) gameClearCount_ = 2;
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
+	//選択したら変えられないようにする
+	if (!isDecision) {
+		//キーボード操作
+		if (Input::GetInstance()->TriggerKey(DIK_W)) {
+			gameClearCount_--;
+			if (gameClearCount_ < 1) gameClearCount_ = 1;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_S)) {
+			gameClearCount_++;
+			if (gameClearCount_ > 2) gameClearCount_ = 2;
+		}
+
+		//コントローラ操作
+		if (Input::GetInstance()->GetJoystickState(0, state)) {
+			float y = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f;
+
+			if (y >= 0.7f) {
+				gameClearCount_--;
+				if (gameClearCount_ < 1) gameClearCount_ = 1;
+			}
+
+			if (y <= -0.7f) {
+				gameClearCount_++;
+				if (gameClearCount_ > 2) gameClearCount_ = 2;
+			}
+		}
 	}
 
-	if (gameClearCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		GameData::selectedStage++;
-		sceneNo = Game;
+
+	if ((Input::GetInstance()->TriggerKey(DIK_SPACE) || 
+		((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)))) {	
+		isDecision = true;
+		FadeManager::GetInstance()->StartFadeOut(0.03f);
 	}
 
-	if (gameClearCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		sceneNo = Select;
+	if (FadeManager::GetInstance()->IsFadeComplete() && isDecision) {
+		if (gameClearCount_ == 1) {
+			//次のステージに移動
+			GameData::selectedStage++;
+			sceneNo = Game;
+		}
+		else if (gameClearCount_ == 2) {
+			sceneNo = Select;
+		}
 	}
 
 	gameClearNextStage->Update();

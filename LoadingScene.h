@@ -21,7 +21,14 @@ public:
     void Finalize() override;
 
 private:
-    // 非同期ローディング関連のメソッド
+    // 最適化されたローディングメソッド
+    void InitializeUI();            // UI要素の初期化
+    void PrepareResourceQueue();    // リソースキューの準備
+    void UpdateAnimations();        // アニメーション更新
+    void UpdateProgressBar(float progress); // プログレスバー更新
+    void HandleLoadingComplete();   // ロード完了処理
+    
+    // 非同期ローディング関連のメソッド（互換性のため残す）
     void StartAsyncLoading();
     void LoadEssentialResources();  // 最初に必要な基本リソースのロード
     void LoadStage1Resources();     // ステージ1（基本モデルとUI）

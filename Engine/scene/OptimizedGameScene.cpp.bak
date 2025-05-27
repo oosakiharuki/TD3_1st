@@ -1,6 +1,8 @@
 #include "GameScene.h"
 #include "ParticleNumber.h"
 #include "ImGuiManager.h"
+#include "ResourceManager.h"
+#include "PerformanceMonitor.h"
 #include <filesystem>
 
 GameScene::GameScene() {}
@@ -8,20 +10,29 @@ GameScene::GameScene() {}
 GameScene::~GameScene() {}
 
 void GameScene::Finalize() {
+	// パフォーマンス計測開始
+	PerformanceMonitor::GetInstance()->BeginSection("GameSceneFinalize");
+	
 	delete camera_;
 	delete player_;
 	delete mapLoader_;
 	delete enemyLoader_;
 	delete stage;
 	delete skydome_;
-
 	delete uiManager;
 
 	allObstacles_.clear();
-	ParticleManager::GetInstance()->ParticleListReset();//パーテイクルのコンテナをリセット
+	ParticleManager::GetInstance()->ParticleListReset();//パーティクルのコンテナをリセット
+	
+	// リソースの未使用部分を解放
+	ResourceManager::GetInstance()->ReleaseUnusedResources();
+	
+	PerformanceMonitor::GetInstance()->EndSection("GameSceneFinalize");
 }
 
 void GameScene::Initialize() {
+	// パフォーマンス計測開始
+	PerformanceMonitor::GetInstance()->BeginSection("GameSceneInit");
 
 	currentStage_ = GameData::selectedStage;
 	
@@ -136,7 +147,7 @@ void GameScene::Initialize() {
 		bgmFile = "sound/stage4.wav"; // stage5.wavがない場合の代替
 		break;
 	case 5:
-		bgmFile = "sound/stage6.wav"; // stage7.wavがない場合の代替
+		bgmFile = "sound/stage5.wav"; // stage7.wavがない場合の代替
 		break;
 	default:
 		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM
@@ -152,20 +163,22 @@ void GameScene::Initialize() {
 	BGMSound = audio_->LoadWave(bgmFile.c_str());
 	audio_->SoundPlayWave(BGMSound, 0.25f, true);
 
-	//パーテイクルのメモリ対策でリセット
+	//パーティクルのメモリ対策でリセット
 	ParticleNum::number = 0;
 
 	//前のシーンのボタン情報の取得
 	state = Input::GetInstance()->GetState();
 	preState = Input::GetInstance()->GetPreState();
+	
+	PerformanceMonitor::GetInstance()->EndSection("GameSceneInit");
 }
 
 void GameScene::Update() {
-
+	// パフォーマンス計測開始
+	PerformanceMonitor::GetInstance()->BeginSection("GameSceneUpdate");
 
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
-
 
 	// ポーズのトグル（ESCキーまたはStartボタン）
 	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
@@ -215,6 +228,7 @@ void GameScene::Update() {
 			sceneNo = GameOver;
 		}
 
+		PerformanceMonitor::GetInstance()->EndSection("GameSceneUpdate");
 		return;
 	}
 
@@ -231,73 +245,43 @@ void GameScene::Update() {
 		audio_->StopWave(BGMSound);
 		Initialize();
 	}
-	
-
-	//フェードが終わったらステージクリアかゲームオーバーのシーンに移動
-	if (FadeManager::GetInstance()->IsFadeComplete()) {
-		if (isClear) {
-			audio_->StopWave(BGMSound);
-			sceneNo = GameClear;
-			return; // ゴールクリア状態なら更新処理をスキップ
-		}
-
-		if(isOver){		
-			sceneNo = GameOver; // GameOverSceneに遷移
-			return;
-		}
-	}
 
 	// MapLoaderが管理するGoalの状態をチェック
-	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear() && !isClear) {
-		FadeManager::GetInstance()->StartFadeOut(0.03f);
-		isClear = true;
+	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear()) {
+		audio_->StopWave(BGMSound);
+		sceneNo = GameClear;
+		PerformanceMonitor::GetInstance()->EndSection("GameSceneUpdate");
+		return; // ゴールクリア状態なら更新処理をスキップ
 	}
+
+	// プレイヤー更新の計測
+	PerformanceMonitor::GetInstance()->BeginSection("PlayerUpdate");
+	player_->Update();
+	PerformanceMonitor::GetInstance()->EndSection("PlayerUpdate");
 
 	// プレイヤーのHPが0になった場合、GameOverSceneに移行
 	//デスパーティクルが終了した時も追加
-	if (player_->GetHp() <= 0 && !player_->GetDeadPlayer() && !isOver) {
-		FadeManager::GetInstance()->StartFadeOut(0.03f);
-		isOver = true;
+	if (player_->GetHp() <= 0 && !player_->GetDeadPlayer()) {
 		audio_->StopWave(BGMSound);
+		sceneNo = GameOver; // GameOverSceneに遷移
 	}
 
-	//フェード中プレイヤーを動かせないようにする
-	if (isClear || isOver) {
-		return;
-	}
-
-	player_->Update();
-
-	// EnemyLoaderの更新
+	// 敵の更新の計測
+	PerformanceMonitor::GetInstance()->BeginSection("EnemyUpdate");
 	if (enemyLoader_) {
 		enemyLoader_->Update();
 	}
+	PerformanceMonitor::GetInstance()->EndSection("EnemyUpdate");
 
-	// MapLoaderの更新
+	// マップオブジェクトの更新の計測
+	PerformanceMonitor::GetInstance()->BeginSection("MapUpdate");
 	if (mapLoader_) {
 		mapLoader_->Update();
 	}
+	PerformanceMonitor::GetInstance()->EndSection("MapUpdate");
 
 	player_->DrawUI();
 	skydome_->Update();
-
-	// 　↓　ゴールしたら1と2ステージループするようになってる、切り替え処理2を消すとステージ3に進む
-
-	//if (mapLoader_ && mapLoader_->IsDoorOpened()) {
-	//	// 次のステージ番号を計算
-	//	int nextStage = currentStage_ + 1;
-	//	GameData::selectedStage += 1;
-
-	//	// 次のステージに応じてプレイヤーの座標を設定
-	//	Vector3 newPosition;
-	//	newPosition = PlayerPosition::stage[nextStage];
-
-	//	// プレイヤーの座標を変更
-	//	player_->SetPosition(newPosition);
-
-	//	// ステージを切り替え
-	//	ChangeStage(nextStage);
-	//}
 
 	camera_->Update();
 
@@ -306,21 +290,23 @@ void GameScene::Update() {
 	}
 
 	uiManager->Update();
+	
+	PerformanceMonitor::GetInstance()->EndSection("GameSceneUpdate");
 }
 
 void GameScene::Draw() {
+	// パフォーマンス計測開始
+	PerformanceMonitor::GetInstance()->BeginSection("GameSceneDraw");
 
 	//スプライト描画処理(背景用)
 	SpriteCommon::GetInstance()->Command();
 
-
 	//モデル描画処理
+	PerformanceMonitor::GetInstance()->BeginSection("3DDraw");
 	Object3dCommon::GetInstance()->Command();
 
 	skydome_->Draw();
-
 	stage->Draw(worldTransform_);
-
 	player_->Draw();
 
 	// EnemyLoaderで読み込んだ敵の描画
@@ -332,12 +318,11 @@ void GameScene::Draw() {
 	if (mapLoader_) {
 		mapLoader_->Draw();
 	}
-
-
+	PerformanceMonitor::GetInstance()->EndSection("3DDraw");
 
 	//パーティクル描画処理
+	PerformanceMonitor::GetInstance()->BeginSection("ParticleDraw");
 	ParticleCommon::GetInstance()->Command();
-
 
 	player_->DrawP();
 	
@@ -352,8 +337,10 @@ void GameScene::Draw() {
 	if (mapLoader_) {
 		mapLoader_->DrawP();
 	}
+	PerformanceMonitor::GetInstance()->EndSection("ParticleDraw");
 
 	//スプライト描画処理(UI用)
+	PerformanceMonitor::GetInstance()->BeginSection("UIDraw");
 	SpriteCommon::GetInstance()->Command();
 	if (mapLoader_) {
 		mapLoader_->Draw2D();
@@ -395,10 +382,15 @@ void GameScene::Draw() {
 			uiManager->DrawPauseSelect();   // pause_selectを描画
 		}
 	}
+	PerformanceMonitor::GetInstance()->EndSection("UIDraw");
+	
+	PerformanceMonitor::GetInstance()->EndSection("GameSceneDraw");
 }
 
-
 void GameScene::ChangeStage(int nextStage) {
+	// パフォーマンス計測開始
+	PerformanceMonitor::GetInstance()->BeginSection("ChangeStage");
+	
 	allObstacles_.clear();
 	Command.str("");
 	Command.clear();
@@ -422,11 +414,11 @@ void GameScene::ChangeStage(int nextStage) {
 	case 3:
 		bgmFile = "sound/stage3.wav";
 		break;
-	case 4:
+	case 5:
 		bgmFile = "sound/stage4.wav"; // stage5.wavがない場合の代替
 		break;
-	case 5:
-		bgmFile = "sound/stage6.wav"; // stage7.wavがない場合の代替
+	case 7:
+		bgmFile = "sound/stage5.wav"; // stage7.wavがない場合の代替
 		break;
 	default:
 		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM
@@ -522,6 +514,8 @@ void GameScene::ChangeStage(int nextStage) {
 	if (mapLoader_ && mapLoader_->GetGoal()) {
 		player_->SetGoal(mapLoader_->GetGoal());
 	}
+	
+	PerformanceMonitor::GetInstance()->EndSection("ChangeStage");
 }
 
 // AddObstacle、LoadStage、UpdateStageAABBメソッドはそのまま以前の実装を使用
@@ -558,16 +552,6 @@ void GameScene::LoadStage(std::string objFile) {
 	for (const auto& obstacles : allObstacles_) {
 		player_->SetObstacleList(obstacles);
 	}
-
-	//たまにバグる
-	//if (enemyLoader_) {
-	//	for (auto& enemy : enemyLoader_->GetEnemyList()) {
-	//		enemy->ClearObstacleList();
-	//		for (const auto& obstacles : allObstacles_) {
-	//			enemy->SetObstacleList(obstacles);
-	//		}
-	//	}
-	//}
 }
 
 void GameScene::UpdateImGui() {
@@ -709,9 +693,19 @@ void GameScene::UpdateImGui() {
 		}
 	}
 
-	// TODO: 他のオブジェクトにもSetRotateX/Y/Zメソッドを追加する必要があります
-	// 下記のクラスにはこれらのメソッドが実装されていません
-	// Block, Key, GhostBlock, Enemy/GhostEnemy, CannonEnemy, SpringEnemy, Player, Goal
+	// パフォーマンス情報表示
+	if (ImGui::CollapsingHeader("Performance")) {
+		std::string perfStats = PerformanceMonitor::GetInstance()->GetPerformanceStats();
+		ImGui::Text("%s", perfStats.c_str());
+		
+		// メモリ使用量
+		ImGui::Text("Resource Memory: %.2f MB", 
+			ResourceManager::GetInstance()->GetTotalMemoryUsage() / (1024.0f * 1024.0f));
+		ImGui::Text("Texture Memory: %.2f MB", 
+			ResourceManager::GetInstance()->GetTextureMemoryUsage() / (1024.0f * 1024.0f));
+		ImGui::Text("Model Memory: %.2f MB", 
+			ResourceManager::GetInstance()->GetModelMemoryUsage() / (1024.0f * 1024.0f));
+	}
 
 	ImGui::End();
 #endif

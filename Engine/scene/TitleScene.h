@@ -19,4 +19,6 @@ private:
 	Sprite* bottonSprite;
 
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
+	///決定した時
+	bool isDecision = false;
 };

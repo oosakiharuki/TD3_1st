@@ -39,5 +39,7 @@ private:
 
 	Vector3 cameraPosition = { -0.8f,1.5f,-4.0f };
 	Vector3 cameraRotate = { 0.35f,0,0 };
-
+	
+	///決定した時
+	bool isDecision = false;
 };
