@@ -6,6 +6,7 @@
 #include "Input.h"
 #include <vector>
 #include "Audio.h"
+#include "Block.h"
 
 class Player;      // 前方宣言
 class SpringEnemy; // 前方宣言
@@ -44,6 +45,9 @@ public:
 	bool GetPlayerCtrl() { return isPlayer; }
 	
 	bool IsAttacking() const { return isAttacking_; } // 状態取得
+	
+	// 壊せるブロックのリストを設定
+	void SetBlocks(const std::vector<Block*>& blocks) { blocks_ = blocks; }
 
 private:
 	WorldTransform worldTransform_;
@@ -55,6 +59,9 @@ private:
 
 	// 障害物リスト
 	std::vector<AABB> obstacleList_;
+
+	// 破壊可能なブロックのリスト
+	std::vector<Block*> blocks_;
 
 	// プレイヤー参照
 	Player* player_ = nullptr;

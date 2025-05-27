@@ -111,6 +111,17 @@ void SpringEnemy::Update() {
 			}
 		}
 
+		// 大砲と壊せるブロックの衝突チェック
+		for (Block* block : blocks_) {
+			// ブロックがアクティブな場合のみ判定
+			if (block->IsActive()) {
+				AABB blockAABB = block->GetAABB();
+				if (IsCollisionAABB(enemyAABB, blockAABB)) {
+					ResolveAABBCollision(enemyAABB, blockAABB, velocityY_, onGround_);
+				}
+			}
+		}
+
 		// 衝突解決後のAABB中心をプレイヤー座標に反映
 		position.x = (enemyAABB.min.x + enemyAABB.max.x) * 0.5f;
 		position.y = (enemyAABB.min.y + enemyAABB.max.y) * 0.5f;

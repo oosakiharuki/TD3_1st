@@ -94,6 +94,11 @@ void GameScene::Initialize() {
 		cannon->SetBlocks(blocks);
 	}
 
+	// キャノン敵にもブロックリストを設定
+	for (SpringEnemy* spring : enemyLoader_->GetSpringEnemyList()) {
+		spring->SetBlocks(blocks);
+	}
+
 	const std::vector<GhostBlock*>& ghostBlocks = mapLoader_->GetGhostBlockList();
 	player_->SetGhostBlocks(ghostBlocks);
 
@@ -162,13 +167,15 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
+	camera_->Update();
 
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
 
 	// ポーズのトグル（ESCキーまたはStartボタン）
-	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
+	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)|| 
+		((state.Gamepad.wButtons & XINPUT_GAMEPAD_START) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_START))) {
 		isPaused_ = !isPaused_;
 	}
 
@@ -184,6 +191,21 @@ void GameScene::Update() {
 	if (isPaused_) {
 		uiManager->Update(); // 必要ならポーズ画面のUI更新
 
+		//コントローラ操作
+		if (Input::GetInstance()->GetJoystickState(0, state)) {
+			float y = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f;
+
+			if (y >= 0.7f) {
+				pauseCount_--;
+				if (pauseCount_ < 1) pauseCount_ = 1;
+			}
+
+			if (y <= -0.7f) {
+				pauseCount_++;
+				if (pauseCount_ > 2) pauseCount_ = 2;
+			}
+		}
+
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			pauseCount_--;
 			if (pauseCount_ < 1) pauseCount_ = 1;
@@ -193,16 +215,19 @@ void GameScene::Update() {
 			if (pauseCount_ > 2) pauseCount_ = 2;
 		}
 
-		if (pauseCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			Finalize();
-			audio_->StopWave(BGMSound);
-			Initialize();
-			isPaused_ = !isPaused_;
-		}
-
-		if (pauseCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			audio_->StopWave(BGMSound);
-			sceneNo = Select;
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE) ||
+			((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A))) {		
+			if (pauseCount_ == 1) {
+				Finalize();
+				audio_->StopWave(BGMSound);
+				Initialize();
+				isPaused_ = !isPaused_;
+			}		
+			if (pauseCount_ == 2) {
+				audio_->StopWave(BGMSound);
+				sceneNo = Select;
+			}
+			Input::GetInstance()->SetStates(state, preState);
 		}
 
 		if (Input::GetInstance()->TriggerKey(DIK_F1)) {
@@ -234,9 +259,9 @@ void GameScene::Update() {
 	
 
 	//フェードが終わったらステージクリアかゲームオーバーのシーンに移動
-	if (FadeManager::GetInstance()->IsFadeComplete()) {
+	if (FadeManager::GetInstance()->IsFadeComplete() && (isClear || isOver)) {
 		if (isClear) {
-			audio_->StopWave(BGMSound);
+			audio_->StopWave(BGMSound); //GameClearSceneに遷移
 			sceneNo = GameClear;
 			return; // ゴールクリア状態なら更新処理をスキップ
 		}
@@ -249,16 +274,20 @@ void GameScene::Update() {
 
 	// MapLoaderが管理するGoalの状態をチェック
 	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear() && !isClear) {
+		//フェードアウト開始
 		FadeManager::GetInstance()->StartFadeOut(0.03f);
 		isClear = true;
 	}
 
 	// プレイヤーのHPが0になった場合、GameOverSceneに移行
-	//デスパーティクルが終了した時も追加
-	if (player_->GetHp() <= 0 && !player_->GetDeadPlayer() && !isOver) {
-		FadeManager::GetInstance()->StartFadeOut(0.03f);
-		isOver = true;
+	if (player_->GetHp() <= 0 && !isOver) {
 		audio_->StopWave(BGMSound);
+		//デスパーティクルが終わった時
+		if (!player_->GetDeadPlayer()) {
+			//フェードアウト開始
+			FadeManager::GetInstance()->StartFadeOut(0.03f);
+			isOver = true;
+		}
 	}
 
 	//フェード中プレイヤーを動かせないようにする
@@ -298,8 +327,6 @@ void GameScene::Update() {
 	//	// ステージを切り替え
 	//	ChangeStage(nextStage);
 	//}
-
-	camera_->Update();
 
 	if (GameData::selectedStage == 0) {
 		uiManager->TutorialPos(player_->GetWorldPosition());

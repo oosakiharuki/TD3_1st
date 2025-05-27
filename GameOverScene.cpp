@@ -18,8 +18,8 @@ void GameOverScene::Update() {
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
-	//選択したら変えられないようにする
-	if (!isDecision) {
+	//フェード中操作させない
+	if (FadeManager::GetInstance()->IsFadeComplete()) {
 		//キーボード操作
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			gameOverCount_--;
@@ -44,14 +44,14 @@ void GameOverScene::Update() {
 				if (gameOverCount_ > 2) gameOverCount_ = 2;
 			}
 		}
+
+		if ((Input::GetInstance()->TriggerKey(DIK_SPACE) ||
+			((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)))) {
+			isDecision = true;
+			FadeManager::GetInstance()->StartFadeOut(0.03f);
+		}
 	}
 
-
-	if ((Input::GetInstance()->TriggerKey(DIK_SPACE) ||
-		((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)))) {
-		isDecision = true;
-		FadeManager::GetInstance()->StartFadeOut(0.03f);
-	}
 	if (FadeManager::GetInstance()->IsFadeComplete() && isDecision) {
 		if (gameOverCount_ == 1) {
 			sceneNo = Game;

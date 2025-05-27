@@ -37,15 +37,18 @@ void TitleScene::Update() {
 	Input::GetInstance()->GetJoystickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
-	if (((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
-		Input::GetInstance()->TriggerKey(DIK_SPACE)) && !isDecision) {
-		//押した瞬間のボタン情報の取得
-		Input::GetInstance()->SetStates(state, preState);
-		// フェードアウト開始
-		FadeManager::GetInstance()->StartFadeOut(0.03f);
-		isDecision = true;
+	//フェード中操作させない
+	if (FadeManager::GetInstance()->IsFadeComplete()) {
+		if (((state.Gamepad.wButtons & XINPUT_GAMEPAD_A && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) ||
+			Input::GetInstance()->TriggerKey(DIK_SPACE)) && !isDecision) {
+			//押した瞬間のボタン情報の取得
+			Input::GetInstance()->SetStates(state, preState);
+			// フェードアウト開始
+			FadeManager::GetInstance()->StartFadeOut(0.03f);
+			isDecision = true;
+		}
 	}
-	
+
 	if (FadeManager::GetInstance()->IsFadeComplete() && isDecision) {
 		// 既にロード済みなので、直接Selectシーンに遷移
 		sceneNo = Select;

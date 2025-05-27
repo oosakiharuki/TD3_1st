@@ -67,25 +67,6 @@ void CannonEnemy::Update() {
 		}
 	}
 
-	//// 弾と壊せるブロックの衝突チェック
-	//for (Block* block : blocks_) {
-	//	// ブロックがアクティブな場合のみ判定
-	//	if (block->IsActive()) {
-	//		AABB blockAABB = block->GetAABB();
-	//		for (Bom* bullet : bullets_) {
-	//			AABB bulletAABB = bullet->GetAABB();
-	//			if (IsCollisionAABB(bulletAABB, blockAABB)) {
-	//				// 弾を消滅させる
-	//				bullet->OnCollision();
-
-	//				// プレイヤーが大砲に乗っている場合、ブロックを壊す
-	//				if (isPlayer) {
-	//					block->SetActive(false);
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
 
 	if (!isPlayer) {
 		// 重力処理
@@ -116,6 +97,17 @@ void CannonEnemy::Update() {
 			}
 			iterations++;
 		} while (collisionOccurred && iterations < maxIterations);
+	
+		// 大砲と壊せるブロックの衝突チェック
+		for (Block* block : blocks_) {
+			// ブロックがアクティブな場合のみ判定
+			if (block->IsActive()) {
+				AABB blockAABB = block->GetAABB();
+				if (IsCollisionAABB(enemyAABB, blockAABB)) {
+					ResolveAABBCollision(enemyAABB, blockAABB, velocityY_, onGround_);
+				}
+			}
+		}
 
 		// 衝突解決後の位置更新
 		position.x = (enemyAABB.min.x + enemyAABB.max.x) * 0.5f;
