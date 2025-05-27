@@ -40,20 +40,44 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = ConvertString(filePath);
 	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "TextureManager::LoadTexture - Failed to load texture file: %s (HRESULT: 0x%08X)\n", filePath.c_str(), hr);
+		OutputDebugStringA(errorMsg);
+		return;
+	}
 
 	//ミップマップ　//拡大縮小で使う
 	DirectX::ScratchImage mipImages{};
 	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "TextureManager::LoadTexture - Failed to generate mipmaps for: %s (HRESULT: 0x%08X)\n", filePath.c_str(), hr);
+		OutputDebugStringA(errorMsg);
+		return;
+	}
 	
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
+	
+	// メタデータの検証
+	if (metadata.width == 0 || metadata.height == 0) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "TextureManager::LoadTexture - Invalid texture metadata for: %s (width=%zu, height=%zu)\n", 
+			filePath.c_str(), metadata.width, metadata.height);
+		OutputDebugStringA(errorMsg);
+		return;
+	}
 	
 	//最後尾を取得
 	TextureData& textureData = textureDatas[filePath];
 
 	textureData.metadata = metadata;
 	textureData.resource = dxCommon_->CreateTextureResource(textureData.metadata);
+	if (!textureData.resource) {
+		// リソース作成に失敗した場合はエントリを削除
+		textureDatas.erase(filePath);
+		return;
+	}
 	dxCommon_->UploadTextureData(textureData.resource, mipImages);
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -183,22 +207,61 @@ float TextureManager::PreloadTextures() {
 uint32_t TextureManager::GetSrvIndex(const std::string filePath) {
 	assert(srvManager->Max());
 
-	TextureData& textureData = textureDatas[filePath];
-	return textureData.srvIndex;
+	// テクスチャが存在しない場合はエラー
+	auto it = textureDatas.find(filePath);
+	if (it == textureDatas.end()) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "TextureManager::GetSrvIndex - Texture not found: %s\n", filePath.c_str());
+		OutputDebugStringA(errorMsg);
+		return 0; // 無効なインデックスを返す
+	}
+
+	return it->second.srvIndex;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string filePath) {
 	assert(srvManager->Max());
 
-	TextureData& textureData = textureDatas[filePath];
-	return textureData.srvHandleGPU;
+	// テクスチャが存在しない場合はエラー
+	auto it = textureDatas.find(filePath);
+	if (it == textureDatas.end()) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "TextureManager::GetSrvHandleGPU - Texture not found: %s\n", filePath.c_str());
+		OutputDebugStringA(errorMsg);
+		D3D12_GPU_DESCRIPTOR_HANDLE emptyHandle = {};
+		return emptyHandle;
+	}
+
+	return it->second.srvHandleGPU;
 }
 
 const DirectX::TexMetadata& TextureManager::GetMetaData(const std::string filePath) {
 	assert(srvManager->Max());
 
-	TextureData& textureData = textureDatas[filePath];
-	return textureData.metadata;
+	// テクスチャが存在しない場合はエラー
+	auto it = textureDatas.find(filePath);
+	if (it == textureDatas.end()) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "TextureManager::GetMetaData - Texture not found: %s\n", filePath.c_str());
+		OutputDebugStringA(errorMsg);
+		// 静的な空のメタデータを返す
+		static DirectX::TexMetadata emptyMetadata = {};
+		// 初回のみデフォルト値を設定
+		static bool initialized = false;
+		if (!initialized) {
+			emptyMetadata.width = 1;
+			emptyMetadata.height = 1;
+			emptyMetadata.depth = 1;
+			emptyMetadata.arraySize = 1;
+			emptyMetadata.mipLevels = 1;
+			emptyMetadata.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			emptyMetadata.dimension = DirectX::TEX_DIMENSION_TEXTURE2D;
+			initialized = true;
+		}
+		return emptyMetadata;
+	}
+
+	return it->second.metadata;
 }
 
 bool TextureManager::CheckTextureExist(const std::string& filePath) {

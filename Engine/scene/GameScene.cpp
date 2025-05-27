@@ -141,7 +141,7 @@ void GameScene::Initialize() {
 		bgmFile = "sound/stage4.wav"; // stage5.wavがない場合の代替
 		break;
 	case 5:
-		bgmFile = "sound/stage5.wav"; // stage7.wavがない場合の代替
+		bgmFile = "sound/stage6.wav"; // stage7.wavがない場合の代替
 		break;
 	default:
 		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM
@@ -378,6 +378,10 @@ void GameScene::Draw() {
 
 	if (mapLoader_) {
 		mapLoader_->DrawP();
+		// ゴールのパーティクルも描画
+		if (mapLoader_->GetGoal()) {
+			mapLoader_->GetGoal()->DrawP();
+		}
 	}
 
 	//スプライト描画処理(UI用)
@@ -449,11 +453,11 @@ void GameScene::ChangeStage(int nextStage) {
 	case 3:
 		bgmFile = "sound/stage3.wav";
 		break;
-	case 5:
+	case 4:
 		bgmFile = "sound/stage4.wav"; // stage5.wavがない場合の代替
 		break;
-	case 7:
-		bgmFile = "sound/stage5.wav"; // stage7.wavがない場合の代替
+	case 5:
+		bgmFile = "sound/stage6.wav"; // stage7.wavがない場合の代替
 		break;
 	default:
 		bgmFile = "sound/stage1.wav"; // デフォルトはステージ1のBGM

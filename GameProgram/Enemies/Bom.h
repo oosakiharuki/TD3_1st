@@ -3,7 +3,7 @@
 #include "Object3d.h"
 #include "AABB.h"
 #include "collision.h"
-
+#include "Particle.h"
 #include "Mymath.h"
 #include "Audio.h"
 
@@ -14,6 +14,7 @@ public:
 	void Init(Vector3 position, Vector3 velocity);
 	void Update();
 	void Draw();
+	void DrawP(); // パーティクル描画
 	bool IsDaed() { return isDead; }
 
 	AABB GetAABB();
@@ -40,4 +41,7 @@ private:
 	bool isDead = false;
 	// 表示フラグを追加
 	bool isVisible = true;
+
+	// パーティクル
+	Particle* particleExplosion_ = nullptr;
 };

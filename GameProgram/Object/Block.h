@@ -3,6 +3,7 @@
 #include "WorldTransform.h"
 #include "Object3d.h"
 #include "Particle.h"
+#include "Audio.h"
 
 class Block {
 public:
@@ -25,6 +26,9 @@ public:
 	void OnCollision();
 	void SetParticlePosition(Vector3 position) { particlePosition = position; }
 
+	// HPを取得するメソッド
+	uint32_t GetHP() const { return hp; }
+
 private:
 	WorldTransform worldTransform;
 	Camera* viewProjection_ = nullptr;
@@ -33,7 +37,27 @@ private:
 	uint32_t texturehandle_ = 0;
 
 	Vector3 size_;
+	Vector3 originalPosition_; // 元の位置（揺れエフェクト用）
 	uint32_t hp = 3;
+	uint32_t maxHP = 3; // 最大HP
 	Particle* particle = nullptr;
 	Vector3 particlePosition = { 0,0,0 };
+
+	// ダメージエフェクト用
+	float damageTimer_ = 0.0f;
+	float scaleTimer_ = 0.0f;
+	float shakeTimer_ = 0.0f;
+	bool isDamaged_ = false;
+
+	// エフェクト用のパラメータ（控えめに調整）
+	const float DAMAGE_EFFECT_TIME = 0.3f;
+	const float SCALE_EFFECT_TIME = 0.2f;
+	const float SHAKE_EFFECT_TIME = 0.15f;
+	float SHAKE_INTENSITY = 0.05f; // より控えめに
+	float SCALE_INTENSITY = 1.1f; // より控えめに
+
+	// オーディオ
+	Audio* audio_ = nullptr;
+	SoundData hitSound_;
+	SoundData breakSound_;
 };

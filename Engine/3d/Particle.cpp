@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include <fstream>
 #include <sstream>
+#include <mutex>
 
 #include <numbers>
 #include "ModelManager.h"
@@ -13,30 +14,92 @@
 
 using namespace MyMath;
 
+Particle::~Particle() {
+	// リソースのアンマップ
+	if (vertexResource && vertexData) {
+		vertexResource->Unmap(0, nullptr);
+		vertexData = nullptr;
+	}
+	if (materialResource && materialData) {
+		materialResource->Unmap(0, nullptr);
+		materialData = nullptr;
+	}
+	if (wvpResource && wvpData) {
+		wvpResource->Unmap(0, nullptr);
+		wvpData = nullptr;
+	}
+	if (directionalLightSphereResource && directionalLightSphereData) {
+		directionalLightSphereResource->Unmap(0, nullptr);
+		directionalLightSphereData = nullptr;
+	}
+}
+
 void Particle::Initialize(std::string textureFile) {
 	this->particleCommon = ParticleCommon::GetInstance();
 	this->camera = particleCommon->GetDefaultCamera();
 	
 	//パーティクルの発生源数を増やす
-	ParticleNum::number++;
-	number = ParticleNum::number;
+	const uint32_t MAX_PARTICLE_GROUPS = 1000; // パーティクルグループの最大数
+	
+	// スレッドセーフなインクリメント
+	static std::mutex particleNumMutex;
+	{
+		std::lock_guard<std::mutex> lock(particleNumMutex);
+		ParticleNum::number++;
+		// パーティクル番号が上限に達した場合はリセット
+		if (ParticleNum::number >= MAX_PARTICLE_GROUPS) {
+			char errorMsg[256];
+			sprintf_s(errorMsg, "Particle::Initialize - Particle group limit reached (%d). Resetting to 1.\n", MAX_PARTICLE_GROUPS);
+			OutputDebugStringA(errorMsg);
+			ParticleNum::number = 1;
+		}
+		number = ParticleNum::number;
+	}
 
+	char debugMsg[256];
+	sprintf_s(debugMsg, "Particle::Initialize - Creating particle group with number: %d, texture: %s\n", number, textureFile.c_str());
+	OutputDebugStringA(debugMsg);
+	
 	ParticleManager::GetInstance()->CreateParticleGroup(std::to_string(number),textureFile);
 
 	this->fileName = std::to_string(number);
 
 
 	modelData = ParticleManager::GetInstance()->GetModelData(fileName);
+	
+	// モデルデータが空の場合は初期化失敗
+	if (modelData.vertices.empty()) {
+		OutputDebugStringA("Particle::Initialize - Failed to get model data from ParticleManager\n");
+		isInitialized = false;
+		return;
+	}
 
 	vertexResource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
+	if (!vertexResource) {
+		OutputDebugStringA("Failed to create vertexResource\n");
+		return;
+	}
 
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 
+	// HRESULTを一度だけ宣言
+	HRESULT hr;
+	
 	wvpResource = ParticleManager::GetInstance()->GetResource(fileName);
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	if (!wvpResource) {
+		OutputDebugStringA("Failed to get wvpResource from ParticleManager\n");
+		isInitialized = false;
+		return;
+	}
+	hr = wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	if (FAILED(hr)) {
+		OutputDebugStringA("Failed to map wvpResource\n");
+		isInitialized = false;
+		return;
+	}
 	
 	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		wvpData[index].World = MakeIdentity4x4();
@@ -45,29 +108,63 @@ void Particle::Initialize(std::string textureFile) {
 	}
 
 
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	hr = vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	if (FAILED(hr)) {
+		OutputDebugStringA("Failed to map vertexResource\n");
+		isInitialized = false;
+		return;
+	}
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
 
 	//Particle用マテリアル
 	//マテリアル用のリソース
 	materialResource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(Material));
+	if (!materialResource) {
+		OutputDebugStringA("Failed to create materialResource\n");
+		return;
+	}
 	//書き込むためのアドレス
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	hr = materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	if (FAILED(hr)) {
+		OutputDebugStringA("Failed to map materialResource\n");
+		isInitialized = false;
+		return;
+	}
 	//色の設定
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData->enableLighting = true;
 	materialData->uvTransform = MakeIdentity4x4();
 
 	//テクスチャ読み込み
-	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
-	modelData.material.textureIndex = TextureManager::GetInstance()->GetSrvIndex(modelData.material.textureFilePath);
+	if (!modelData.material.textureFilePath.empty()) {
+		char debugMsg[256];
+		sprintf_s(debugMsg, "Particle::Initialize - Loading texture: %s\n", modelData.material.textureFilePath.c_str());
+		OutputDebugStringA(debugMsg);
+		
+		TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
+		modelData.material.textureIndex = TextureManager::GetInstance()->GetSrvIndex(modelData.material.textureFilePath);
+	} else {
+		OutputDebugStringA("Particle::Initialize - Warning: Empty texture file path in modelData\n");
+	}
 
 
 	//ライト用のリソース
 	directionalLightSphereResource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(DirectionalLight));
+	//リソースの作成チェック
+	if (!directionalLightSphereResource) {
+		// リソース作成に失敗した場合はエラーログを出力して早期リターン
+		OutputDebugStringA("Failed to create directionalLightSphereResource\n");
+		return;
+	}
 	//書き込むためのアドレス
-	directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
+	hr = directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
+	if (FAILED(hr)) {
+		// Mapに失敗した場合
+		OutputDebugStringA("Failed to map directionalLightSphereResource\n");
+		isInitialized = false;
+		return;
+	}
 	//色の設定
 	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightSphereData->direction = { 0.0f,-1.0f,0.0f };
@@ -88,9 +185,16 @@ void Particle::Initialize(std::string textureFile) {
 	accelerationField.acceleration = { 0.0f,15.0f,0.0f };
 	accelerationField.area.min = { -1.0f,-1.0f,-1.0f };
 	accelerationField.area.max = { 1.0f,1.0f,1.0f };
+	
+	// 初期化成功
+	isInitialized = true;
 }
 
 void Particle::Update() {
+	// 初期化されていない場合は処理をスキップ
+	if (!isInitialized) {
+		return;
+	}
 
 	const float kDeltaTime = 1.0f / 60.0f;
 
@@ -185,28 +289,50 @@ void Particle::Update() {
 			WorldViewProjectionMatrix = worldMatrix;
 		}
 
-		wvpData[numInstance].World = worldMatrix;
+		// wvpDataのnullチェック
+		if (wvpData) {
+			wvpData[numInstance].World = worldMatrix;
 
-		wvpData[numInstance].color = (*particleIterator).color;
-		wvpData[numInstance].color.s = alpha;
+			wvpData[numInstance].color = (*particleIterator).color;
+			wvpData[numInstance].color.s = alpha;
 
-		if (numInstance < kNumMaxInstance) {
-			wvpData[numInstance].WVP = WorldViewProjectionMatrix;
-			++numInstance;
+			if (numInstance < kNumMaxInstance) {
+				wvpData[numInstance].WVP = WorldViewProjectionMatrix;
+				++numInstance;
+			}
 		}
 		++particleIterator;
 	}
 
-	directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
+	// directionalLightSphereDataのnullチェック
+	if (directionalLightSphereData) {
+		directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
+	}
 
 }
 
 void Particle::Draw() {
+	// 初期化されていない場合は描画をスキップ
+	if (!isInitialized) {
+		return;
+	}
+	
+	// リソースのnullチェック
+	if (!vertexResource || !materialResource || !wvpResource || !directionalLightSphereResource) {
+		// いずれかのリソースがnullの場合は描画をスキップ
+		return;
+	}
 	
 	particleCommon->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath));
+	// テクスチャが存在するか確認
+	if (!modelData.material.textureFilePath.empty() && TextureManager::GetInstance()->CheckTextureExist(modelData.material.textureFilePath)) {
+		particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath));
+	} else {
+		// テクスチャが存在しない場合は白いテクスチャを使用するか、スキップ
+		return; // 今回は描画をスキップ
+	}
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
 
 	//4のやつ particle専用

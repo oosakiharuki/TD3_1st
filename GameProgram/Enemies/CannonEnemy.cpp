@@ -201,6 +201,11 @@ void CannonEnemy::Draw() {
 
 void CannonEnemy::DrawP() {
 	particleMove_->Draw();
+
+	// 弾のパーティクルも描画
+	for (Bom* bom : bullets_) {
+		bom->DrawP();
+	}
 }
 
 void CannonEnemy::Fire() {

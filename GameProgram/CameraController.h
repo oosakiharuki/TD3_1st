@@ -34,4 +34,16 @@ private:
 
 	Vector3 cameraTransofrm_;
 	Vector3 cameraRotate_;
+
+	// カメラシェイク用
+	float shakeIntensity_ = 0.0f;
+	float shakeDuration_ = 0.0f;
+	Vector3 shakeOffset_ = {0.0f, 0.0f, 0.0f};
+
+	// カメラシェイク関数
+	void UpdateShake();
+
+public:
+	// カメラシェイクを開始
+	void StartShake(float intensity, float duration);
 };
