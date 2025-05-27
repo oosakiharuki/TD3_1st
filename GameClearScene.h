@@ -17,5 +17,7 @@ private:
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 
 	int gameClearCount_ = 1;
+	bool isDecision = false;
+
 };
 

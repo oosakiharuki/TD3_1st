@@ -68,7 +68,7 @@ void FadeManager::Update() {
 
 void FadeManager::Draw() {
     // フェード中のみ描画（Complete状態では描画しない）
-    if ((fadeState_ == FadeState::FadeIn || fadeState_ == FadeState::FadeOut) && fadeAlpha_ > 0.0f) {
+    if (fadeAlpha_ > 0.0f) {
         fadeSprite_->Draw();
     }
 }

@@ -57,7 +57,7 @@ void GameManager::Update() {
 		// ローディングからの遷移以外ではフェード処理を行う
 		// Loadingシーンからの遷移は、LoadingScene内で独自にフェード処理を行っているため
 		if (prevSceneNo_ != Loading) {
-			// フェードアウト・インを行う
+			 //フェードアウト・インを行う
 			FadeManager::GetInstance()->StartFadeIn(0.03f);
 		}
 
