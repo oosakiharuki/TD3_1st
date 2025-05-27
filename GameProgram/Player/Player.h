@@ -10,6 +10,7 @@
 #include "SpringEnemy.h"
 #include <vector>
 #include "Audio.h"
+#include <Xinput.h> // XInputを直接インクルード
 
 #include "Particle.h"
 
@@ -182,6 +183,10 @@ private:
 	SoundData SnapSound_;
 	SoundData DamageSound_;
 	SoundData FallSound_; // 落下音追加
+
+	// 振動関連
+	float vibrationTimer = 0.0f;      // 振動タイマー
+	const float vibrationDuration = 0.5f; // 振動持続時間（0.5秒）
 
 	// 初期位置にリセットする関数
 	void ResetToInitialPosition();

@@ -129,3 +129,16 @@ void Input::SetStates(XINPUT_STATE state, XINPUT_STATE preState) {
 	copyState_ = state;
 	copyPreState_ = preState;
 }
+
+// 振動機能の実装
+void Input::SetVibration(uint32_t num, float leftMotor, float rightMotor) {
+	XINPUT_VIBRATION vibration;
+	vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * 65535.0f);
+	vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * 65535.0f);
+	XInputSetState(num, &vibration);
+}
+
+void Input::StopVibration(uint32_t num) {
+	XINPUT_VIBRATION vibration = { 0, 0 };
+	XInputSetState(num, &vibration);
+}

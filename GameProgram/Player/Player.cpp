@@ -7,6 +7,15 @@
 
 #include <algorithm>
 #include <iostream>
+#include <Windows.h> // XInput関連のエラーコード用
+
+// XInputライブラリのリンク
+#pragma comment(lib, "Xinput.lib")
+
+// ERROR_SUCCESSが未定義の場合の対策
+#ifndef ERROR_SUCCESS
+#define ERROR_SUCCESS 0
+#endif
 
 #include"Audio.h"
 
@@ -17,6 +26,9 @@ using namespace MyMath;
 Player::Player() {}
 
 Player::~Player() {
+	// コントローラーの振動を停止
+	Input::GetInstance()->StopVibration(0);
+
 	delete particleMove_;
 	delete particleTransfar_;
 	delete particleDeath_;
@@ -28,6 +40,9 @@ void Player::Init(Camera* camera) {
 	camera_ = camera;
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
+	
+	// 初期化時に振動を停止（前回の振動が残っている場合の対策）
+	Input::GetInstance()->StopVibration(0);
 
 	//頭用のワールド座標
 	worldTransformH_.Initialize();
@@ -217,8 +232,8 @@ void Player::Update() {
 			// カメラ向き
 			// Y軸
 			cameraYaw += xCamera * 2.5f;
-			// X軸
-			cameraPitch += zCamera * 2.5f;
+			// X軸（上下反転）
+			cameraPitch -= zCamera * 2.5f;  // += から -= に変更して反転
 		}
 
 		cameraPitch = std::clamp(cameraPitch, 0.0f, 80.0f);
@@ -535,12 +550,53 @@ void Player::Update() {
 
 	ImGui::Text("HP: %d", hp);
 	ImGui::Text("Position Y: %.2f (Fall at: %.2f)", position.y, fallThreshold);
+	ImGui::Text("Vibration Timer: %.2f", vibrationTimer);
+	
+	// テスト用振動ボタン
+	if (ImGui::Button("Test Vibration")) {
+		// まずコントローラーの状態を確認
+		XINPUT_STATE testState;
+		DWORD connectResult = XInputGetState(0, &testState);
+		
+		if (connectResult == ERROR_SUCCESS) {
+		// Inputクラスを使用して振動
+		Input::GetInstance()->SetVibration(0, 0.8f, 0.8f); // 80%の強度
+		vibrationTimer = 1.0f; // テスト用に長め
+		ImGui::Text("Vibration Started!");
+		}
+		else {
+			ImGui::Text("Controller not connected! Result: %d", connectResult);
+		}
+	}
+	
+	// コントローラーの状態を常に表示
+	XINPUT_STATE currentState;
+	if (XInputGetState(0, &currentState) == ERROR_SUCCESS) {
+		ImGui::Text("Controller Connected: YES");
+		ImGui::Text("Left Trigger: %d", currentState.Gamepad.bLeftTrigger);
+		ImGui::Text("Right Trigger: %d", currentState.Gamepad.bRightTrigger);
+	}
+	else {
+		ImGui::Text("Controller Connected: NO");
+	}
 	ImGui::End();
 #endif
 #pragma endregion
 
 	//速すぎてものが貫通しないようにする
 	velocityY_ = std::clamp(velocityY_, -20.0f, 20.0f);
+
+	// 振動タイマーの更新
+	if (vibrationTimer > 0.0f) {
+		const float deltaTime = 1.0f / 60.0f;
+		vibrationTimer -= deltaTime;
+		
+		// タイマーが0以下になったら振動を停止
+		if (vibrationTimer <= 0.0f) {
+			Input::GetInstance()->StopVibration(0);
+			vibrationTimer = 0.0f;
+		}
+	}
 
 	UpdateFloatingGimmick();
 
@@ -566,6 +622,10 @@ void Player::CheckFallOut() {
 
 			// 大きめのカメラシェイク
 			cameraController_.StartShake(0.8f, 0.5f); // 落下は大きめのシェイク
+			
+			// 落下時の振動（大きめ）
+			Input::GetInstance()->SetVibration(0, 0.9f, 0.9f); // 90%の強度
+			vibrationTimer = 0.7f; // 落下は長めの振動
 
 			if (hp > 0) {
 				// 初期位置にリセット
@@ -739,6 +799,11 @@ void Player::TakeDamage(int damageAmount) {
 
 		// カメラシェイクを発生させる
 		cameraController_.StartShake(0.5f, 0.3f); // 強度0.5、持続時間0.3秒
+
+		// コントローラーを0.5秒振動させる
+		// Inputクラスを使用して振動
+		Input::GetInstance()->SetVibration(0, 0.7f, 0.7f); // 0.7 = 70%の強度
+		vibrationTimer = vibrationDuration; // 振動タイマーをセット
 	}
 }
 
