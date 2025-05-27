@@ -15,22 +15,51 @@ void GameOverScene::Initialize() {
 }
 
 void GameOverScene::Update() {
+	Input::GetInstance()->GetJoystickState(0, state);
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
 
-	if (Input::GetInstance()->TriggerKey(DIK_W)) {
-		gameOverCount_--;
-		if (gameOverCount_ < 1) gameOverCount_ = 1;
-	}
-	if (Input::GetInstance()->TriggerKey(DIK_S)) {
-		gameOverCount_++;
-		if (gameOverCount_ > 2) gameOverCount_ = 2;
+	//選択したら変えられないようにする
+	if (!isDecision) {
+		//キーボード操作
+		if (Input::GetInstance()->TriggerKey(DIK_W)) {
+			gameOverCount_--;
+			if (gameOverCount_ < 1) gameOverCount_ = 1;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_S)) {
+			gameOverCount_++;
+			if (gameOverCount_ > 2) gameOverCount_ = 2;
+		}
+
+		//コントローラ操作
+		if (Input::GetInstance()->GetJoystickState(0, state)) {
+			float y = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f;
+
+			if (y >= 0.7f) {
+				gameOverCount_--;
+				if (gameOverCount_ < 1) gameOverCount_ = 1;
+			}
+
+			if (y <= -0.7f) {
+				gameOverCount_++;
+				if (gameOverCount_ > 2) gameOverCount_ = 2;
+			}
+		}
 	}
 
-	if (gameOverCount_ == 1 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		sceneNo = Game;
-	}
 
-	if (gameOverCount_ == 2 && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		sceneNo = Title;
+	if ((Input::GetInstance()->TriggerKey(DIK_SPACE) ||
+		((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)))) {
+		isDecision = true;
+		FadeManager::GetInstance()->StartFadeOut(0.03f);
+	}
+	if (FadeManager::GetInstance()->IsFadeComplete() && isDecision) {
+		if (gameOverCount_ == 1) {
+			sceneNo = Game;
+		}
+
+		if (gameOverCount_ == 2) {
+			sceneNo = Title;
+		}
 	}
 
 	gameOverContinue->Update();

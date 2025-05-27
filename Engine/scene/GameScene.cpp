@@ -237,24 +237,42 @@ void GameScene::Update() {
 		audio_->StopWave(BGMSound);
 		Initialize();
 	}
+	
 
+	//フェードが終わったらステージクリアかゲームオーバーのシーンに移動
+	if (FadeManager::GetInstance()->IsFadeComplete()) {
+		if (isClear) {
+			audio_->StopWave(BGMSound);
+			sceneNo = GameClear;
+			return; // ゴールクリア状態なら更新処理をスキップ
+		}
 
-	// MapLoaderが管理するGoalの状態をチェック
-	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear()) {
-		audio_->StopWave(BGMSound);
-		sceneNo = GameClear;
-		return; // ゴールクリア状態なら更新処理をスキップ
+		if(isOver){		
+			sceneNo = GameOver; // GameOverSceneに遷移
+			return;
+		}
 	}
 
-	player_->Update();
+	// MapLoaderが管理するGoalの状態をチェック
+	if (mapLoader_ && mapLoader_->GetGoal() && mapLoader_->GetGoal()->IsClear() && !isClear) {
+		FadeManager::GetInstance()->StartFadeOut(0.03f);
+		isClear = true;
+	}
 
 	// プレイヤーのHPが0になった場合、GameOverSceneに移行
 	//デスパーティクルが終了した時も追加
-	if (player_->GetHp() <= 0 && !player_->GetDeadPlayer()) {
+	if (player_->GetHp() <= 0 && !player_->GetDeadPlayer() && !isOver) {
+		FadeManager::GetInstance()->StartFadeOut(0.03f);
+		isOver = true;
 		audio_->StopWave(BGMSound);
-		sceneNo = GameOver; // GameOverSceneに遷移
 	}
 
+	//フェード中プレイヤーを動かせないようにする
+	if (isClear || isOver) {
+		return;
+	}
+
+	player_->Update();
 
 	// EnemyLoaderの更新
 	if (enemyLoader_) {

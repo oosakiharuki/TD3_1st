@@ -1,4 +1,5 @@
 #include "StageSelect.h"
+#include "FadeManager.h"
 #include <iostream>
 #include  <string>
 
@@ -75,68 +76,76 @@ void StageSelect::Update() {
 	worldTransform_.translation_.x = -0.3f;
 	worldTransform_.rotation_.y += 0.01f;
 	worldTransform_.scale_ = { 0.005f,0.007f,0.005f };
-	
-
-	Input::GetInstance()->GetJoystickState(0, state);
-	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
-
-	bool isPlus = false;  //数字が増える 
-	bool isMinus = false; //数字が減る
-	
-	const float deltaTimer = 1.0f / 60.0f;
-	
-	if (Input::GetInstance()->GetJoystickState(0, state)) {
-		float x = static_cast<float>(state.Gamepad.sThumbLX) / 32768.0f;
-
-		if (x >= 0.7f) {
-			isPlus = true; 
-		}
-		else if (x <= -0.7f) {
-			isMinus = true; 
-		}
-	}
-
-	if (Input::GetInstance()->PushKey(DIK_D)) {
-		isPlus = true;
-	}
-
-	if (Input::GetInstance()->PushKey(DIK_A)) {
-		isMinus = true;
-	}
-
-	if (isPlus || isMinus) {
-		steackCount -= deltaTimer;		
-	}
-	else {
-		steackCount = 0.01f; // 離した後、次に押すときスムーズに切り替わる
-	}
-
-	//ステージの数字が大きいほうに進む
-	if (isPlus && stageNum < 7 && steackCount <= 0) {
-		stageNum += 1;
-		steackCount = steackMax;
-	}
-	
-	//ステージの数字が小さいほうに進む
-	if (isMinus && stageNum > 0 && steackCount <= 0) {
-		stageNum -= 1;
-		steackCount = steackMax;
-	}
-
-	stageNumber->SetTextureLT({ selectLT * stageNum,0 });
-
-	//決定ボタン
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE) ||
-		((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A))) {
-		GameData::selectedStage = stageNum;
 		
+	if (FadeManager::GetInstance()->IsFadeComplete() && isDecision) {
+		GameData::selectedStage = stageNum;
+
 		// デバッグ出力 - ステージ選択時のステージ番号
 		std::string debugMsg = "Stage Selected: " + std::to_string(GameData::selectedStage) + "\n";
 		OutputDebugStringA(debugMsg.c_str());
-		
+
 		sceneNo = Game;
 	}
 
+	//フェードイン中に操作させないようにする
+	if (FadeManager::GetInstance()->IsFadeComplete()) {
+
+		Input::GetInstance()->GetJoystickState(0, state);
+		Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
+		bool isPlus = false;  //数字が増える 
+		bool isMinus = false; //数字が減る
+
+		const float deltaTimer = 1.0f / 60.0f;
+
+		if (Input::GetInstance()->GetJoystickState(0, state)) {
+			float x = static_cast<float>(state.Gamepad.sThumbLX) / 32768.0f;
+
+			if (x >= 0.7f) {
+				isPlus = true;
+			}
+			else if (x <= -0.7f) {
+				isMinus = true;
+			}
+		}
+
+		if (Input::GetInstance()->PushKey(DIK_D)) {
+			isPlus = true;
+		}
+
+		if (Input::GetInstance()->PushKey(DIK_A)) {
+			isMinus = true;
+		}
+
+		if (isPlus || isMinus) {
+			steackCount -= deltaTimer;
+		}
+		else {
+			steackCount = 0.01f; // 離した後、次に押すときスムーズに切り替わる
+		}
+
+		//ステージの数字が大きいほうに進む
+		if (isPlus && stageNum < 7 && steackCount <= 0) {
+			stageNum += 1;
+			steackCount = steackMax;
+		}
+
+		//ステージの数字が小さいほうに進む
+		if (isMinus && stageNum > 0 && steackCount <= 0) {
+			stageNum -= 1;
+			steackCount = steackMax;
+		}
+
+		stageNumber->SetTextureLT({ selectLT * stageNum,0 });
+
+		//決定ボタン
+		if ((Input::GetInstance()->TriggerKey(DIK_SPACE) ||
+			((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A))) && !isDecision) {
+			// フェードアウト開始
+			FadeManager::GetInstance()->StartFadeOut(0.03f);
+			isDecision = true;
+		}
+	}
 
 	camera_->SetTranslate(cameraPosition);
 	camera_->SetRotate(cameraRotate);

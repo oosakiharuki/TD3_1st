@@ -31,6 +31,7 @@ void MyGame::Draw() {
 	gameScene->Draw();
 
 	// フェードの描画（全ての描画の一番上から）
+	SpriteCommon::GetInstance()->Command(); //Sprite描画にする
 	FadeManager::GetInstance()->Draw();
 
 #ifdef  USE_IMGUI
