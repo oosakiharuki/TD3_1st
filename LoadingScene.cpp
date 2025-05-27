@@ -297,8 +297,6 @@ void LoadingScene::LoadStage3Resources() {
         "stage3",
         "stage4",
         "stage5",
-        "stage6",
-        "stage7",
         "BlueGhost"
     };
     
