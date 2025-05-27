@@ -3,6 +3,7 @@
 #include "WorldTransform.h"
 #include "Object3d.h"
 #include "Particle.h"
+#include "Audio.h"
 
 class Block {
 public:
@@ -54,4 +55,9 @@ private:
 	const float SHAKE_EFFECT_TIME = 0.15f;
 	float SHAKE_INTENSITY = 0.05f; // より控えめに
 	float SCALE_INTENSITY = 1.1f; // より控えめに
+
+	// オーディオ
+	Audio* audio_ = nullptr;
+	SoundData hitSound_;
+	SoundData breakSound_;
 };

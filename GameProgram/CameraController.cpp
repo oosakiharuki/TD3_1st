@@ -1,6 +1,7 @@
 #include "CameraController.h"
 #include "ImGuiManager.h"
 #include "Player.h"
+#include <random>
 
 CameraController::CameraController() : offset_{0.0f, 5.0f, -20.0f}, pitchDeg_(10.0f) {}
 
@@ -53,6 +54,14 @@ void CameraController::Update(Camera* camera, const Vector3& playerPosition) {
 	cameraRotate_.y += (yawRad - cameraRotate_.y) * rotationSmoothFactor;
 	cameraRotate_.z = 0.0f;
 
+	// カメラシェイクの更新
+	UpdateShake();
+
+	// シェイクオフセットを適用
+	cameraTransofrm_.x += shakeOffset_.x;
+	cameraTransofrm_.y += shakeOffset_.y;
+	cameraTransofrm_.z += shakeOffset_.z;
+
 #ifdef _DEBUG
 	ImGui::Begin("camera");
 	ImGui::DragFloat3("cameraTranslate",  &cameraTransofrm_.x);
@@ -68,4 +77,31 @@ void CameraController::Update(Camera* camera, const Vector3& playerPosition) {
 
 	//camera->UpdateViewMatrix();
 	//camera->TransferMatrix();
+}
+
+void CameraController::StartShake(float intensity, float duration) {
+	shakeIntensity_ = intensity;
+	shakeDuration_ = duration;
+}
+
+void CameraController::UpdateShake() {
+	if (shakeDuration_ > 0) {
+		// ランダムなシェイクを生成
+		static std::random_device rd;
+		static std::mt19937 gen(rd());
+		std::uniform_real_distribution<> dis(-1.0, 1.0);
+
+		// 時間経過で弱まるシェイク
+		float currentIntensity = shakeIntensity_ * (shakeDuration_ / 0.5f); // 0.5秒で完全に減衰
+
+		shakeOffset_.x = static_cast<float>(dis(gen)) * currentIntensity;
+		shakeOffset_.y = static_cast<float>(dis(gen)) * currentIntensity;
+		shakeOffset_.z = static_cast<float>(dis(gen)) * currentIntensity * 0.5f; // Z軸は控えめに
+
+		shakeDuration_ -= 1.0f / 60.0f; // deltaTime
+	}
+	else {
+		shakeOffset_ = {0.0f, 0.0f, 0.0f};
+		shakeIntensity_ = 0.0f;
+	}
 }

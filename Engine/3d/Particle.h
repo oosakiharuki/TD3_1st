@@ -44,6 +44,7 @@ enum class ParticleType {
 
 class Particle{
 public:
+	~Particle(); // デストラクタを追加
 	void Initialize(std::string textureFile);
 	void Update();
 	void Draw();
@@ -134,4 +135,7 @@ private:
 	ParticleType particleType = ParticleType::Normal;
 
 	uint32_t number = 0;
+	
+	// 初期化状態を追跡するフラグ
+	bool isInitialized = false;
 };

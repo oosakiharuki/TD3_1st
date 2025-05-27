@@ -351,6 +351,10 @@ void GameScene::Draw() {
 
 	if (mapLoader_) {
 		mapLoader_->DrawP();
+		// ゴールのパーティクルも描画
+		if (mapLoader_->GetGoal()) {
+			mapLoader_->GetGoal()->DrawP();
+		}
 	}
 
 	//スプライト描画処理(UI用)

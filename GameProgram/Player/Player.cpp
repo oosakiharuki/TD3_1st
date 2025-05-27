@@ -564,6 +564,9 @@ void Player::CheckFallOut() {
 			// 落下音を再生
 			audio_->SoundPlayWave(FallSound_, 0.7f);
 
+			// 大きめのカメラシェイク
+			cameraController_.StartShake(0.8f, 0.5f); // 落下は大きめのシェイク
+
 			if (hp > 0) {
 				// 初期位置にリセット
 				ResetToInitialPosition();
@@ -600,6 +603,10 @@ void Player::CheckCollision() {
 						block_->SetParticlePosition(bom->GetWorldPosition());
 						block_->OnCollision();
 						bom->OnCollision();
+						// ブロックが破壊された場合、他の弾との判定をスキップ
+						if (!block_->IsActive()) {
+							break;
+						}
 					}
 				}
 			}
@@ -729,6 +736,9 @@ void Player::TakeDamage(int damageAmount) {
 		isVisible = true;
 
 		Audio::GetInstance()->SoundPlayWave(DamageSound_, 0.7f);// ダメージを食らったときのSE
+
+		// カメラシェイクを発生させる
+		cameraController_.StartShake(0.5f, 0.3f); // 強度0.5、持続時間0.3秒
 	}
 }
 
@@ -746,6 +756,19 @@ void Player::CheckCollisionWithSprings() {
 				velocityY_ = 0.6f * springEnemy->GetJumpBoost();
 				onGround_ = false;
 				springEnemy->Compress(); // Trigger visual feedback
+
+				// スプリングジャンプの音を再生
+				audio_->SoundPlayWave(JumpSound_, 1.0f); // 通常より大きい音
+
+				// スプリングジャンプパーティクル
+				particleTransfar_->SetParticleCount(30);
+				particleTransfar_->SetFrequency(0.001f);
+				particleTransfar_->SetTranslate(springAABB.min + Vector3{1.0f, 2.0f, 1.0f});
+				particleTransfar_->SetScale({1.5f, 1.5f, 1.5f});
+				particleTransfar_->ChangeMode(BornParticle::MomentMode);
+
+				// カメラシェイク（ジャンプ感を演出）
+				cameraController_.StartShake(0.3f, 0.2f);
 			}
 		}
 	}
