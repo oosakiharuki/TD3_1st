@@ -5,7 +5,7 @@
 #include <algorithm>
 
 void LoadingScene::Initialize() {
-    OutputDebugStringA("LoadingScene::Initialize() 開始\n");
+    OutputDebugStringA("OptimizedLoadingScene::Initialize() 開始\n");
     
     // パフォーマンスモニター初期化
     PerformanceMonitor::GetInstance()->BeginSection("LoadingSceneInit");
@@ -40,7 +40,7 @@ void LoadingScene::Initialize() {
     ResourceManager::GetInstance()->StartBatchLoading();
     
     PerformanceMonitor::GetInstance()->EndSection("LoadingSceneInit");
-    OutputDebugStringA("LoadingScene::Initialize() 完了\n");
+    OutputDebugStringA("OptimizedLoadingScene::Initialize() 完了\n");
 }
 
 void LoadingScene::InitializeUI() {
@@ -202,11 +202,8 @@ void LoadingScene::UpdateAnimations() {
     background->Update();
     progressBarBg->Update();
     
-    // アイコン回転（2秒で1回転）
-    // 2秒で2πラジアン = 1秒でπラジアン = 60FPSでπ/60ラジアン/フレーム
-    const float PI = 3.14159265359f;
-    const float rotationSpeed = PI / 60.0f;  // 2秒で1回転
-    rotationAngle += rotationSpeed;
+    // アイコン回転
+    rotationAngle += 2.0f;
     float wobble = sin(rotationAngle * 0.02f) * 5.0f;
     loadingIcon->SetPosition({ posX, posY + wobble });
     loadingIcon->SetRotate(rotationAngle);
@@ -351,7 +348,7 @@ void LoadingScene::Draw() {
 }
 
 void LoadingScene::Finalize() {
-    OutputDebugStringA("LoadingScene::Finalize() 開始\n");
+    OutputDebugStringA("OptimizedLoadingScene::Finalize() 開始\n");
     
     // 音声停止
     if (!isSoundStopped) {
@@ -369,13 +366,5 @@ void LoadingScene::Finalize() {
         delete stars[i];
     }
     
-    OutputDebugStringA("LoadingScene::Finalize() 完了\n");
+    OutputDebugStringA("OptimizedLoadingScene::Finalize() 完了\n");
 }
-
-// 互換性のために残すメソッド（空実装）
-void LoadingScene::StartAsyncLoading() {}
-void LoadingScene::LoadEssentialResources() {}
-void LoadingScene::LoadStage1Resources() {}
-void LoadingScene::LoadStage2Resources() {}
-void LoadingScene::LoadStage3Resources() {}
-void LoadingScene::LoadStage4Resources() {}
