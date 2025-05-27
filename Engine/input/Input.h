@@ -25,6 +25,10 @@ public:
 	bool GetJoystickState(uint32_t num,XINPUT_STATE& state);
 	bool GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state);
 
+	// 振動機能を追加
+	void SetVibration(uint32_t num, float leftMotor, float rightMotor);
+	void StopVibration(uint32_t num);
+
 	//ボタン情報の移行する
 	XINPUT_STATE GetState() { return copyState_; }
 	XINPUT_STATE GetPreState() { return copyPreState_; }

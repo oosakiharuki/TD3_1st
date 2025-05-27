@@ -99,6 +99,7 @@ void StageSelect::Update() {
 		const float deltaTimer = 1.0f / 60.0f;
 
 		if (Input::GetInstance()->GetJoystickState(0, state)) {
+			// 左スティック
 			float x = static_cast<float>(state.Gamepad.sThumbLX) / 32768.0f;
 
 			if (x >= 0.7f) {
@@ -106,6 +107,16 @@ void StageSelect::Update() {
 			}
 			else if (x <= -0.7f) {
 				isMinus = true;
+			}
+
+			// 十字キー
+			if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)) {
+				isPlus = true;
+				steackCount = 0.01f; // 即座に反応
+			}
+			else if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)) {
+				isMinus = true;
+				steackCount = 0.01f; // 即座に反応
 			}
 		}
 
