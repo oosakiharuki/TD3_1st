@@ -17,6 +17,14 @@ Block::~Block() {
 		delete particle;
 		particle = nullptr;
 	}
+	
+	// 破片モデルの削除
+	for (auto& fragment : fragments_) {
+		if (fragment.model) {
+			delete fragment.model;
+			fragment.model = nullptr;
+		}
+	}
 }
 
 void Block::Init() {
@@ -54,6 +62,16 @@ void Block::Init() {
 	audio_ = Audio::GetInstance();
 	hitSound_ = audio_->LoadWave("sound/hit.wav");
 	breakSound_ = audio_->LoadWave("sound/break.wav");
+	
+	// 破片の初期化
+	fragments_.resize(MAX_FRAGMENTS);
+	for (auto& fragment : fragments_) {
+		fragment.transform.Initialize();
+		fragment.model = new Object3d();
+		fragment.model->Initialize();
+		fragment.model->SetModelFile("cube"); // 同じキューブモデルを使用
+		fragment.isActive = false;
+	}
 }
 
 void Block::Update() {
@@ -67,6 +85,9 @@ void Block::Update() {
 		if (pScale > 2.0f) pScale = 2.0f; // 最大スケールを制限
 		particle->SetScale({ pScale, pScale, pScale });
 	}
+	
+	// 破片の更新（非アクティブでも更新する）
+	UpdateFragments();
 	
 	// 非アクティブなブロックは以降の処理をスキップ
 	if (!isActive_) {
@@ -142,6 +163,9 @@ void Block::Draw() {
 		model_->Draw(worldTransform);
 	}
 	// 非アクティブなら描画しない (ここでreturnを入れるなら上のifブロックの外に出す)
+	
+	// 破片の描画
+	DrawFragments();
 }
 
 void Block::DrawP() {
@@ -236,6 +260,10 @@ void Block::OnCollision() {
 		float volume = 0.5f + (sizeMultiplier * 0.3f);
 		if (volume > 1.0f) volume = 1.0f;
 		audio_->SoundPlayWave(breakSound_, volume);
+		
+		// 3D破片を生成
+		CreateFragments();
+		
 		// 最後にisActive_をfalseにする
 		isActive_ = false;
 	}
@@ -305,4 +333,106 @@ void Block::OnCollision() {
 	
 	particle->SetTranslate(effectPosition);
 	particle->ChangeMode(BornParticle::MomentMode);
+}
+
+void Block::CreateFragments() {
+	// ランダム生成用
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> velocityDist(-10.0f, 10.0f);
+	std::uniform_real_distribution<float> rotationDist(-5.0f, 5.0f);
+	std::uniform_real_distribution<float> scaleDist(0.1f, 0.3f);
+	
+	// ブロックサイズに基づいて破片数を決定
+	float volumeMultiplier = size_.x * size_.y * size_.z;
+	int fragmentCount = static_cast<int>(10 + volumeMultiplier * 0.5f);
+	if (fragmentCount > MAX_FRAGMENTS) fragmentCount = MAX_FRAGMENTS;
+	if (fragmentCount < 10) fragmentCount = 10;
+	
+	// 破片を生成
+	for (int i = 0; i < fragmentCount; i++) {
+		auto& fragment = fragments_[i];
+		
+		// 破片を有効化
+		fragment.isActive = true;
+		fragment.lifetime = 2.0f; // 2秒間表示
+		
+		// 初期位置をブロックの位置に設定（少しランダムにずらす）
+		fragment.transform.translation_ = worldTransform.translation_;
+		fragment.transform.translation_.x += velocityDist(gen) * 0.1f;
+		fragment.transform.translation_.y += velocityDist(gen) * 0.1f;
+		fragment.transform.translation_.z += velocityDist(gen) * 0.1f;
+		
+		// 破片のサイズを設定（ブロックサイズに基づく）
+		float fragmentScale = scaleDist(gen) * ((size_.x + size_.y + size_.z) / 3.0f);
+		fragment.transform.scale_ = {fragmentScale, fragmentScale, fragmentScale};
+		
+		// 初期回転をランダムに
+		fragment.transform.rotation_.x = rotationDist(gen);
+		fragment.transform.rotation_.y = rotationDist(gen);
+		fragment.transform.rotation_.z = rotationDist(gen);
+		
+		// 速度と回転速度を設定
+		fragment.velocity = {
+			velocityDist(gen),
+			velocityDist(gen) + 5.0f, // 上方向に飛ばす
+			velocityDist(gen)
+		};
+		
+		fragment.rotationSpeed = {
+			rotationDist(gen),
+			rotationDist(gen),
+			rotationDist(gen)
+		};
+		
+		fragment.transform.UpdateMatrix();
+	}
+}
+
+void Block::UpdateFragments() {
+	const float deltaTime = 1.0f / 60.0f;
+	const float gravity = -20.0f;
+	
+	for (auto& fragment : fragments_) {
+		if (!fragment.isActive) continue;
+		
+		// ライフタイムを減らす
+		fragment.lifetime -= deltaTime;
+		if (fragment.lifetime <= 0.0f) {
+			fragment.isActive = false;
+			continue;
+		}
+		
+		// 重力を適用
+		fragment.velocity.y += gravity * deltaTime;
+		
+		// 位置を更新
+		fragment.transform.translation_.x += fragment.velocity.x * deltaTime;
+		fragment.transform.translation_.y += fragment.velocity.y * deltaTime;
+		fragment.transform.translation_.z += fragment.velocity.z * deltaTime;
+		
+		// 回転を更新
+		fragment.transform.rotation_.x += fragment.rotationSpeed.x * deltaTime;
+		fragment.transform.rotation_.y += fragment.rotationSpeed.y * deltaTime;
+		fragment.transform.rotation_.z += fragment.rotationSpeed.z * deltaTime;
+		
+		// フェードアウト効果（最後の0.5秒）
+		if (fragment.lifetime < 0.5f) {
+			float alpha = fragment.lifetime / 0.5f;
+			// 元のスケールを保存していないので、現在のスケールに係数を掛ける
+			fragment.transform.scale_.x = fragment.transform.scale_.x * 0.95f; // 徐々に小さく
+			fragment.transform.scale_.y = fragment.transform.scale_.y * 0.95f;
+			fragment.transform.scale_.z = fragment.transform.scale_.z * 0.95f;
+		}
+		
+		fragment.transform.UpdateMatrix();
+	}
+}
+
+void Block::DrawFragments() {
+	for (const auto& fragment : fragments_) {
+		if (fragment.isActive && fragment.model) {
+			fragment.model->Draw(fragment.transform);
+		}
+	}
 }

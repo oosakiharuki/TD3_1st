@@ -4,6 +4,8 @@
 #include "Object3d.h"
 #include "Particle.h"
 #include "Audio.h"
+#include <vector>
+#include <random>
 
 class Block {
 public:
@@ -42,6 +44,16 @@ public:
 	}
 
 private:
+	// 3D破片パーティクル用の構造体
+	struct BlockFragment {
+		WorldTransform transform;
+		Object3d* model = nullptr;
+		Vector3 velocity;
+		Vector3 rotationSpeed;
+		float lifetime;
+		bool isActive = false;
+	};
+	
 	WorldTransform worldTransform;
 	Camera* viewProjection_ = nullptr;
 	Object3d* model_ = nullptr;
@@ -72,4 +84,11 @@ private:
 	Audio* audio_ = nullptr;
 	SoundData hitSound_;
 	SoundData breakSound_;
+	
+	// 3D破片パーティクル用
+	std::vector<BlockFragment> fragments_;
+	const int MAX_FRAGMENTS = 50; // 最大破片数
+	void CreateFragments(); // 破片を生成
+	void UpdateFragments(); // 破片を更新
+	void DrawFragments();   // 破片を描画
 };
