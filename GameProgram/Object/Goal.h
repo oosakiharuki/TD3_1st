@@ -31,6 +31,10 @@ public:
 		worldTransform_.UpdateMatrix();
 	}
 
+	// MapLoader用のメソッド
+	Object3d* GetObject() { return model_; }
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
+
 private:
 
 	WorldTransform worldTransform_;

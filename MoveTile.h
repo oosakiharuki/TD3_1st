@@ -40,6 +40,17 @@ public:
 	// 初期Y座標を設定
 	void SetInitialY(float y) { initialY_ = y; }
 
+	// Getter メソッド
+	float GetSpeed() const { return moveSpeed_; }
+	float GetRange() const { return moveRange_; }
+	float GetInitialY() const { return initialY_; }
+	Object3d* GetObject() { return model_; }
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
+
+	// Setter メソッド（MapLoader.cppで使用）
+	void SetSpeed(float speed) { moveSpeed_ = speed; }
+	void SetRange(float range) { moveRange_ = range; }
+
 private:
 
 	WorldTransform worldTransform_;

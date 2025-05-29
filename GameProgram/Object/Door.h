@@ -115,6 +115,16 @@ public:
 		useCustomRotation_ = true;
 	}
 
+	// MapLoader用のメソッド
+	Vector3 GetTranslation() const { return worldTransform_.translation_; }
+	void SetTranslation(const Vector3& translation) { 
+		worldTransform_.translation_ = translation;
+		position_ = translation;
+	}
+	Vector3 GetScale() const { return worldTransform_.scale_; }
+	void SetScale(const Vector3& scale) { worldTransform_.scale_ = scale; }
+	void SetRotation(const Vector3& rotation) { worldTransform_.rotation_ = rotation; }
+
 private:
 	WorldTransform worldTransform_;
 	Object3d* model_ = nullptr;

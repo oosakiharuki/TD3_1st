@@ -1,12 +1,16 @@
 #include "MapLoader.h"
 #include <algorithm>
 #include <iostream>
+#include "ImGuiManager.h"
 
 MapLoader::MapLoader() {}
 
 MapLoader::~MapLoader() { ClearResources(); }
 
 bool MapLoader::LoadMapData(const std::string& csvPath) {
+	// 現在のCSVパスを保存
+	currentCSVPath_ = csvPath;
+	
 	// 以前のデータをクリア
 	mapObjectsData_.clear();
 
@@ -569,7 +573,7 @@ void MapLoader::ChangeStage(int stageNumber, Player* player) {
 	ClearResources();
 
 	// ステージ番号に応じたCSVファイル名を決定
-	std::string csvPath = "Resources/objects" + std::to_string(stageNumber) + ".csv";
+	std::string csvPath = "resource/objects" + std::to_string(stageNumber) + ".csv";
 
 	// マップデータを読み込み
 	if (LoadMapData(csvPath)) {
@@ -579,4 +583,209 @@ void MapLoader::ChangeStage(int stageNumber, Player* player) {
 	else {
 		std::cerr << "Failed to load map data: " << csvPath << std::endl;
 	}
+}
+
+bool MapLoader::SaveMapData(const std::string& csvPath) {
+	std::ofstream file(csvPath);
+	if (!file.is_open()) {
+		return false;
+	}
+
+	// 各オブジェクトをCSV形式で書き込む
+	for (const auto& key : keys_) {
+		file << key->GetWorldTransform().translation_.x << ","
+			 << key->GetWorldTransform().translation_.y << ","
+			 << key->GetWorldTransform().translation_.z << ",key\n";
+	}
+
+	for (const auto& door : doors_) {
+		file << door->GetTranslation().x << ","
+			 << door->GetTranslation().y << ","
+			 << door->GetTranslation().z << ",door";
+		
+		// ドアの回転角度も保存
+		float rotationY = door->GetRotation().y * (180.0f / 3.14159265359f);
+		if (abs(rotationY) > 0.01f) {
+			file << "," << rotationY;
+		}
+		file << "\n";
+	}
+
+	for (const auto& block : blocks_) {
+		file << block->GetTranslation().x << ","
+			 << block->GetTranslation().y << ","
+			 << block->GetTranslation().z << ",block,"
+			 << block->GetScale().x << ","
+			 << block->GetScale().y << ","
+			 << block->GetScale().z << "\n";
+	}
+
+	for (const auto& tile : tiles_) {
+		file << tile->GetWorldTransform().translation_.x << ","
+			 << tile->GetWorldTransform().translation_.y << ","
+			 << tile->GetWorldTransform().translation_.z << ",tile";
+		
+		// カスタム設定の場合はパラメータも保存
+		if (tile->GetSpeed() != 1.0f || tile->GetRange() != 15.0f || tile->GetInitialY() != 92.0f) {
+			file << ",custom," 
+				 << tile->GetSpeed() << ","
+				 << tile->GetRange() << ","
+				 << tile->GetInitialY();
+		}
+		file << "\n";
+	}
+
+	for (const auto& ghostBlock : ghostBlocks_) {
+		file << ghostBlock->GetTranslation().x << ","
+			 << ghostBlock->GetTranslation().y << ","
+			 << ghostBlock->GetTranslation().z << ",colorwall,"
+			 << (ghostBlock->GetColorType() == ColorType::Red ? "red" :
+				 ghostBlock->GetColorType() == ColorType::Blue ? "blue" : "green") << "\n";
+	}
+
+	if (goal_) {
+		file << goal_->GetWorldTransform().translation_.x << ","
+			 << goal_->GetWorldTransform().translation_.y << ","
+			 << goal_->GetWorldTransform().translation_.z << ",goal\n";
+	}
+
+	file.close();
+	return true;
+}
+
+void MapLoader::UpdateImGui() {
+#ifdef _DEBUG
+	if (ImGui::Begin("Map Object Editor")) {
+		ImGui::Text("Current CSV: %s", currentCSVPath_.c_str());
+		ImGui::Separator();
+
+		// 鍵の編集
+		if (ImGui::CollapsingHeader("Keys")) {
+			for (size_t i = 0; i < keys_.size(); i++) {
+				ImGui::PushID(static_cast<int>(i));
+				if (ImGui::TreeNode(("Key " + std::to_string(i)).c_str())) {
+					Vector3 pos = keys_[i]->GetWorldTransform().translation_;
+					Vector3 scale = keys_[i]->GetWorldTransform().scale_;
+					
+					if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+						keys_[i]->GetWorldTransform().translation_ = pos;
+					}
+					if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+						keys_[i]->GetWorldTransform().scale_ = scale;
+					}
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			}
+		}
+
+		// ドアの編集
+		if (ImGui::CollapsingHeader("Doors")) {
+			for (size_t i = 0; i < doors_.size(); i++) {
+				ImGui::PushID(static_cast<int>(i + 1000));
+				if (ImGui::TreeNode(("Door " + std::to_string(i)).c_str())) {
+					Vector3 pos = doors_[i]->GetTranslation();
+					Vector3 scale = doors_[i]->GetScale();
+					Vector3 rotation = doors_[i]->GetRotation();
+					rotation.y *= (180.0f / 3.14159265359f); // ラジアンから度に変換
+					
+					if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+						doors_[i]->SetTranslation(pos);
+					}
+					if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+						doors_[i]->SetScale(scale);
+					}
+					if (ImGui::DragFloat("Rotation Y", &rotation.y, 1.0f, -180.0f, 180.0f)) {
+						rotation.y *= (3.14159265359f / 180.0f); // 度からラジアンに変換
+						doors_[i]->SetRotation(rotation);
+					}
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			}
+		}
+
+		// ブロックの編集
+		if (ImGui::CollapsingHeader("Blocks")) {
+			for (size_t i = 0; i < blocks_.size(); i++) {
+				ImGui::PushID(static_cast<int>(i + 2000));
+				if (ImGui::TreeNode(("Block " + std::to_string(i)).c_str())) {
+					Vector3 pos = blocks_[i]->GetTranslation();
+					Vector3 scale = blocks_[i]->GetScale();
+					
+					if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+						blocks_[i]->SetTranslation(pos);
+					}
+					if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 100.0f)) {
+						blocks_[i]->SetScale(scale);
+					}
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			}
+		}
+
+		// タイルの編集
+		if (ImGui::CollapsingHeader("Moving Tiles")) {
+			for (size_t i = 0; i < tiles_.size(); i++) {
+				ImGui::PushID(static_cast<int>(i + 3000));
+				if (ImGui::TreeNode(("Tile " + std::to_string(i)).c_str())) {
+					Vector3 pos = tiles_[i]->GetWorldTransform().translation_;
+					Vector3 scale = tiles_[i]->GetWorldTransform().scale_;
+					
+					if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+						tiles_[i]->GetWorldTransform().translation_ = pos;
+					}
+					if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+						tiles_[i]->GetWorldTransform().scale_ = scale;
+					}
+					
+					// MoveTileのパラメータも編集可能に
+					float speed = tiles_[i]->GetSpeed();
+					float range = tiles_[i]->GetRange();
+					float initialY = tiles_[i]->GetInitialY();
+					
+					if (ImGui::DragFloat("Speed", &speed, 0.1f, 0.1f, 10.0f)) {
+						tiles_[i]->SetSpeed(speed);
+					}
+					if (ImGui::DragFloat("Range", &range, 1.0f, 1.0f, 100.0f)) {
+						tiles_[i]->SetRange(range);
+					}
+					if (ImGui::DragFloat("Initial Y", &initialY, 1.0f)) {
+						tiles_[i]->SetInitialY(initialY);
+					}
+					
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+			}
+		}
+
+		// ゴールの編集
+		if (goal_ && ImGui::CollapsingHeader("Goal")) {
+			Vector3 pos = goal_->GetWorldTransform().translation_;
+			Vector3 scale = goal_->GetWorldTransform().scale_;
+			
+			if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+				goal_->GetWorldTransform().translation_ = pos;
+			}
+			if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+				goal_->GetWorldTransform().scale_ = scale;
+			}
+		}
+
+		ImGui::Separator();
+		
+		// 保存ボタン
+		if (ImGui::Button("Save to CSV", ImVec2(200, 40))) {
+			if (SaveMapData(currentCSVPath_)) {
+				ImGui::TextColored(ImVec4(0, 1, 0, 1), "Saved successfully!");
+			} else {
+				ImGui::TextColored(ImVec4(1, 0, 0, 1), "Failed to save!");
+			}
+		}
+		
+		ImGui::End();
+	}
+#endif
 }
