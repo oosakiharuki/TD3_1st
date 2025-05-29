@@ -32,6 +32,9 @@ Player::~Player() {
 	delete particleMove_;
 	delete particleTransfar_;
 	delete particleDeath_;
+	delete particleRainbowRed_;
+	delete particleRainbowBlue_;
+	delete particleRainbowGreen_;
 	delete headModel_;
 	delete footModel_;
 }
@@ -87,6 +90,21 @@ void Player::Init(Camera* camera) {
 	particleDeath_->ChangeMode(BornParticle::Stop);
 	particleDeath_->ChangeType(ParticleType::Normal);
 
+	// 虹色エフェクト用パーティクル初期化
+	particleRainbowRed_ = new Particle();
+	particleRainbowRed_->Initialize("resource/Sprite/Red.png");
+	particleRainbowRed_->ChangeMode(BornParticle::Stop);
+	particleRainbowRed_->ChangeType(ParticleType::Normal);
+	
+	particleRainbowBlue_ = new Particle();
+	particleRainbowBlue_->Initialize("resource/Sprite/Blue.png");
+	particleRainbowBlue_->ChangeMode(BornParticle::Stop);
+	particleRainbowBlue_->ChangeType(ParticleType::Normal);
+	
+	particleRainbowGreen_ = new Particle();
+	particleRainbowGreen_->Initialize("resource/Sprite/Green.png");
+	particleRainbowGreen_->ChangeMode(BornParticle::Stop);
+	particleRainbowGreen_->ChangeType(ParticleType::Normal);
 
 	//切り替え時長押しにならないように
 	state = Input::GetInstance()->GetState();
@@ -304,11 +322,43 @@ void Player::Update() {
 			velocityY_ = 0.0f;
 			EnemyContral = false;
 			onEnemy = true;
+			
+			// バネ敵から解除したかチェック
+			for (SpringEnemy* spring : springEnemies_) {
+				if (spring->GetPlayerCtrl()) {
+					wasOnSpring_ = true;
+					springEffectTimer_ = 5.0f; // 5秒間虹色エフェクト
+					break;
+				}
+			}
+			
+			// 解除時の瞬間的な虹色パーティクル
+			particleTransfar_->SetParticleCount(50);
+			particleTransfar_->SetFrequency(0.0003f);
+			particleTransfar_->SetTranslate(worldTransform_.translation_);
+			particleTransfar_->SetScale({3.0f, 3.0f, 3.0f});
+			particleTransfar_->ChangeMode(BornParticle::MomentMode);
 		}
 		else if (Input::GetInstance()->TriggerKey(DIK_K) && velocityY_ == 0.0f && EnemyContral) {
 			velocityY_ = 0.0f;
 			EnemyContral = false;
 			onEnemy = true;
+			
+			// バネ敵から解除したかチェック
+			for (SpringEnemy* spring : springEnemies_) {
+				if (spring->GetPlayerCtrl()) {
+					wasOnSpring_ = true;
+					springEffectTimer_ = 5.0f; // 5秒間虹色エフェクト
+					break;
+				}
+			}
+			
+			// 解除時の瞬間的な虹色パーティクル
+			particleTransfar_->SetParticleCount(50);
+			particleTransfar_->SetFrequency(0.0003f);
+			particleTransfar_->SetTranslate(worldTransform_.translation_);
+			particleTransfar_->SetScale({3.0f, 3.0f, 3.0f});
+			particleTransfar_->ChangeMode(BornParticle::MomentMode);
 		}
 #pragma endregion
 
@@ -432,6 +482,13 @@ void Player::Update() {
 
 				// 乗り移り音を再生
 				audio_->SoundPlayWave(SnapSound_, 0.6f);
+				
+				// バネに乗り移った時の鮮やかなパーティクル
+				particleTransfar_->SetParticleCount(45);
+				particleTransfar_->SetFrequency(0.0004f);
+				particleTransfar_->SetTranslate(springAABB.min + Vector3{1.0f, 1.0f, 1.0f});
+				particleTransfar_->SetScale({2.2f, 2.2f, 2.2f});
+				particleTransfar_->ChangeMode(BornParticle::MomentMode);
 			}
 		}
 
@@ -513,23 +570,94 @@ void Player::Update() {
 
 	//particleMove_->ChangeMode(BornParticle::Stop);	
 	//particleTransfar_->ChangeMode(BornParticle::Stop);
+	
+	// タイマー更新と地面判定
+	if (springEffectTimer_ > 0.0f) {
+		springEffectTimer_ -= 1.0f / 60.0f;
+		if (springEffectTimer_ <= 0.0f || onGround_) {
+			wasOnSpring_ = false;
+			springEffectTimer_ = 0.0f;
+		}
+	}
 
 	if (worldTransform_.translation_.x != position.x || velocityY_ != 0.0f || worldTransform_.translation_.z != position.z) {
-		particleMove_->SetParticleCount(2);
-		particleMove_->SetFrequency(0.25f);
-
-		if (EnemyContral) {
-			//操っている敵のほうにパーテイクルを出す
-			particleMove_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 2.0f,worldTransform_.translation_.z });
+		if (wasOnSpring_ && springEffectTimer_ > 0.0f) {
+			// バネ解除後は虹色パーティクル
+			// 通常のパーティクルを停止
+			particleMove_->ChangeMode(BornParticle::Stop);
+			
+			// 虹色パーティクルを有効化（横一列に配置）
+			Vector3 basePos = EnemyContral ? 
+				Vector3{worldTransform_.translation_.x, worldTransform_.translation_.y - 2.0f, worldTransform_.translation_.z} :
+				worldTransform_.translation_;
+			
+			// 進行方向に基づいて虹の向きを調整
+			float velocityMagnitude = Length(velocity);
+			Vector3 moveDir = {0.0f, 0.0f, 0.0f};
+			if (velocityMagnitude > 0.01f) {
+				moveDir = Normalize(velocity);
+			}
+			
+			// 進行方向に対して垂直な方向を計算（横方向）
+			Vector3 perpDir = {-moveDir.z, 0.0f, moveDir.x};
+			if (Length(perpDir) < 0.01f) {
+				perpDir = {1.0f, 0.0f, 0.0f}; // デフォルトは横方向
+			}
+			
+			// 赤（左端）
+			particleRainbowRed_->SetParticleCount(2);
+			particleRainbowRed_->SetFrequency(0.08f);
+			particleRainbowRed_->SetTranslate(basePos + perpDir * -1.2f);
+			particleRainbowRed_->SetScale({0.6f, 0.6f, 0.6f});
+			particleRainbowRed_->ChangeMode(BornParticle::TimerMode);
+			
+			// 黄色の代わりに白（左寄り）
+			particleTransfar_->SetParticleCount(2);
+			particleTransfar_->SetFrequency(0.08f);
+			particleTransfar_->SetTranslate(basePos + perpDir * -0.4f);
+			particleTransfar_->SetScale({0.6f, 0.6f, 0.6f});
+			particleTransfar_->ChangeMode(BornParticle::TimerMode);
+			
+			// 緑（右寄り）
+			particleRainbowGreen_->SetParticleCount(2);
+			particleRainbowGreen_->SetFrequency(0.08f);
+			particleRainbowGreen_->SetTranslate(basePos + perpDir * 0.4f);
+			particleRainbowGreen_->SetScale({0.6f, 0.6f, 0.6f});
+			particleRainbowGreen_->ChangeMode(BornParticle::TimerMode);
+			
+			// 青（右端）
+			particleRainbowBlue_->SetParticleCount(2);
+			particleRainbowBlue_->SetFrequency(0.08f);
+			particleRainbowBlue_->SetTranslate(basePos + perpDir * 1.2f);
+			particleRainbowBlue_->SetScale({0.6f, 0.6f, 0.6f});
+			particleRainbowBlue_->ChangeMode(BornParticle::TimerMode);
 		}
 		else {
-			particleMove_->SetTranslate(worldTransform_.translation_);
+			// 通常のパーティクル
+			particleMove_->SetParticleCount(2);
+			particleMove_->SetFrequency(0.25f);
+
+			if (EnemyContral) {
+				//操っている敵のほうにパーテイクルを出す
+				particleMove_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 2.0f,worldTransform_.translation_.z });
+			}
+			else {
+				particleMove_->SetTranslate(worldTransform_.translation_);
+			}
+			particleMove_->ChangeMode(BornParticle::TimerMode);
+			
+			// 虹色パーティクルを停止
+			particleRainbowRed_->ChangeMode(BornParticle::Stop);
+			particleRainbowBlue_->ChangeMode(BornParticle::Stop);
+			particleRainbowGreen_->ChangeMode(BornParticle::Stop);
 		}
-		particleMove_->ChangeMode(BornParticle::TimerMode);
 		isMoving = true;
 	}
 	else {
 		particleMove_->ChangeMode(BornParticle::Stop);
+		particleRainbowRed_->ChangeMode(BornParticle::Stop);
+		particleRainbowBlue_->ChangeMode(BornParticle::Stop);
+		particleRainbowGreen_->ChangeMode(BornParticle::Stop);
 		isMoving = false;
 	}
 
@@ -559,6 +687,9 @@ void Player::Update() {
 	particleMove_->Update();
 	particleTransfar_->Update();
 	particleDeath_->Update();
+	particleRainbowRed_->Update();
+	particleRainbowBlue_->Update();
+	particleRainbowGreen_->Update();
 
 #pragma endregion
 
@@ -839,6 +970,9 @@ void Player::DrawP() {
 	particleMove_->Draw();
 	particleTransfar_->Draw();
 	particleDeath_->Draw();
+	particleRainbowRed_->Draw();
+	particleRainbowBlue_->Draw();
+	particleRainbowGreen_->Draw();
 }
 
 void Player::SetGhostEnemies(const std::vector<GhostEnemy*>& enemies) { ghostEnemies_ = enemies; }
@@ -903,11 +1037,11 @@ void Player::CheckCollisionWithSprings() {
 				// スプリングジャンプの音を再生
 				audio_->SoundPlayWave(JumpSound_, 1.0f); // 通常より大きい音
 
-				// スプリングジャンプパーティクル
-				particleTransfar_->SetParticleCount(30);
-				particleTransfar_->SetFrequency(0.001f);
+				// スプリングジャンプパーティクル（より鮮やかに）
+				particleTransfar_->SetParticleCount(60);  // 30から60に増加
+				particleTransfar_->SetFrequency(0.0005f); // より密度を高く
 				particleTransfar_->SetTranslate(springAABB.min + Vector3{1.0f, 2.0f, 1.0f});
-				particleTransfar_->SetScale({1.5f, 1.5f, 1.5f});
+				particleTransfar_->SetScale({2.5f, 2.5f, 2.5f}); // より大きく
 				particleTransfar_->ChangeMode(BornParticle::MomentMode);
 
 				// カメラシェイク（ジャンプ感を演出）

@@ -197,6 +197,15 @@ private:
 	Particle* particleMove_ = nullptr;
 	Particle* particleTransfar_ = nullptr;
 	Particle* particleDeath_ = nullptr;
+	
+	// 虹色エフェクト用（赤、青、緑）
+	Particle* particleRainbowRed_ = nullptr;
+	Particle* particleRainbowBlue_ = nullptr;
+	Particle* particleRainbowGreen_ = nullptr;
+	
+	// バネから解除した後のフラグ
+	bool wasOnSpring_ = false;
+	float springEffectTimer_ = 0.0f;
 
 	float RotateY = 0.0f;
 
