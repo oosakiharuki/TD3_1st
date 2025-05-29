@@ -41,6 +41,8 @@ void GameClearScene::Update() {
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			gameClearCount_--;
 			if (gameClearCount_ < 1) gameClearCount_ = 1;
+
+			if (gameClearCount_ < 2 && allClear) gameClearCount_ = 2;
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_S)) {
 			gameClearCount_++;

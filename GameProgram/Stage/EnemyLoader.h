@@ -46,6 +46,29 @@ public:
 	const std::vector<CannonEnemy*>& GetCannonEnemyList() const { return cannonEnemies_; }
 	const std::vector<SpringEnemy*>& GetSpringEnemyList() const { return springEnemies_; }
 
+	// CSV保存機能
+	bool SaveEnemyData(const std::string& csvPath);
+
+	// ImGui編集用
+	void UpdateImGui();
+
+	// 現在のCSVファイルパス
+	const std::string& GetCurrentCSVPath() const { return currentCSVPath_; }
+
+	// 敵の動的追加
+	void AddGhostEnemy(const Vector3& position, ColorType color);
+	void AddCannonEnemy(const Vector3& position);
+	void AddSpringEnemy(const Vector3& position);
+
+	// 敵の削除
+	void RemoveGhostEnemy(int index);
+	void RemoveCannonEnemy(int index);
+	void RemoveSpringEnemy(int index);
+
+	// プレイヤー参照を保持
+	void SetPlayer(Player* player) { player_ = player; }
+	void SetObstacles(const std::vector<std::vector<AABB>>& obstacles) { obstacles_ = obstacles; }
+
 private:
 	// 読み込んだ敵データのリスト
 	std::vector<EnemyData> enemyData_;
@@ -61,4 +84,11 @@ private:
 
 	// リソースのクリーンアップ
 	void ClearResources();
+
+	// 現在のCSVファイルパス
+	std::string currentCSVPath_;
+
+	// プレイヤーと障害物の参照
+	Player* player_ = nullptr;
+	std::vector<std::vector<AABB>> obstacles_;
 };

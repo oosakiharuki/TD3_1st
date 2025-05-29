@@ -197,8 +197,24 @@ private:
 	Particle* particleMove_ = nullptr;
 	Particle* particleTransfar_ = nullptr;
 	Particle* particleDeath_ = nullptr;
+	
+	// 虹色エフェクト用（赤、青、緑）
+	Particle* particleRainbowRed_ = nullptr;
+	Particle* particleRainbowBlue_ = nullptr;
+	Particle* particleRainbowGreen_ = nullptr;
+	
+	// バネから解除した後のフラグ
+	bool wasOnSpring_ = false;
+	float springEffectTimer_ = 0.0f;
 
 	float RotateY = 0.0f;
 
 	float deathTimer = 2.0f;
+	
+#ifdef _DEBUG
+	// デバッグ用クリエイティブモード
+	bool isCreativeMode_ = false;  // クリエイティブモードのON/OFF
+	float flySpeed_ = 0.5f;        // 飛行速度
+	Vector3 flyVelocity_ = {0.0f, 0.0f, 0.0f}; // 飛行時の速度
+#endif
 };
