@@ -292,12 +292,12 @@ void UIManager::DrawControlGuide() {
 		return;
 	}
 
-	// 検出されたデバイスに応じたガイドを表示
-	if (detectedDevice_ == InputDeviceType::Keyboard && keyboardGuideSprite_) {
-		keyboardGuideSprite_->Draw();
-	} else if (detectedDevice_ == InputDeviceType::Controller && controllerGuideSprite_) {
-		controllerGuideSprite_->Draw();
-	}
+	//// 検出されたデバイスに応じたガイドを表示
+	//if (detectedDevice_ == InputDeviceType::Keyboard && keyboardGuideSprite_) {
+	//	keyboardGuideSprite_->Draw();
+	//} else if (detectedDevice_ == InputDeviceType::Controller && controllerGuideSprite_) {
+	//	controllerGuideSprite_->Draw();
+	//}
 }
 
 void UIManager::TutorialPos(Vector3 playerPos) {

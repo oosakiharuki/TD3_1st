@@ -298,7 +298,7 @@ void GameScene::Update() {
 		mapLoader_->Update();
 	}
 
-	player_->DrawUI();
+	//player_->DrawUI();
 	skydome_->Update();
 
 	// 　↓　ゴールしたら1と2ステージループするようになってる、切り替え処理2を消すとステージ3に進む
