@@ -26,6 +26,7 @@ public:
     // MapLoader用のメソッド
     Vector3 GetTranslation() const { return worldTransform_.translation_; }
     ColorType GetColorType() const { return colorType; }
+    Vector3 GetSize() const { return size_; }
 private:
     WorldTransform worldTransform_;
 

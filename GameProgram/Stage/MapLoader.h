@@ -117,6 +117,39 @@ public:
 	// MoveTileリストへのアクセス
 	std::vector<MoveTile*>& GetTiles() { return tiles_; }
 
+	// オブジェクトの動的追加・削除
+	void AddKey(const Vector3& position);
+	void AddDoor(const Vector3& position, float rotation = 0.0f);
+	void AddBlock(const Vector3& position, const Vector3& size);
+	void AddTile(const Vector3& position, float speed = 1.0f, float range = 15.0f);
+	void AddGhostBlock(const Vector3& position, ColorType color, const Vector3& size = Vector3(10.0f, 10.0f, 10.0f));
+	void AddGoal(const Vector3& position);
+
+	// オブジェクトの削除
+	void RemoveKey(int index);
+	void RemoveDoor(int index);
+	void RemoveBlock(int index);
+	void RemoveTile(int index);
+	void RemoveGhostBlock(int index);
+
+	// プレイヤーの参照を保持
+	void SetPlayer(Player* player) { player_ = player; }
+
+	// オブジェクト選択機能（マウス入力システム実装後に有効化）
+	// void UpdateObjectSelection(const Vector2& mousePos, Camera* camera);
+	void ClearSelection() { selectedObjectType_ = SelectedObjectType::None; selectedObjectIndex_ = -1; }
+
+	// 選択されたオブジェクトの種類
+	enum class SelectedObjectType {
+		None,
+		Key,
+		Door,
+		Block,
+		Tile,
+		GhostBlock,
+		Goal
+	};
+
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 
@@ -156,4 +189,15 @@ private:
 
 	// 現在のCSVファイルパス
 	std::string currentCSVPath_;
+
+	// プレイヤー参照
+	Player* player_ = nullptr;
+
+	// 選択状態
+	SelectedObjectType selectedObjectType_ = SelectedObjectType::None;
+	int selectedObjectIndex_ = -1;
+
+	// レイキャスト用ヘルパー関数（マウス入力システム実装後に有効化）
+	// bool RayIntersectsAABB(const Vector3& rayOrigin, const Vector3& rayDir, const AABB& aabb, float& distance);
+	// Vector3 ScreenToWorldRay(const Vector2& screenPos, Camera* camera, Vector3& rayOrigin);
 };
