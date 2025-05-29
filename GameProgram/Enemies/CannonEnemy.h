@@ -50,6 +50,9 @@ public:
 		RespownPosition = pos;
 	}
 	
+	// エディター用のメソッド
+	Vector3 GetPosition() const { return position; }
+	
 	// 壊せるブロックのリストを設定
 	void SetBlocks(const std::vector<Block*>& blocks) { blocks_ = blocks; }
 

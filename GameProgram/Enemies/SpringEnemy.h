@@ -27,6 +27,9 @@ public:
 
 	// 位置設定
 	void SetPosition(const Vector3& pos);
+	
+	// エディター用のメソッド
+	Vector3 GetPosition() const { return position; }
 
 	// 衝突判定用AABB
 	AABB GetAABB() const;
