@@ -39,19 +39,21 @@ void Particle::Initialize(std::string textureFile) {
 	this->camera = particleCommon->GetDefaultCamera();
 	
 	//パーティクルの発生源数を増やす
-	const uint32_t MAX_PARTICLE_GROUPS = 1000; // パーティクルグループの最大数
+	const uint32_t MAX_PARTICLE_GROUPS = 100; // パーティクルグループの最大数
 	
 	// スレッドセーフなインクリメント
 	static std::mutex particleNumMutex;
 	{
 		std::lock_guard<std::mutex> lock(particleNumMutex);
-		ParticleNum::number++;
+		
 		// パーティクル番号が上限に達した場合はリセット
 		if (ParticleNum::number >= MAX_PARTICLE_GROUPS) {
 			char errorMsg[256];
 			sprintf_s(errorMsg, "Particle::Initialize - Particle group limit reached (%d). Resetting to 1.\n", MAX_PARTICLE_GROUPS);
 			OutputDebugStringA(errorMsg);
-			ParticleNum::number = 1;
+		}
+		else {
+			ParticleNum::number++;
 		}
 		number = ParticleNum::number;
 	}
@@ -64,6 +66,7 @@ void Particle::Initialize(std::string textureFile) {
 
 	this->fileName = std::to_string(number);
 
+	this->textureFile = textureFile;
 
 	modelData = ParticleManager::GetInstance()->GetModelData(fileName);
 	
@@ -327,8 +330,8 @@ void Particle::Draw() {
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 	// テクスチャが存在するか確認
-	if (!modelData.material.textureFilePath.empty() && TextureManager::GetInstance()->CheckTextureExist(modelData.material.textureFilePath)) {
-		particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath));
+	if (!modelData.material.textureFilePath.empty() && TextureManager::GetInstance()->CheckTextureExist(textureFile)) {
+		particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureFile));
 	} else {
 		// テクスチャが存在しない場合は白いテクスチャを使用するか、スキップ
 		return; // 今回は描画をスキップ

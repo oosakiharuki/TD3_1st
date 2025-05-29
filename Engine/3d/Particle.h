@@ -88,6 +88,7 @@ private:
 
 	
 	std::string fileName;
+	std::string textureFile;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;

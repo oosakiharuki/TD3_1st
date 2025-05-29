@@ -78,7 +78,7 @@ void GameOverScene::Update() {
 
 	//矢印の位置変更
 	arrowPosY = 352 + (138 * (float(gameOverCount_) - 1));
-	Arrow->SetPosition({ 400,arrowPosY });
+	Arrow->SetPosition({ 400 + floatOffset,arrowPosY });
 
 	Arrow->Update();
 

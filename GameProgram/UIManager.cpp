@@ -225,13 +225,14 @@ void UIManager::DrawKeyCount(int remainingKeys, int totalKeys) {
 		currentTotalKeys_ = totalKeys;
 		
 		// 鍵アイコンの位置を再計算（中央揃えにする）
-		float startX = 5.0f; // 15
+		
 		float iconWidth = 30.0f;
 		float iconSpacing = 5.0f;
-		float totalWidth = (iconWidth + iconSpacing) * totalKeys - iconSpacing;
+		float startX = (iconWidth + iconSpacing) * totalKeys - iconSpacing; // 15
+		float totalWidth = 5.0f;
 		
 		for (int i = 0; i < totalKeys; i++) {
-			float xPos = startX + i * (iconWidth + iconSpacing);
+			float xPos = startX - i * (iconWidth + iconSpacing);
 			keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 140 });
 			No_keyIcons_[i]->SetPosition({ xPos, WinApp::kClientHeight - 140 });
 		}
