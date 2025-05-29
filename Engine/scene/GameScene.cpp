@@ -188,11 +188,6 @@ void GameScene::Update() {
 // マウス選択機能は現在無効化されています
 	// TODO: マウス入力システムを実装後に有効化
 
-	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
-		audio_->StopWave(BGMSound);
-		sceneNo = Title;
-	}
-
 	// ポーズ中はUIのみ更新し、ゲーム処理をスキップ
 	if (isPaused_) {
 		uiManager->Update(); // 必要ならポーズ画面のUI更新
@@ -234,16 +229,6 @@ void GameScene::Update() {
 				sceneNo = Select;
 			}
 			Input::GetInstance()->SetStates(state, preState);
-		}
-
-		if (Input::GetInstance()->TriggerKey(DIK_F1)) {
-			audio_->StopWave(BGMSound);
-			sceneNo = GameClear;
-		}
-
-		if (Input::GetInstance()->TriggerKey(DIK_F2)) {
-			audio_->StopWave(BGMSound);
-			sceneNo = GameOver;
 		}
 
 		return;

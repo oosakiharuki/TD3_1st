@@ -69,6 +69,10 @@ void StageSelect::Update() {
 	selectBar->Update();
 	buttonSprite->Update();
 
+	if (Input::GetInstance()->TriggerKey(DIK_ESCAPE) ||
+		((state.Gamepad.wButtons & XINPUT_GAMEPAD_START) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_START))) {
+		sceneNo = Title;
+	}
 
 	//ステージごとのモデル
 	stageObject_->SetModelFile("stage" + std::to_string(stageNum));
