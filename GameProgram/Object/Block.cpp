@@ -60,7 +60,9 @@ void Block::Update() {
 	// パーティクルは常に更新（破壊エフェクトのため）
 	if (particle) {
 		particle->Update();
-		particle->SetScale({ 0.8f,0.8f ,0.8f });
+		// パーティクルのスケールをブロックサイズに合わせる
+		float baseScale = (size_.x + size_.y + size_.z) / 3.0f; // 平均サイズを基準に
+		particle->SetScale({ baseScale * 0.8f, baseScale * 0.8f, baseScale * 0.8f });
 	}
 	
 	// 非アクティブなブロックは以降の処理をスキップ
@@ -185,57 +187,96 @@ void Block::OnCollision() {
 	scaleTimer_ = SCALE_EFFECT_TIME;
 	shakeTimer_ = SHAKE_EFFECT_TIME;
 
-	// HPに応じてエフェクトを変更（控えめに調整）
+	// ブロックサイズに基づいたエフェクト強度の調整
+	float sizeEffect = (size_.x + size_.y + size_.z) / 3.0f;
+	
+	// HPに応じてエフェクトを変更（ブロックサイズも考慮）
 	if (hp <= 1) {
 		// HPが低い時は少し大きめのエフェクト
-		SCALE_INTENSITY = 1.15f;
-		SHAKE_INTENSITY = 0.08f;
+		SCALE_INTENSITY = 1.15f + (sizeEffect * 0.02f);
+		SHAKE_INTENSITY = 0.08f * sizeEffect;
 	}
 	else if (hp <= 2) {
 		// HPが中程度の時は中程度のエフェクト
-		SCALE_INTENSITY = 1.12f;
-		SHAKE_INTENSITY = 0.06f;
+		SCALE_INTENSITY = 1.12f + (sizeEffect * 0.015f);
+		SHAKE_INTENSITY = 0.06f * sizeEffect;
 	}
 	else {
 		// HPが満タンの時は通常のエフェクト
-		SCALE_INTENSITY = 1.1f;
-		SHAKE_INTENSITY = 0.05f;
+		SCALE_INTENSITY = 1.1f + (sizeEffect * 0.01f);
+		SHAKE_INTENSITY = 0.05f * sizeEffect;
 	}
 
+	// ブロックサイズに基づいたスケール係数を計算
+	float sizeMultiplier = (size_.x + size_.y + size_.z) / 3.0f; // 平均サイズ
+	float volumeMultiplier = size_.x * size_.y * size_.z; // 体積に基づく係数
+	
 	// パーティクルエフェクト（HPに応じて段階的に変更）
 	if (hp <= 0) {
 		// 破壊時は最も派手なパーティクル
-		particle->SetParticleCount(50); // 大幅に増加
+		// ブロックサイズに応じてパーティクル数を調整（最小20、最大100）
+		int particleCount = static_cast<int>(20 + (volumeMultiplier * 2.0f));
+		if (particleCount < 20) particleCount = 20;
+		if (particleCount > 100) particleCount = 100;
+		particle->SetParticleCount(particleCount);
+		
 		particle->SetFrequency(0.001f); // より密度を高く
 		particle->ChangeType(ParticleType::Plane);
-		particle->SetScale({2.0f, 2.0f, 2.0f}); // 大きめのパーティクル
-		// 破壊音を再生
-		audio_->SoundPlayWave(breakSound_, 0.8f);
+		
+		// パーティクルスケールもブロックサイズに比例
+		float pScale = sizeMultiplier * 2.0f;
+		particle->SetScale({pScale, pScale, pScale});
+		
+		// 破壊音を再生（大きいブロックほど大きな音）
+		float volume = 0.5f + (sizeMultiplier * 0.3f);
+		if (volume > 1.0f) volume = 1.0f;
+		audio_->SoundPlayWave(breakSound_, volume);
 		// 最後にisActive_をfalseにする
 		isActive_ = false;
 	}
 	else if (hp == 1) {
 		// HP1の時は中程度のパーティクル
-		particle->SetParticleCount(20); // 増加
+		int particleCount = static_cast<int>(10 + (volumeMultiplier * 1.0f));
+		if (particleCount < 10) particleCount = 10;
+		if (particleCount > 40) particleCount = 40;
+		particle->SetParticleCount(particleCount);
+		
 		particle->SetFrequency(0.005f);
 		particle->ChangeType(ParticleType::Normal);
-		particle->SetScale({1.5f, 1.5f, 1.5f});
+		
+		float pScale = sizeMultiplier * 1.5f;
+		particle->SetScale({pScale, pScale, pScale});
 	}
 	else if (hp == 2) {
 		// HP2の時は小さなパーティクル
-		particle->SetParticleCount(10); // 増加
+		int particleCount = static_cast<int>(5 + (volumeMultiplier * 0.5f));
+		if (particleCount < 5) particleCount = 5;
+		if (particleCount > 20) particleCount = 20;
+		particle->SetParticleCount(particleCount);
+		
 		particle->SetFrequency(0.01f);
 		particle->ChangeType(ParticleType::Normal);
-		particle->SetScale({1.2f, 1.2f, 1.2f});
+		
+		float pScale = sizeMultiplier * 1.2f;
+		particle->SetScale({pScale, pScale, pScale});
 	}
 	else {
 		// HP3の時は最小のパーティクル
-		particle->SetParticleCount(5); // 増加
+		int particleCount = static_cast<int>(3 + (volumeMultiplier * 0.3f));
+		if (particleCount < 3) particleCount = 3;
+		if (particleCount > 10) particleCount = 10;
+		particle->SetParticleCount(particleCount);
+		
 		particle->SetFrequency(0.015f);
 		particle->ChangeType(ParticleType::Normal);
-		particle->SetScale({1.0f, 1.0f, 1.0f});
-		// ヒット音を再生
-		audio_->SoundPlayWave(hitSound_, 0.6f);
+		
+		float pScale = sizeMultiplier * 1.0f;
+		particle->SetScale({pScale, pScale, pScale});
+		
+		// ヒット音を再生（サイズに応じた音量）
+		float volume = 0.4f + (sizeMultiplier * 0.2f);
+		if (volume > 0.8f) volume = 0.8f;
+		audio_->SoundPlayWave(hitSound_, volume);
 	}
 
 	// パーティクル位置の設定（セットされていない場合はブロックの位置を使用）
