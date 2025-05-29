@@ -60,9 +60,12 @@ void Block::Update() {
 	// パーティクルは常に更新（破壊エフェクトのため）
 	if (particle) {
 		particle->Update();
-		// パーティクルのスケールをブロックサイズに合わせる
+		// パーティクルのスケールをブロックサイズに合わせる（視界を遮らないように制限）
 		float baseScale = (size_.x + size_.y + size_.z) / 3.0f; // 平均サイズを基準に
-		particle->SetScale({ baseScale * 0.8f, baseScale * 0.8f, baseScale * 0.8f });
+		float pScale = baseScale * 0.6f; // 元の0.8fの75%
+		if (pScale < 0.4f) pScale = 0.4f; // 最小スケール
+		if (pScale > 2.0f) pScale = 2.0f; // 最大スケールを制限
+		particle->SetScale({ pScale, pScale, pScale });
 	}
 	
 	// 非アクティブなブロックは以降の処理をスキップ
@@ -224,7 +227,9 @@ void Block::OnCollision() {
 		particle->ChangeType(ParticleType::Plane);
 		
 		// パーティクルスケールもブロックサイズに比例
-		float pScale = sizeMultiplier * 2.0f;
+		float pScale = sizeMultiplier * 1.5f; // 元の2.0fの75%
+		if (pScale < 0.6f) pScale = 0.6f;  // 最小スケール
+		if (pScale > 3.5f) pScale = 3.5f;  // 最大スケール（視界を遮らないように）
 		particle->SetScale({pScale, pScale, pScale});
 		
 		// 破壊音を再生（大きいブロックほど大きな音）
@@ -244,7 +249,9 @@ void Block::OnCollision() {
 		particle->SetFrequency(0.005f);
 		particle->ChangeType(ParticleType::Normal);
 		
-		float pScale = sizeMultiplier * 1.5f;
+		float pScale = sizeMultiplier * 1.125f; // 元の1.5fの75%
+		if (pScale < 0.5f) pScale = 0.5f;
+		if (pScale > 2.5f) pScale = 2.5f;
 		particle->SetScale({pScale, pScale, pScale});
 	}
 	else if (hp == 2) {
@@ -257,7 +264,9 @@ void Block::OnCollision() {
 		particle->SetFrequency(0.01f);
 		particle->ChangeType(ParticleType::Normal);
 		
-		float pScale = sizeMultiplier * 1.2f;
+		float pScale = sizeMultiplier * 0.9f; // 元の1.2fの75%
+		if (pScale < 0.4f) pScale = 0.4f;
+		if (pScale > 2.0f) pScale = 2.0f;
 		particle->SetScale({pScale, pScale, pScale});
 	}
 	else {
@@ -270,7 +279,9 @@ void Block::OnCollision() {
 		particle->SetFrequency(0.015f);
 		particle->ChangeType(ParticleType::Normal);
 		
-		float pScale = sizeMultiplier * 1.0f;
+		float pScale = sizeMultiplier * 0.75f; // 元の1.0fの75%
+		if (pScale < 0.3f) pScale = 0.3f;
+		if (pScale > 1.5f) pScale = 1.5f;
 		particle->SetScale({pScale, pScale, pScale});
 		
 		// ヒット音を再生（サイズに応じた音量）
