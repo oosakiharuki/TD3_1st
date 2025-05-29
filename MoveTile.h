@@ -51,6 +51,10 @@ public:
 	void SetSpeed(float speed) { moveSpeed_ = speed; }
 	void SetRange(float range) { moveRange_ = range; }
 
+	// プリセット情報
+	void SetIsCustom(bool isCustom) { isCustom_ = isCustom; }
+	bool IsCustom() const { return isCustom_; }
+
 private:
 
 	WorldTransform worldTransform_;
@@ -65,4 +69,5 @@ private:
 	float initialY_ = 92;
 	bool movingUp_ = true; // 上昇中か下降中かを示すフラグ
 	int frameCount_ = 0; // フレームカウント（初期値0）
+	bool isCustom_ = false; // カスタム設定かどうか
 };

@@ -117,6 +117,24 @@ public:
 	// MoveTileリストへのアクセス
 	std::vector<MoveTile*>& GetTiles() { return tiles_; }
 
+	// オブジェクトの動的追加・削除
+	void AddKey(const Vector3& position);
+	void AddDoor(const Vector3& position, float rotation = 0.0f);
+	void AddBlock(const Vector3& position, const Vector3& size);
+	void AddTile(const Vector3& position, float speed = 1.0f, float range = 15.0f);
+	void AddGhostBlock(const Vector3& position, ColorType color, const Vector3& size = Vector3(10.0f, 10.0f, 10.0f));
+	void AddGoal(const Vector3& position);
+
+	// オブジェクトの削除
+	void RemoveKey(int index);
+	void RemoveDoor(int index);
+	void RemoveBlock(int index);
+	void RemoveTile(int index);
+	void RemoveGhostBlock(int index);
+
+	// プレイヤーの参照を保持
+	void SetPlayer(Player* player) { player_ = player; }
+
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 
@@ -156,4 +174,7 @@ private:
 
 	// 現在のCSVファイルパス
 	std::string currentCSVPath_;
+
+	// プレイヤー参照
+	Player* player_ = nullptr;
 };
