@@ -744,6 +744,11 @@ void GameScene::UpdateImGui() {
 	if (mapLoader_) {
 		mapLoader_->UpdateImGui();
 	}
+	
+	// EnemyLoaderのImGui更新を呼び出す
+	if (enemyLoader_) {
+		enemyLoader_->UpdateImGui();
+	}
 #endif
 }
 

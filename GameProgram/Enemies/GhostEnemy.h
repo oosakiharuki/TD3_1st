@@ -56,6 +56,10 @@ public:
 
     ColorType GetColor() { return colorType; }
     void SetColor(ColorType color) { colorType = color; }
+    
+    // エディター用のメソッド
+    Vector3 GetPosition() const { return position; }
+    ColorType GetColorType() const { return colorType; }
 
     // 他のゴーストへの参照を設定
     void SetOtherGhosts(std::vector<GhostEnemy*>* others) { otherGhosts_ = others; }

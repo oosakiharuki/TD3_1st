@@ -201,4 +201,11 @@ private:
 	float RotateY = 0.0f;
 
 	float deathTimer = 2.0f;
+	
+#ifdef _DEBUG
+	// デバッグ用クリエイティブモード
+	bool isCreativeMode_ = false;  // クリエイティブモードのON/OFF
+	float flySpeed_ = 0.5f;        // 飛行速度
+	Vector3 flyVelocity_ = {0.0f, 0.0f, 0.0f}; // 飛行時の速度
+#endif
 };

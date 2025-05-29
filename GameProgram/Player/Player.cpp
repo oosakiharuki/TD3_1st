@@ -102,6 +102,21 @@ void Player::Update() {
 #pragma region 入力処理
 		Input::GetInstance()->GetJoystickState(0, state);
 		Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+		
+#ifdef _DEBUG
+		// F2キーでクリエイティブモード切り替え
+		if (Input::GetInstance()->TriggerKey(DIK_F2)) {
+			isCreativeMode_ = !isCreativeMode_;
+			if (isCreativeMode_) {
+				// クリエイティブモードON：重力を無効化
+				velocityY_ = 0.0f;
+				OutputDebugStringA("Creative Mode: ON\n");
+			} else {
+				// クリエイティブモードOFF：通常の重力に戻す
+				OutputDebugStringA("Creative Mode: OFF\n");
+			}
+		}
+#endif
 
 		// キーボードとGamePad左スティックの入力を合算して移動処理する
 		float keyboardSpeed = 0.55f;
@@ -298,10 +313,49 @@ void Player::Update() {
 #pragma endregion
 
 #pragma region 物理演算と衝突処理
-		// 重力と垂直移動
+#ifdef _DEBUG
+		if (isCreativeMode_) {
+			// クリエイティブモード時の飛行処理
+			float flyUpDown = 0.0f;
+			
+			// キーボード：ShiftとCtrlで上下移動
+			if (Input::GetInstance()->PushKey(DIK_SPACE)) {
+				flyUpDown += flySpeed_;
+			}
+			if (Input::GetInstance()->PushKey(DIK_LSHIFT)) {
+				flyUpDown -= flySpeed_;
+			}
+			
+			// ゲームパッド：RT/LTで上下移動
+			if (Input::GetInstance()->GetJoystickState(0, state)) {
+				// RT（右トリガー）で上昇
+				if (state.Gamepad.bRightTrigger > 0) {
+					flyUpDown += flySpeed_ * (state.Gamepad.bRightTrigger / 255.0f);
+				}
+				// LT（左トリガー）で下降
+				if (state.Gamepad.bLeftTrigger > 0) {
+					flyUpDown -= flySpeed_ * (state.Gamepad.bLeftTrigger / 255.0f);
+				}
+			}
+			
+			// Y軸の速度を設定（重力無効）
+			velocityY_ = flyUpDown;
+			position.y += velocityY_;
+			
+			// 地面判定を常にfalseに
+			onGround_ = false;
+		} else {
+			// 通常モード：重力と垂直移動
+			float gravity = 0.01f;
+			velocityY_ -= gravity;
+			position.y += velocityY_;
+		}
+#else
+		// リリースビルドでは通常の重力処理のみ
 		float gravity = 0.01f;
 		velocityY_ -= gravity;
 		position.y += velocityY_;
+#endif
 	}
 
 	// プレイヤーのAABB更新
@@ -310,19 +364,25 @@ void Player::Update() {
 	playerAABB.max = { position.x + halfW, position.y + halfH, position.z + halfD };
 
 	// 障害物との衝突解決
-	const int maxIterations = 10;
-	int iterations = 0;
-	bool collisionOccurred = false;
-	do {
-		collisionOccurred = false;
-		for (auto& obstacleAABB : obstacleList_) {
-			if (IsCollisionAABB(playerAABB, obstacleAABB)) {
-				ResolveAABBCollision(playerAABB, obstacleAABB, velocityY_, onGround_);
-				collisionOccurred = true;
+#ifdef _DEBUG
+	if (!isCreativeMode_) {
+#endif
+		const int maxIterations = 10;
+		int iterations = 0;
+		bool collisionOccurred = false;
+		do {
+			collisionOccurred = false;
+			for (auto& obstacleAABB : obstacleList_) {
+				if (IsCollisionAABB(playerAABB, obstacleAABB)) {
+					ResolveAABBCollision(playerAABB, obstacleAABB, velocityY_, onGround_);
+					collisionOccurred = true;
+				}
 			}
-		}
-		iterations++;
-	} while (collisionOccurred && iterations < maxIterations);
+			iterations++;
+		} while (collisionOccurred && iterations < maxIterations);
+#ifdef _DEBUG
+	}
+#endif
 #pragma endregion
 
 #pragma region 敵との衝突処理
@@ -552,6 +612,18 @@ void Player::Update() {
 	ImGui::Text("Position Y: %.2f (Fall at: %.2f)", position.y, fallThreshold);
 	ImGui::Text("Vibration Timer: %.2f", vibrationTimer);
 	
+	// クリエイティブモード状態を表示
+	ImGui::Separator();
+	ImGui::TextColored(isCreativeMode_ ? ImVec4(0, 1, 0, 1) : ImVec4(1, 0, 0, 1), 
+		"Creative Mode: %s (Press F2 to toggle)", isCreativeMode_ ? "ON" : "OFF");
+	if (isCreativeMode_) {
+		ImGui::Text("Controls:");
+		ImGui::Text("- Space: Fly Up");
+		ImGui::Text("- Left Shift: Fly Down");
+		ImGui::Text("- RT/LT (Gamepad): Fly Up/Down");
+		ImGui::DragFloat("Fly Speed", &flySpeed_, 0.01f, 0.1f, 2.0f);
+	}
+	
 	// テスト用振動ボタン
 	if (ImGui::Button("Test Vibration")) {
 		// まずコントローラーの状態を確認
@@ -609,6 +681,12 @@ void Player::Update() {
 
 // 落下チェック関数
 void Player::CheckFallOut() {
+#ifdef _DEBUG
+	// クリエイティブモード時は落下判定をスキップ
+	if (isCreativeMode_) {
+		return;
+	}
+#endif
 	// Y座標が閾値を下回った場合
 	if (position.y < fallThreshold && hp > 0) {
 
