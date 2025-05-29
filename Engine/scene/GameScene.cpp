@@ -182,6 +182,9 @@ void GameScene::Update() {
 	// ImGuiの更新
 	UpdateImGui();
 
+// マウス選択機能は現在無効化されています
+	// TODO: マウス入力システムを実装後に有効化
+
 	if (Input::GetInstance()->TriggerKey(DIK_F1)) { //シーンが切り替わる
 		audio_->StopWave(BGMSound);
 		sceneNo = Title;

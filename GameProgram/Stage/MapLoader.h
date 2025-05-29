@@ -135,6 +135,21 @@ public:
 	// プレイヤーの参照を保持
 	void SetPlayer(Player* player) { player_ = player; }
 
+	// オブジェクト選択機能（マウス入力システム実装後に有効化）
+	// void UpdateObjectSelection(const Vector2& mousePos, Camera* camera);
+	void ClearSelection() { selectedObjectType_ = SelectedObjectType::None; selectedObjectIndex_ = -1; }
+
+	// 選択されたオブジェクトの種類
+	enum class SelectedObjectType {
+		None,
+		Key,
+		Door,
+		Block,
+		Tile,
+		GhostBlock,
+		Goal
+	};
+
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 
@@ -177,4 +192,12 @@ private:
 
 	// プレイヤー参照
 	Player* player_ = nullptr;
+
+	// 選択状態
+	SelectedObjectType selectedObjectType_ = SelectedObjectType::None;
+	int selectedObjectIndex_ = -1;
+
+	// レイキャスト用ヘルパー関数（マウス入力システム実装後に有効化）
+	// bool RayIntersectsAABB(const Vector3& rayOrigin, const Vector3& rayDir, const AABB& aabb, float& distance);
+	// Vector3 ScreenToWorldRay(const Vector2& screenPos, Camera* camera, Vector3& rayOrigin);
 };

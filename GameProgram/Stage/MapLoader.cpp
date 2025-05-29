@@ -1,10 +1,29 @@
 #include "MapLoader.h"
 #include <algorithm>
 #include <iostream>
+#include <cfloat>
 #include "ImGuiManager.h"
+#include "math/Matrix4x4.h"
+#include "math/Vector3.h"
+#include "math/MyMath.h"
+#include "3d/Camera.h"
 #ifdef _DEBUG
 #include <windows.h>
 #endif
+
+using namespace MyMath;
+
+// ヘルパー関数：座標変換
+Vector3 TransformCoordinate(const Vector3& v, const Matrix4x4& m) {
+	Vector3 result;
+	float w = v.x * m.m[0][3] + v.y * m.m[1][3] + v.z * m.m[2][3] + m.m[3][3];
+	
+	result.x = (v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0] + m.m[3][0]) / w;
+	result.y = (v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1] + m.m[3][1]) / w;
+	result.z = (v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2] + m.m[3][2]) / w;
+	
+	return result;
+}
 
 MapLoader::MapLoader() {}
 
@@ -663,6 +682,34 @@ void MapLoader::UpdateImGui() {
 #ifdef _DEBUG
 	if (ImGui::Begin("Map Object Editor")) {
 		ImGui::Text("Current CSV: %s", currentCSVPath_.c_str());
+		
+		// 選択中のオブジェクト情報を表示
+		if (selectedObjectType_ != SelectedObjectType::None && selectedObjectIndex_ >= 0) {
+			ImGui::Separator();
+			ImGui::TextColored(ImVec4(1, 1, 0, 1), "Selected Object:");
+			
+			switch (selectedObjectType_) {
+			case SelectedObjectType::Key:
+				ImGui::Text("Type: Key [%d]", selectedObjectIndex_);
+				break;
+			case SelectedObjectType::Door:
+				ImGui::Text("Type: Door [%d]", selectedObjectIndex_);
+				break;
+			case SelectedObjectType::Block:
+				ImGui::Text("Type: Block [%d]", selectedObjectIndex_);
+				break;
+			case SelectedObjectType::Tile:
+				ImGui::Text("Type: Moving Tile [%d]", selectedObjectIndex_);
+				break;
+			case SelectedObjectType::GhostBlock:
+				ImGui::Text("Type: Ghost Block [%d]", selectedObjectIndex_);
+				break;
+			case SelectedObjectType::Goal:
+				ImGui::Text("Type: Goal");
+				break;
+			}
+		}
+		
 		ImGui::Separator();
 
 		// 新規オブジェクト配置UI
@@ -716,11 +763,174 @@ void MapLoader::UpdateImGui() {
 
 		ImGui::Separator();
 
-		// 鍵の編集
-		if (ImGui::CollapsingHeader("Keys")) {
-			for (size_t i = 0; i < keys_.size(); i++) {
-				ImGui::PushID(static_cast<int>(i));
-				if (ImGui::TreeNode(("Key " + std::to_string(i)).c_str())) {
+		// 選択されたオブジェクトの編集
+		if (selectedObjectType_ != SelectedObjectType::None && selectedObjectIndex_ >= 0) {
+			if (ImGui::CollapsingHeader("Edit Selected Object", ImGuiTreeNodeFlags_DefaultOpen)) {
+				switch (selectedObjectType_) {
+				case SelectedObjectType::Key:
+					if (selectedObjectIndex_ < static_cast<int>(keys_.size())) {
+						Vector3 pos = keys_[selectedObjectIndex_]->GetWorldTransform().translation_;
+						Vector3 scale = keys_[selectedObjectIndex_]->GetWorldTransform().scale_;
+						
+						if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+							keys_[selectedObjectIndex_]->GetWorldTransform().translation_ = pos;
+						}
+						if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+							keys_[selectedObjectIndex_]->GetWorldTransform().scale_ = scale;
+						}
+						
+						if (ImGui::Button("Delete Selected")) {
+							RemoveKey(selectedObjectIndex_);
+							ClearSelection();
+						}
+					}
+					break;
+					
+				case SelectedObjectType::Door:
+					if (selectedObjectIndex_ < static_cast<int>(doors_.size())) {
+						Vector3 pos = doors_[selectedObjectIndex_]->GetTranslation();
+						Vector3 scale = doors_[selectedObjectIndex_]->GetScale();
+						Vector3 rotation = doors_[selectedObjectIndex_]->GetRotation();
+						
+						if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+							doors_[selectedObjectIndex_]->SetTranslation(pos);
+						}
+						if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+							doors_[selectedObjectIndex_]->SetScale(scale);
+						}
+						if (ImGui::DragFloat("Rotation Y", &rotation.y, 1.0f, -180.0f, 180.0f)) {
+							doors_[selectedObjectIndex_]->SetRotateY(rotation.y);
+						}
+						
+						if (ImGui::Button("Delete Selected")) {
+							RemoveDoor(selectedObjectIndex_);
+							ClearSelection();
+						}
+					}
+					break;
+					
+				case SelectedObjectType::Block:
+					if (selectedObjectIndex_ < static_cast<int>(blocks_.size())) {
+						Vector3 pos = blocks_[selectedObjectIndex_]->GetTranslation();
+						Vector3 scale = blocks_[selectedObjectIndex_]->GetScale();
+						
+						if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+							blocks_[selectedObjectIndex_]->SetTranslation(pos);
+						}
+						if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 100.0f)) {
+							blocks_[selectedObjectIndex_]->SetScale(scale);
+						}
+						
+						if (ImGui::Button("Delete Selected")) {
+							RemoveBlock(selectedObjectIndex_);
+							ClearSelection();
+						}
+					}
+					break;
+					
+				case SelectedObjectType::Tile:
+					if (selectedObjectIndex_ < static_cast<int>(tiles_.size())) {
+						Vector3 pos = tiles_[selectedObjectIndex_]->GetWorldTransform().translation_;
+						Vector3 scale = tiles_[selectedObjectIndex_]->GetWorldTransform().scale_;
+						
+						if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+							tiles_[selectedObjectIndex_]->GetWorldTransform().translation_ = pos;
+							tiles_[selectedObjectIndex_]->SetInitialY(pos.y);
+						}
+						if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+							tiles_[selectedObjectIndex_]->GetWorldTransform().scale_ = scale;
+						}
+						
+						// MoveTileのパラメータ編集
+						float speed = tiles_[selectedObjectIndex_]->GetSpeed();
+						float range = tiles_[selectedObjectIndex_]->GetRange();
+						float initialY = tiles_[selectedObjectIndex_]->GetInitialY();
+						
+						if (ImGui::DragFloat("Speed", &speed, 0.1f, 0.1f, 10.0f)) {
+							tiles_[selectedObjectIndex_]->SetSpeed(speed);
+							tiles_[selectedObjectIndex_]->SetIsCustom(true);
+						}
+						if (ImGui::DragFloat("Range", &range, 1.0f, 1.0f, 100.0f)) {
+							tiles_[selectedObjectIndex_]->SetRange(range);
+							tiles_[selectedObjectIndex_]->SetIsCustom(true);
+						}
+						if (ImGui::DragFloat("Initial Y", &initialY, 1.0f)) {
+							tiles_[selectedObjectIndex_]->SetInitialY(initialY);
+							tiles_[selectedObjectIndex_]->SetIsCustom(true);
+						}
+						
+						if (ImGui::Button("Delete Selected")) {
+							RemoveTile(selectedObjectIndex_);
+							ClearSelection();
+						}
+					}
+					break;
+					
+				case SelectedObjectType::GhostBlock:
+					if (selectedObjectIndex_ < static_cast<int>(ghostBlocks_.size())) {
+						Vector3 pos = ghostBlocks_[selectedObjectIndex_]->GetTranslation();
+						Vector3 size = ghostBlocks_[selectedObjectIndex_]->GetSize();
+						
+						if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+							ghostBlocks_[selectedObjectIndex_]->SetPosition(pos);
+						}
+						if (ImGui::DragFloat3("Scale", &size.x, 0.1f, 0.1f, 100.0f)) {
+							ghostBlocks_[selectedObjectIndex_]->SetSize(size);
+						}
+						
+						// 色の選択
+						const char* colorNames[] = {"Red", "Blue", "Green"};
+						int currentColor = ghostBlocks_[selectedObjectIndex_]->GetColorType() == ColorType::Red ? 0 :
+										   ghostBlocks_[selectedObjectIndex_]->GetColorType() == ColorType::Blue ? 1 : 2;
+						if (ImGui::Combo("Color", &currentColor, colorNames, 3)) {
+							ColorType newColor = currentColor == 0 ? ColorType::Red :
+												 currentColor == 1 ? ColorType::Blue : ColorType::Green;
+							ghostBlocks_[selectedObjectIndex_]->SetColor(newColor);
+						}
+						
+						if (ImGui::Button("Delete Selected")) {
+							RemoveGhostBlock(selectedObjectIndex_);
+							ClearSelection();
+						}
+					}
+					break;
+					
+				case SelectedObjectType::Goal:
+					if (goal_) {
+						Vector3 pos = goal_->GetWorldTransform().translation_;
+						Vector3 scale = goal_->GetWorldTransform().scale_;
+						
+						if (ImGui::DragFloat3("Position", &pos.x, 1.0f)) {
+							goal_->GetWorldTransform().translation_ = pos;
+						}
+						if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
+							goal_->GetWorldTransform().scale_ = scale;
+						}
+						
+						// ゴールは削除できない（1つしかないため）
+					}
+					break;
+				}
+			}
+		}
+
+		ImGui::Separator();
+
+		// 全オブジェクトリスト（折りたたみ可能）
+		if (ImGui::CollapsingHeader("All Objects")) {
+			// 鍵の編集
+			if (ImGui::CollapsingHeader("Keys")) {
+				for (size_t i = 0; i < keys_.size(); i++) {
+					ImGui::PushID(static_cast<int>(i));
+					
+					// クリックで選択
+					bool isSelected = (selectedObjectType_ == SelectedObjectType::Key && selectedObjectIndex_ == static_cast<int>(i));
+					if (ImGui::Selectable(("Key " + std::to_string(i)).c_str(), isSelected)) {
+						selectedObjectType_ = SelectedObjectType::Key;
+						selectedObjectIndex_ = static_cast<int>(i);
+					}
+					
+					if (ImGui::TreeNode(("Key " + std::to_string(i)).c_str())) {
 					Vector3 pos = keys_[i]->GetWorldTransform().translation_;
 					Vector3 scale = keys_[i]->GetWorldTransform().scale_;
 					
@@ -749,6 +959,14 @@ void MapLoader::UpdateImGui() {
 		if (ImGui::CollapsingHeader("Doors")) {
 			for (size_t i = 0; i < doors_.size(); i++) {
 				ImGui::PushID(static_cast<int>(i + 1000));
+				
+				// クリックで選択
+				bool isSelected = (selectedObjectType_ == SelectedObjectType::Door && selectedObjectIndex_ == static_cast<int>(i));
+				if (ImGui::Selectable(("Door " + std::to_string(i)).c_str(), isSelected)) {
+					selectedObjectType_ = SelectedObjectType::Door;
+					selectedObjectIndex_ = static_cast<int>(i);
+				}
+				
 				if (ImGui::TreeNode(("Door " + std::to_string(i)).c_str())) {
 					Vector3 pos = doors_[i]->GetTranslation();
 					Vector3 scale = doors_[i]->GetScale();
@@ -782,6 +1000,14 @@ void MapLoader::UpdateImGui() {
 		if (ImGui::CollapsingHeader("Blocks")) {
 			for (size_t i = 0; i < blocks_.size(); i++) {
 				ImGui::PushID(static_cast<int>(i + 2000));
+				
+				// クリックで選択
+				bool isSelected = (selectedObjectType_ == SelectedObjectType::Block && selectedObjectIndex_ == static_cast<int>(i));
+				if (ImGui::Selectable(("Block " + std::to_string(i)).c_str(), isSelected)) {
+					selectedObjectType_ = SelectedObjectType::Block;
+					selectedObjectIndex_ = static_cast<int>(i);
+				}
+				
 				if (ImGui::TreeNode(("Block " + std::to_string(i)).c_str())) {
 					Vector3 pos = blocks_[i]->GetTranslation();
 					Vector3 scale = blocks_[i]->GetScale();
@@ -811,6 +1037,14 @@ void MapLoader::UpdateImGui() {
 		if (ImGui::CollapsingHeader("Moving Tiles")) {
 			for (size_t i = 0; i < tiles_.size(); i++) {
 				ImGui::PushID(static_cast<int>(i + 3000));
+				
+				// クリックで選択
+				bool isSelected = (selectedObjectType_ == SelectedObjectType::Tile && selectedObjectIndex_ == static_cast<int>(i));
+				if (ImGui::Selectable(("Tile " + std::to_string(i)).c_str(), isSelected)) {
+					selectedObjectType_ = SelectedObjectType::Tile;
+					selectedObjectIndex_ = static_cast<int>(i);
+				}
+				
 				if (ImGui::TreeNode(("Tile " + std::to_string(i)).c_str())) {
 					Vector3 pos = tiles_[i]->GetWorldTransform().translation_;
 					Vector3 scale = tiles_[i]->GetWorldTransform().scale_;
@@ -860,6 +1094,14 @@ void MapLoader::UpdateImGui() {
 		if (ImGui::CollapsingHeader("Ghost Blocks")) {
 			for (size_t i = 0; i < ghostBlocks_.size(); i++) {
 				ImGui::PushID(static_cast<int>(i + 4000));
+				
+				// クリックで選択
+				bool isSelected = (selectedObjectType_ == SelectedObjectType::GhostBlock && selectedObjectIndex_ == static_cast<int>(i));
+				if (ImGui::Selectable(("Ghost Block " + std::to_string(i)).c_str(), isSelected)) {
+					selectedObjectType_ = SelectedObjectType::GhostBlock;
+					selectedObjectIndex_ = static_cast<int>(i);
+				}
+				
 				if (ImGui::TreeNode(("Ghost Block " + std::to_string(i)).c_str())) {
 					Vector3 pos = ghostBlocks_[i]->GetTranslation();
 					Vector3 size = ghostBlocks_[i]->GetSize();
@@ -898,6 +1140,13 @@ void MapLoader::UpdateImGui() {
 
 		// ゴールの編集
 		if (goal_ && ImGui::CollapsingHeader("Goal")) {
+			// クリックで選択
+			bool isSelected = (selectedObjectType_ == SelectedObjectType::Goal);
+			if (ImGui::Selectable("Goal", isSelected)) {
+				selectedObjectType_ = SelectedObjectType::Goal;
+				selectedObjectIndex_ = 0;
+			}
+			
 			Vector3 pos = goal_->GetWorldTransform().translation_;
 			Vector3 scale = goal_->GetWorldTransform().scale_;
 			
@@ -907,6 +1156,7 @@ void MapLoader::UpdateImGui() {
 			if (ImGui::DragFloat3("Scale", &scale.x, 0.1f, 0.1f, 10.0f)) {
 				goal_->GetWorldTransform().scale_ = scale;
 			}
+		}
 		}
 
 		ImGui::Separator();
@@ -920,7 +1170,7 @@ void MapLoader::UpdateImGui() {
 			}
 		}
 		
-		ImGui::End();
+	ImGui::End();
 	}
 #endif
 }
@@ -1038,3 +1288,162 @@ void MapLoader::RemoveGhostBlock(int index) {
 		ghostBlocks_.erase(ghostBlocks_.begin() + index);
 	}
 }
+
+// レイキャスト実装（マウス入力システム実装後に有効化）
+/*
+bool MapLoader::RayIntersectsAABB(const Vector3& rayOrigin, const Vector3& rayDir, const AABB& aabb, float& distance) {
+	float tMin = 0.0f;
+	float tMax = FLT_MAX;
+	
+	for (int i = 0; i < 3; i++) {
+		float origin = (i == 0) ? rayOrigin.x : (i == 1) ? rayOrigin.y : rayOrigin.z;
+		float dir = (i == 0) ? rayDir.x : (i == 1) ? rayDir.y : rayDir.z;
+		float aabbMin = (i == 0) ? aabb.min.x : (i == 1) ? aabb.min.y : aabb.min.z;
+		float aabbMax = (i == 0) ? aabb.max.x : (i == 1) ? aabb.max.y : aabb.max.z;
+		
+		if (fabs(dir) < 0.00001f) {
+			if (origin < aabbMin || origin > aabbMax) {
+				return false;
+			}
+		} else {
+			float t1 = (aabbMin - origin) / dir;
+			float t2 = (aabbMax - origin) / dir;
+			
+			if (t1 > t2) {
+				float temp = t1;
+				t1 = t2;
+				t2 = temp;
+			}
+			
+			tMin = fmax(tMin, t1);
+			tMax = fmin(tMax, t2);
+			
+			if (tMin > tMax) {
+				return false;
+			}
+		}
+	}
+	
+	distance = tMin;
+	return true;
+}
+
+Vector3 MapLoader::ScreenToWorldRay(const Vector2& screenPos, Camera* camera, Vector3& rayOrigin) {
+	// ビューポート情報（仮定：画面全体）
+	float viewportWidth = 1280.0f;  // ウィンドウサイズに合わせて調整
+	float viewportHeight = 720.0f;
+	
+	// NDC座標に変換
+	float ndcX = (2.0f * screenPos.x) / viewportWidth - 1.0f;
+	float ndcY = 1.0f - (2.0f * screenPos.y) / viewportHeight;
+	
+	// カメラの逆行列を取得
+	Matrix4x4 viewMatrix = camera->GetViewMatrix();
+	Matrix4x4 projMatrix = camera->GetProjMatrix();
+	Matrix4x4 viewProjInv = Inverse(viewMatrix * projMatrix);
+	
+	// 近い点と遠い点を計算
+	Vector3 nearPoint = TransformCoordinate(Vector3(ndcX, ndcY, 0.0f), viewProjInv);
+	Vector3 farPoint = TransformCoordinate(Vector3(ndcX, ndcY, 1.0f), viewProjInv);
+	
+	// レイの方向を計算
+	Vector3 rayDir = Normalize(farPoint - nearPoint);
+	
+	// レイの原点はカメラ位置
+	rayOrigin = camera->GetTranslate();
+	
+	return rayDir;
+}
+
+void MapLoader::UpdateObjectSelection(const Vector2& mousePos, Camera* camera) {
+	Vector3 rayOrigin;
+	Vector3 rayDir = ScreenToWorldRay(mousePos, camera, rayOrigin);
+	
+	float closestDistance = FLT_MAX;
+	SelectedObjectType closestType = SelectedObjectType::None;
+	int closestIndex = -1;
+	
+	// 各オブジェクトタイプをチェック
+	// Keys
+	for (size_t i = 0; i < keys_.size(); i++) {
+		float distance;
+		AABB aabb = keys_[i]->GetAABB();
+		if (RayIntersectsAABB(rayOrigin, rayDir, aabb, distance)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestType = SelectedObjectType::Key;
+				closestIndex = static_cast<int>(i);
+			}
+		}
+	}
+	
+	// Doors
+	for (size_t i = 0; i < doors_.size(); i++) {
+		float distance;
+		AABB aabb = doors_[i]->GetAABB();
+		if (RayIntersectsAABB(rayOrigin, rayDir, aabb, distance)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestType = SelectedObjectType::Door;
+				closestIndex = static_cast<int>(i);
+			}
+		}
+	}
+	
+	// Blocks
+	for (size_t i = 0; i < blocks_.size(); i++) {
+		float distance;
+		AABB aabb = blocks_[i]->GetAABB();
+		if (RayIntersectsAABB(rayOrigin, rayDir, aabb, distance)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestType = SelectedObjectType::Block;
+				closestIndex = static_cast<int>(i);
+			}
+		}
+	}
+	
+	// Tiles
+	for (size_t i = 0; i < tiles_.size(); i++) {
+		float distance;
+		AABB aabb = tiles_[i]->GetAABB();
+		if (RayIntersectsAABB(rayOrigin, rayDir, aabb, distance)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestType = SelectedObjectType::Tile;
+				closestIndex = static_cast<int>(i);
+			}
+		}
+	}
+	
+	// GhostBlocks
+	for (size_t i = 0; i < ghostBlocks_.size(); i++) {
+		float distance;
+		AABB aabb = ghostBlocks_[i]->GetAABB();
+		if (RayIntersectsAABB(rayOrigin, rayDir, aabb, distance)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestType = SelectedObjectType::GhostBlock;
+				closestIndex = static_cast<int>(i);
+			}
+		}
+	}
+	
+	// Goal
+	if (goal_) {
+		float distance;
+		AABB aabb = goal_->GetAABB();
+		if (RayIntersectsAABB(rayOrigin, rayDir, aabb, distance)) {
+			if (distance < closestDistance) {
+				closestDistance = distance;
+				closestType = SelectedObjectType::Goal;
+				closestIndex = 0;
+			}
+		}
+	}
+	
+	// 最も近いオブジェクトを選択
+	selectedObjectType_ = closestType;
+	selectedObjectIndex_ = closestIndex;
+}
+*/
