@@ -141,6 +141,9 @@ void GameScene::Initialize() {
 		bgmFile = "sound/stage4.wav"; // stage5.wavがない場合の代替
 		break;
 	case 5:
+		bgmFile = "sound/stage5.wav"; // stage7.wavがない場合の代替
+		break;
+	case 6:
 		bgmFile = "sound/stage6.wav"; // stage7.wavがない場合の代替
 		break;
 	default:
@@ -460,6 +463,9 @@ void GameScene::ChangeStage(int nextStage) {
 		bgmFile = "sound/stage4.wav"; // stage5.wavがない場合の代替
 		break;
 	case 5:
+		bgmFile = "sound/stage5.wav"; // stage7.wavがない場合の代替
+		break;
+	case 6:
 		bgmFile = "sound/stage6.wav"; // stage7.wavがない場合の代替
 		break;
 	default:
