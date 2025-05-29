@@ -18,7 +18,6 @@ void GameScene::Finalize() {
 	delete uiManager;
 
 	allObstacles_.clear();
-	ParticleManager::GetInstance()->ParticleListReset();//パーテイクルのコンテナをリセット
 }
 
 void GameScene::Initialize() {

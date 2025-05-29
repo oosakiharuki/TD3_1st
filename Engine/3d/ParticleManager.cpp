@@ -164,11 +164,6 @@ std::list<Particles> ParticleManager::GetParticle(const std::string filePath) {
 	return particleG.particles;
 }
 
-void ParticleManager::ParticleListReset() {
-	particleGroups.clear();
-}
-
-
 //void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType type) {
 //	ParticleGroup& particleG = particleGroups[name];
 //

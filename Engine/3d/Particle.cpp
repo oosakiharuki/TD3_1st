@@ -64,6 +64,7 @@ void Particle::Initialize(std::string textureFile) {
 
 	this->fileName = std::to_string(number);
 
+	this->textureFile = textureFile;
 
 	modelData = ParticleManager::GetInstance()->GetModelData(fileName);
 	
@@ -327,8 +328,8 @@ void Particle::Draw() {
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 	// テクスチャが存在するか確認
-	if (!modelData.material.textureFilePath.empty() && TextureManager::GetInstance()->CheckTextureExist(modelData.material.textureFilePath)) {
-		particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath));
+	if (!modelData.material.textureFilePath.empty() && TextureManager::GetInstance()->CheckTextureExist(textureFile)) {
+		particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureFile));
 	} else {
 		// テクスチャが存在しない場合は白いテクスチャを使用するか、スキップ
 		return; // 今回は描画をスキップ
