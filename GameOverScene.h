@@ -11,10 +11,16 @@ public:
 	void Finalize() override;
 
 private:
-	Sprite* gameOverContinue;
-	Sprite* gameOverTitle;
+	Sprite* gameOver;
+	Sprite* Arrow;
+	float arrowPosY = 0.0f;
+	bool stopSteck = false;
+	bool allClear = false;
+
 	XINPUT_STATE state = {}, preState = {}; // 初期化を追加	
 
 	int gameOverCount_ = 1;
 	bool isDecision = false;
+
+	float animationTime_ = 0.0f;
 };
