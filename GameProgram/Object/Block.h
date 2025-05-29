@@ -29,6 +29,18 @@ public:
 	// HPを取得するメソッド
 	uint32_t GetHP() const { return hp; }
 
+	// MapLoader用のメソッド
+	Vector3 GetTranslation() const { return worldTransform.translation_; }
+	void SetTranslation(const Vector3& translation) { 
+		worldTransform.translation_ = translation;
+		originalPosition_ = translation;
+	}
+	Vector3 GetScale() const { return size_; }
+	void SetScale(const Vector3& scale) { 
+		size_ = scale;
+		SetSize(scale);
+	}
+
 private:
 	WorldTransform worldTransform;
 	Camera* viewProjection_ = nullptr;

@@ -745,6 +745,11 @@ void GameScene::UpdateImGui() {
 	// Block, Key, GhostBlock, Enemy/GhostEnemy, CannonEnemy, SpringEnemy, Player, Goal
 
 	ImGui::End();
+
+	// MapLoaderのImGui更新を呼び出す
+	if (mapLoader_) {
+		mapLoader_->UpdateImGui();
+	}
 #endif
 }
 

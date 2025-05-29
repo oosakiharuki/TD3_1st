@@ -105,6 +105,18 @@ public:
 	// Goalへのアクセス（追加）
 	Goal* GetGoal() const { return goal_ ? goal_ : nullptr; }
 
+	// CSV保存機能
+	bool SaveMapData(const std::string& csvPath);
+
+	// ImGui編集用
+	void UpdateImGui();
+
+	// 現在のCSVファイルパス
+	const std::string& GetCurrentCSVPath() const { return currentCSVPath_; }
+
+	// MoveTileリストへのアクセス
+	std::vector<MoveTile*>& GetTiles() { return tiles_; }
+
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 
@@ -141,4 +153,7 @@ private:
 
 	// リソースのクリーンアップ
 	void ClearResources();
+
+	// 現在のCSVファイルパス
+	std::string currentCSVPath_;
 };

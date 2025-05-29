@@ -37,6 +37,10 @@ public:
 		worldTransform_.translation_ = position;
 	}
 
+	// MapLoader用のメソッド
+	Object3d* GetObject() { return model_; }
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
+
 private:
 	WorldTransform worldTransform_;
 	Object3d* model_ = nullptr;
