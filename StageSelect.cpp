@@ -136,7 +136,7 @@ void StageSelect::Update() {
 		}
 
 	//ステージの数字が大きいほうに進む
-	if (isPlus && stageNum < 5 && steackCount <= 0) {
+	if (isPlus && stageNum < 6 && steackCount <= 0) {
 		stageNum += 1;
 		steackCount = steackMax;
 	}

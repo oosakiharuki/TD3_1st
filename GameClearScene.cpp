@@ -60,7 +60,11 @@ void GameClearScene::Update() {
 	}
 
 	if (FadeManager::GetInstance()->IsFadeComplete() && isDecision) {
-		if (gameClearCount_ == 1) {
+		
+		if (GameData::selectedStage == 6) {
+			sceneNo = Select;
+		}
+		else if (gameClearCount_ == 1) {
 			//次のステージに移動
 			GameData::selectedStage++;
 			sceneNo = Game;

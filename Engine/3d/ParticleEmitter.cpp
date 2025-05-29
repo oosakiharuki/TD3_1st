@@ -39,10 +39,10 @@ Particles ParticleEmitter::MakeNewParticle(std::mt19937& randomEngine, const Emi
 Particles ParticleEmitter::MakeNewParticlePlane(std::mt19937& randomEngine, const Vector3& translate) {
 	//random
 	std::uniform_real_distribution<float> distRotate(-std::numbers::pi_v<float>, std::numbers::pi_v<float>);
-	std::uniform_real_distribution<float> distScale(2.5f, 4.5f);
+	std::uniform_real_distribution<float> distScale(4.5f, 6.5f);
 
 	Particles particle;
-	particle.transform.scale = { 0.05f,distScale(randomEngine),1.0f };
+	particle.transform.scale = { 0.1f,distScale(randomEngine),1.0f };
 	particle.transform.rotate = { 0.0f,0.0f,distRotate(randomEngine) };
 
 	particle.transform.translate = translate;

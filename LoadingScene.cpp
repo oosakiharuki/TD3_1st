@@ -149,7 +149,7 @@ void LoadingScene::PrepareResourceQueue() {
     
     // Low: ステージモデル、装飾
     std::vector<std::string> lowPriorityModels = {
-        "stage0", "stage1", "stage2", "stage3", "stage4", "stage5",
+        "stage0", "stage1", "stage2", "stage3", "stage4", "stage5","stage6",
         "space", "sky"
     };
     ResourceManager::GetInstance()->QueueResources(lowPriorityModels, ResourceType::Model, ResourcePriority::Low);
