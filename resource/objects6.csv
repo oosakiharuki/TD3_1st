@@ -1,6 +1,6 @@
 36,27,11,key
--29,11,-30,colorWall,Red,2,2,2
--26,11,-30,colorWall,Red,2,4,2
--14.4,9.267,-27.0,door
--10,40,49.25,colorWall,Red,7,3,5
-7,39,49.5,goal
+-14.66,9.267,-27.5,door,0
+-29,11,-30,colorwall,red,2,2,2
+-26,11,-30,colorwall,red,2,4,2
+-10,40,49.25,colorwall,red,7,3,5
+7,38.7724,49.5,goal
