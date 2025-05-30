@@ -277,6 +277,7 @@ void CannonEnemy::PlayerFire() {
 	bullets_.push_back(newBullet);
 
 	// 発射音を再生
+	audio_->StopWave(bomSounds_[currentBomSoundIndex_]);
 	audio_->SoundPlayWave(bomSounds_[currentBomSoundIndex_], 0.4f, false);
 
 
