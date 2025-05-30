@@ -665,7 +665,7 @@ void Player::Update() {
 
 
 	if (collisionEnemy) {
-		particleTransfar_->SetParticleCount(10);
+		particleTransfar_->SetParticleCount(50);
 		particleTransfar_->SetTranslate({ worldTransform_.translation_.x,worldTransform_.translation_.y - 1.0f,worldTransform_.translation_.z });
 		particleTransfar_->ChangeMode(BornParticle::MomentMode);
 	}

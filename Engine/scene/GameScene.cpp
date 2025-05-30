@@ -198,32 +198,45 @@ void GameScene::Update() {
 		if (Input::GetInstance()->GetJoystickState(0, state)) {
 			float y = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f;
 
-			if (y >= 0.7f) {
+			if (y >= 0.7f && !stopSteck) {
 				pauseCount_--;
-				audio_->StopWave(selectSound_);
-				audio_->SoundPlayWave(selectSound_, 0.8f);
-				if (pauseCount_ < 1) pauseCount_ = 1;
-			}
+				stopSteck = true;
 
-			if (y <= -0.7f) {
+				if (pauseCount_ < 1) pauseCount_ = 1;
+				else {
+					audio_->StopWave(selectSound_);
+					audio_->SoundPlayWave(selectSound_, 0.8f);
+				}
+			}
+			else if (y <= -0.7f && !stopSteck) {
 				pauseCount_++;
-				audio_->StopWave(selectSound_);
-				audio_->SoundPlayWave(selectSound_, 0.8f);
+				stopSteck = true;
 				if (pauseCount_ > 2) pauseCount_ = 2;
+				else {
+					audio_->StopWave(selectSound_);
+					audio_->SoundPlayWave(selectSound_, 0.8f);
+				}
+			}
+			else if (y < 0.7f && y > -0.7f) {
+				stopSteck = false;
 			}
 		}
 
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			pauseCount_--;
-			audio_->StopWave(selectSound_);
-			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (pauseCount_ < 1) pauseCount_ = 1;
+			else {
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
+			}
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_S)) {
 			pauseCount_++;
-			audio_->StopWave(selectSound_);
-			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (pauseCount_ > 2) pauseCount_ = 2;
+			else {
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
+			}
 		}
 
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE) ||

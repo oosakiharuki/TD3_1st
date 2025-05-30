@@ -91,6 +91,7 @@ private:
 	int pauseCount_ = 1;
 	//SE
 	SoundData selectSound_;
+	bool stopSteck = false;
 
 	// 入力関連
 	float longPress = 1.0f;

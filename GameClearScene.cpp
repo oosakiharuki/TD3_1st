@@ -44,17 +44,20 @@ void GameClearScene::Update() {
 		//キーボード操作
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			gameClearCount_--;
-			audio_->StopWave(selectSound_);
-			audio_->SoundPlayWave(selectSound_, 0.8f);
-			if (gameClearCount_ < 1) gameClearCount_ = 1;
-
 			if (gameClearCount_ < 2 && allClear) gameClearCount_ = 2;
+			else if (gameClearCount_ < 1) gameClearCount_ = 1;
+			else {
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
+			}		
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_S)) {
 			gameClearCount_++;
-			audio_->StopWave(selectSound_);
-			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (gameClearCount_ > 3) gameClearCount_ = 3;
+			else {
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
+			}
 		}
 
 		//コントローラ操作
@@ -63,19 +66,22 @@ void GameClearScene::Update() {
 
 			if (y >= 0.7f && !stopSteck) {
 				gameClearCount_--;
-				stopSteck = true;
-				audio_->StopWave(selectSound_);
-				audio_->SoundPlayWave(selectSound_, 0.8f);
-				if (gameClearCount_ < 1) gameClearCount_ = 1;
-				
+				stopSteck = true;			
 				if (gameClearCount_ < 2 && allClear) gameClearCount_ = 2;
+				else if (gameClearCount_ < 1) gameClearCount_ = 1;
+				else {
+					audio_->StopWave(selectSound_);
+					audio_->SoundPlayWave(selectSound_, 0.8f);
+				}
 			}
 			else if (y <= -0.7f && !stopSteck) {
 				gameClearCount_++;
 				stopSteck = true;
-				audio_->StopWave(selectSound_);
-				audio_->SoundPlayWave(selectSound_, 0.8f);
 				if (gameClearCount_ > 3) gameClearCount_ = 3;
+				else {
+					audio_->StopWave(selectSound_);
+					audio_->SoundPlayWave(selectSound_, 0.8f);
+				}
 			}
 			else if(y < 0.7f && y > -0.7f){
 				stopSteck = false;
