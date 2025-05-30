@@ -9,6 +9,11 @@ void GameOverScene::Initialize() {
 	Arrow->Initialize("scene/arrow.png");
 	Arrow->SetPosition({ 400,352 });
 
+	// オーディオ初期化
+	audio_ = Audio::GetInstance();
+	selectSound_ = audio_->LoadWave("sound/select.wav");
+	decisionSound_ = audio_->LoadWave("sound/decision.wav");
+
 	//切り替え時長押しにならないように
 	state = Input::GetInstance()->GetState();
 	preState = Input::GetInstance()->GetPreState();
@@ -23,10 +28,14 @@ void GameOverScene::Update() {
 		//キーボード操作
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			gameOverCount_--;
+			audio_->StopWave(selectSound_);
+			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (gameOverCount_ < 1) gameOverCount_ = 1;
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_S)) {
 			gameOverCount_++;
+			audio_->StopWave(selectSound_);
+			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (gameOverCount_ > 3) gameOverCount_ = 3;
 		}
 
@@ -37,11 +46,15 @@ void GameOverScene::Update() {
 			if (y >= 0.7f && !stopSteck) {
 				gameOverCount_--;
 				stopSteck = true;
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
 				if (gameOverCount_ < 1) gameOverCount_ = 1;
 			}
 			else if (y <= -0.7f && !stopSteck) {
 				gameOverCount_++;
 				stopSteck = true;
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
 				if (gameOverCount_ > 3) gameOverCount_ = 3;
 			}
 			else if (y < 0.7f && y > -0.7f) {
@@ -52,6 +65,7 @@ void GameOverScene::Update() {
 		if ((Input::GetInstance()->TriggerKey(DIK_SPACE) ||
 			((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)))) {
 			isDecision = true;
+			audio_->SoundPlayWave(decisionSound_, 0.8f);
 			FadeManager::GetInstance()->StartFadeOut(0.03f);
 		}
 	}

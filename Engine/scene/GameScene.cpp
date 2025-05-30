@@ -121,7 +121,10 @@ void GameScene::Initialize() {
 
 	// 現在のステージに応じたBGM読み込みと再生
 	audio_ = Audio::GetInstance();
-	
+
+	//ポーズのSE
+	selectSound_ = audio_->LoadWave("sound/select.wav");
+
 	// BGMファイル名の作成
 	std::string bgmFile;
 	
@@ -197,21 +200,29 @@ void GameScene::Update() {
 
 			if (y >= 0.7f) {
 				pauseCount_--;
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
 				if (pauseCount_ < 1) pauseCount_ = 1;
 			}
 
 			if (y <= -0.7f) {
 				pauseCount_++;
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
 				if (pauseCount_ > 2) pauseCount_ = 2;
 			}
 		}
 
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			pauseCount_--;
+			audio_->StopWave(selectSound_);
+			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (pauseCount_ < 1) pauseCount_ = 1;
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_S)) {
 			pauseCount_++;
+			audio_->StopWave(selectSound_);
+			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (pauseCount_ > 2) pauseCount_ = 2;
 		}
 

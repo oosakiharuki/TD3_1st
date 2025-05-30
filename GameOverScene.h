@@ -22,5 +22,10 @@ private:
 	int gameOverCount_ = 1;
 	bool isDecision = false;
 
+	//SE
+	Audio* audio_ = nullptr;
+	SoundData selectSound_;
+	SoundData decisionSound_;
+
 	float animationTime_ = 0.0f;
 };

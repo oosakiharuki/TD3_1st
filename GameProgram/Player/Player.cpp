@@ -210,6 +210,7 @@ void Player::Update() {
 
 #pragma endregion
 
+#ifdef _DEBUG
 #pragma region 状態切替
 		// 状態切替
 		if (Input::GetInstance()->TriggerKey(DIK_1)) {
@@ -222,6 +223,7 @@ void Player::Update() {
 			currentState = State::Ghost;
 		}
 #pragma endregion
+#endif
 
 #pragma region カメラ操作
 		// コントローラとキーボード両方で回さないようにするフラグ

@@ -7,6 +7,8 @@
 #include "ModelManager.h"
 #include "Object3d.h"
 
+#include "Audio.h"
+
 class StageSelect : public IScene {
 public:
 	void Initialize();
@@ -40,6 +42,11 @@ private:
 	Vector3 cameraPosition = { -0.8f,1.5f,-4.0f };
 	Vector3 cameraRotate = { 0.35f,0,0 };
 	
+	//SE
+	Audio* audio_ = nullptr;
+	SoundData selectSound_;
+	SoundData decisionSound_;
+
 	///決定した時
 	bool isDecision = false;
 };

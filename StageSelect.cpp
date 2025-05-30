@@ -51,6 +51,10 @@ void StageSelect::Initialize() {
 
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera_);
 
+	// オーディオ初期化
+	audio_ = Audio::GetInstance();
+	selectSound_ = audio_->LoadWave("sound/select.wav");
+	decisionSound_ = audio_->LoadWave("sound/decision.wav");
 
 	//ステージの全体像
 	stageObject_ = new Object3d();
@@ -143,12 +147,16 @@ void StageSelect::Update() {
 	if (isPlus && stageNum < 6 && steackCount <= 0) {
 		stageNum += 1;
 		steackCount = steackMax;
+		audio_->StopWave(selectSound_);
+		audio_->SoundPlayWave(selectSound_, 0.8f);
 	}
 	
 	//ステージの数字が小さいほうに進む
 	if (isMinus && stageNum > 0 && steackCount <= 0) {
 		stageNum -= 1;
 		steackCount = steackMax;
+		audio_->StopWave(selectSound_);
+		audio_->SoundPlayWave(selectSound_, 0.8f);
 	}
 
 		stageNumber->SetTextureLT({ selectLT * stageNum,0 });
@@ -158,6 +166,7 @@ void StageSelect::Update() {
 			((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A))) && !isDecision) {
 			// フェードアウト開始
 			FadeManager::GetInstance()->StartFadeOut(0.03f);
+			audio_->SoundPlayWave(decisionSound_, 0.8f);
 			isDecision = true;
 		}
 	}

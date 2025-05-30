@@ -89,6 +89,8 @@ private:
 	bool isOver = false;
 	bool isPaused_ = false;
 	int pauseCount_ = 1;
+	//SE
+	SoundData selectSound_;
 
 	// 入力関連
 	float longPress = 1.0f;

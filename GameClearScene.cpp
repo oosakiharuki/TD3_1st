@@ -24,6 +24,10 @@ void GameClearScene::Initialize() {
 	Arrow->Initialize("scene/arrow.png");
 	Arrow->SetPosition({ 400,352 });
 
+	// オーディオ初期化
+	audio_ = Audio::GetInstance();
+	selectSound_ = audio_->LoadWave("sound/select.wav");
+	decisionSound_ = audio_->LoadWave("sound/decision.wav");
 
 	//切り替え時長押しにならないように
 	state = Input::GetInstance()->GetState();
@@ -40,12 +44,16 @@ void GameClearScene::Update() {
 		//キーボード操作
 		if (Input::GetInstance()->TriggerKey(DIK_W)) {
 			gameClearCount_--;
+			audio_->StopWave(selectSound_);
+			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (gameClearCount_ < 1) gameClearCount_ = 1;
 
 			if (gameClearCount_ < 2 && allClear) gameClearCount_ = 2;
 		}
 		if (Input::GetInstance()->TriggerKey(DIK_S)) {
 			gameClearCount_++;
+			audio_->StopWave(selectSound_);
+			audio_->SoundPlayWave(selectSound_, 0.8f);
 			if (gameClearCount_ > 3) gameClearCount_ = 3;
 		}
 
@@ -56,6 +64,8 @@ void GameClearScene::Update() {
 			if (y >= 0.7f && !stopSteck) {
 				gameClearCount_--;
 				stopSteck = true;
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
 				if (gameClearCount_ < 1) gameClearCount_ = 1;
 				
 				if (gameClearCount_ < 2 && allClear) gameClearCount_ = 2;
@@ -63,6 +73,8 @@ void GameClearScene::Update() {
 			else if (y <= -0.7f && !stopSteck) {
 				gameClearCount_++;
 				stopSteck = true;
+				audio_->StopWave(selectSound_);
+				audio_->SoundPlayWave(selectSound_, 0.8f);
 				if (gameClearCount_ > 3) gameClearCount_ = 3;
 			}
 			else if(y < 0.7f && y > -0.7f){
@@ -73,6 +85,7 @@ void GameClearScene::Update() {
 		if ((Input::GetInstance()->TriggerKey(DIK_SPACE) ||
 			((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) && !(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)))) {
 			isDecision = true;
+			audio_->SoundPlayWave(decisionSound_, 0.8f);
 			FadeManager::GetInstance()->StartFadeOut(0.03f);
 		}
 	}
