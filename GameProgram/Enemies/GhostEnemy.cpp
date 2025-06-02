@@ -491,6 +491,14 @@ AABB GhostEnemy::GetAABB() const {
 	AABB enemyAABB;
 	enemyAABB.min = { worldTransform_.translation_.x - halfW, worldTransform_.translation_.y - halfH, worldTransform_.translation_.z - halfD };
 	enemyAABB.max = { worldTransform_.translation_.x + halfW, worldTransform_.translation_.y + halfH, worldTransform_.translation_.z + halfD };
+	
+	//プレイヤーが乗り移っている時
+	if (isPlayer) {
+		//絶対当たらないところ(落下判定より下)に移動
+		enemyAABB.min = { worldTransform_.translation_.x - halfW, worldTransform_.translation_.y - 70, worldTransform_.translation_.z - halfD };
+		enemyAABB.max = { worldTransform_.translation_.x + halfW, worldTransform_.translation_.y - 71, worldTransform_.translation_.z + halfD };
+	}
+	
 	return enemyAABB;
 }
 

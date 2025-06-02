@@ -42,38 +42,6 @@ void SpringEnemy::SetPosition(const Vector3& pos) {
 void SpringEnemy::Update() {
 	const float deltaTime = 1.0f / 60.0f;
 
-	// --- 攻撃のロジック ---
-	if (cooldownTimer_ > 0.0f) {
-		cooldownTimer_ -= 1.0f / 60.0f; // 毎フレーム減少（60FPS）
-	}
-	else if (attackTimer_ <= 0.0f && player_) {
-		Vector3 playerPos = player_->GetWorldPosition();
-		Vector3 myPos = worldTransform_.translation_;
-
-		float dx = playerPos.x - myPos.x;
-		float dy = playerPos.y - myPos.y;
-		float dz = playerPos.z - myPos.z;
-		float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-
-		if (distance <= attackRadius_) {
-			isAttacking_ = true;
-			attackTimer_ = attackDuration_;
-			cooldownTimer_ = attackCooldown_; // クールタイム開始！
-
-			player_->TakeDamage();
-		}
-	}
-
-	// --- 回転アニメーション ---
-	if (attackTimer_ > 0.0f) {
-		attackTimer_ -= 1.0f / 60.0f;
-		worldTransform_.rotation_.y += rotationSpeed_;
-	}
-	else {
-		isAttacking_ = false; // 攻撃終了
-		worldTransform_.rotation_.y = 0.0f;
-	}
-
 
 	// スタン状態管理
 	if (isStan) {
@@ -85,6 +53,37 @@ void SpringEnemy::Update() {
 	}
 
 	if (!isPlayer) {
+		// --- 攻撃のロジック ---
+		if (cooldownTimer_ > 0.0f) {
+			cooldownTimer_ -= 1.0f / 60.0f; // 毎フレーム減少（60FPS）
+		}
+		else if (attackTimer_ <= 0.0f && player_) {
+			Vector3 playerPos = player_->GetWorldPosition();
+			Vector3 myPos = worldTransform_.translation_;
+
+			float dx = playerPos.x - myPos.x;
+			float dy = playerPos.y - myPos.y;
+			float dz = playerPos.z - myPos.z;
+			float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+
+			if (distance <= attackRadius_) {
+				isAttacking_ = true;
+				attackTimer_ = attackDuration_;
+				cooldownTimer_ = attackCooldown_; // クールタイム開始！
+
+				player_->TakeDamage();
+			}
+		}
+
+		// --- 回転アニメーション ---
+		if (attackTimer_ > 0.0f) {
+			attackTimer_ -= 1.0f / 60.0f;
+			worldTransform_.rotation_.y += rotationSpeed_;
+		}
+		else {
+			isAttacking_ = false; // 攻撃終了
+			worldTransform_.rotation_.y = 0.0f;
+		}
 		// 重力処理
 		float gravity = 0.01f;
 		velocityY_ -= gravity;
@@ -111,7 +110,7 @@ void SpringEnemy::Update() {
 			}
 		}
 
-		// 大砲と壊せるブロックの衝突チェック
+		// バネと壊せるブロックの衝突チェック
 		for (Block* block : blocks_) {
 			// ブロックがアクティブな場合のみ判定
 			if (block->IsActive()) {
@@ -126,7 +125,7 @@ void SpringEnemy::Update() {
 		position.x = (enemyAABB.min.x + enemyAABB.max.x) * 0.5f;
 		position.y = (enemyAABB.min.y + enemyAABB.max.y) * 0.5f;
 		position.z = (enemyAABB.min.z + enemyAABB.max.z) * 0.5f;
-		
+
 		// 落下判定用
 		const float fallThreshold = -60.0f;
 
@@ -184,6 +183,14 @@ AABB SpringEnemy::GetAABB() const {
 	AABB enemyAABB;
 	enemyAABB.min = {worldTransform_.translation_.x - halfW, worldTransform_.translation_.y - halfH, worldTransform_.translation_.z - halfD};
 	enemyAABB.max = {worldTransform_.translation_.x + halfW, worldTransform_.translation_.y + halfH, worldTransform_.translation_.z + halfD};
+	
+	//プレイヤーが乗り移っている時
+	if (isPlayer) {
+		//絶対当たらないところ(落下判定より下)に移動
+		enemyAABB.min = { worldTransform_.translation_.x - halfW, worldTransform_.translation_.y - 70, worldTransform_.translation_.z - halfD };
+		enemyAABB.max = { worldTransform_.translation_.x + halfW, worldTransform_.translation_.y - 71, worldTransform_.translation_.z + halfD };
+	}
+
 	return enemyAABB;
 }
 
