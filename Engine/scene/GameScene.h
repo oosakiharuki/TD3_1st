@@ -16,7 +16,6 @@
 
 // ゲームオブジェクト
 #include "Player.h"
-#include "Enemy.h"
 #include "CannonEnemy.h"
 #include "SpringEnemy.h"
 #include "Block.h"
