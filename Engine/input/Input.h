@@ -22,9 +22,19 @@ public:
 	bool PushKey(BYTE keyNumber);
 	bool TriggerKey(BYTE keyNumber);
 
-	bool GetJoyStickState(uint32_t num,XINPUT_STATE& state);
+	bool GetJoystickState(uint32_t num,XINPUT_STATE& state);
 	bool GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state);
 
+	// 振動機能を追加
+	void SetVibration(uint32_t num, float leftMotor, float rightMotor);
+	void StopVibration(uint32_t num);
+
+	//ボタン情報の移行する
+	XINPUT_STATE GetState() { return copyState_; }
+	XINPUT_STATE GetPreState() { return copyPreState_; }
+
+	//前のシーンのボタン情報の取得
+	void SetStates(XINPUT_STATE state, XINPUT_STATE preState);
 
 private:
 	ComPtr<IDirectInputDevice8> keyboard;
@@ -43,4 +53,7 @@ private:
 	static uint32_t kSRVIndexTop;
 	
 	XINPUT_STATE prevState = {};
+
+	XINPUT_STATE copyState_ = {};
+	XINPUT_STATE copyPreState_ = {};
 };

@@ -20,11 +20,11 @@ ParticleManager* ParticleManager::GetInstance() {
 void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager) {
 	particleCommon = ParticleCommon::GetInstance(); 
 	this->srvManager = srvManager;
-	particleCommon->Initialize(dxCommon);
+	//particleCommon->Initialize(dxCommon);
 }
 
 void ParticleManager::Finalize() {
-	particleCommon->Finalize();
+	//particleCommon->Finalize();
 	delete instance;
 	instance = nullptr;
 }
@@ -33,6 +33,9 @@ void ParticleManager::Finalize() {
 void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath) {
 	//読み込み済み
 	if (particleGroups.contains(name)) {
+		char debugMsg[256];
+		sprintf_s(debugMsg, "ParticleManager::CreateParticleGroup - Group '%s' already exists, skipping\n", name.c_str());
+		OutputDebugStringA(debugMsg);
 		return;
 	}
 
@@ -52,10 +55,24 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleG.modelData.vertices.push_back({ {-1.0f,-1.0f,0.0f,1.0f},{1.0f,1.0f},{0.0f,0.0f,1.0f} });
 
 	particleG.modelData.material.textureFilePath = textureFilePath;
+	
+	// デバッグ情報を追加
+	char debugMsg[256];
+	sprintf_s(debugMsg, "ParticleManager::CreateParticleGroup - Creating group '%s' with texture: %s\n", name.c_str(), textureFilePath.c_str());
+	OutputDebugStringA(debugMsg);
 
 
 	particleG.resource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(ParticleForGPU) * particleG.kNumInstance);
-
+	
+	// リソース作成のエラーチェック
+	if (!particleG.resource) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "ParticleManager::CreateParticleGroup - Failed to create buffer resource for particle group '%s'\n", name.c_str());
+		OutputDebugStringA(errorMsg);
+		// エラー時はパーティクルグループを削除
+		particleGroups.erase(name);
+		return;
+	}
 
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -87,12 +104,32 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 D3D12_GPU_DESCRIPTOR_HANDLE  ParticleManager::GetSrvHandleGPU(const std::string filePath) {
 	assert(srvManager->Max());
 
+	// パーティクルグループが存在するか確認
+	if (particleGroups.find(filePath) == particleGroups.end()) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "ParticleManager::GetSrvHandleGPU - Particle group '%s' not found\n", filePath.c_str());
+		OutputDebugStringA(errorMsg);
+		// 空のハンドルを返す
+		D3D12_GPU_DESCRIPTOR_HANDLE emptyHandle = {};
+		return emptyHandle;
+	}
+
 	ParticleGroup& particleG = particleGroups[filePath];
 	return particleG.srvHandleGPU;
 }
 
 ModelData ParticleManager::GetModelData(const std::string filePath) {
 	assert(srvManager->Max());
+
+	// パーティクルグループが存在するか確認
+	if (particleGroups.find(filePath) == particleGroups.end()) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "ParticleManager::GetModelData - Particle group '%s' not found\n", filePath.c_str());
+		OutputDebugStringA(errorMsg);
+		// 空のモデルデータを返す
+		ModelData emptyData = {};
+		return emptyData;
+	}
 
 	ParticleGroup& particleG = particleGroups[filePath];
 	return particleG.modelData;
@@ -108,6 +145,14 @@ std::string ParticleManager::GetTextureHandle(const std::string filePath) {
 Microsoft::WRL::ComPtr<ID3D12Resource> ParticleManager::GetResource(const std::string filePath) {
 	assert(srvManager->Max());
 
+	// パーティクルグループが存在するか確認
+	if (particleGroups.find(filePath) == particleGroups.end()) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "ParticleManager::GetResource - Particle group '%s' not found\n", filePath.c_str());
+		OutputDebugStringA(errorMsg);
+		return nullptr;
+	}
+
 	ParticleGroup& particleG = particleGroups[filePath];
 	return particleG.resource;
 }
@@ -119,20 +164,18 @@ std::list<Particles> ParticleManager::GetParticle(const std::string filePath) {
 	return particleG.particles;
 }
 
-
-
-void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
-	ParticleGroup& particleG = particleGroups[name];
-
-
-	emitter.transform.translate = position;
-	emitter.count = count;
-
-	//
-	std::random_device seedGenerator;
-	std::mt19937 randomEngine(seedGenerator());
-
-	particleG.particles = particleEmit.MakeEmit(emitter, randomEngine);
-	//emitter.frequencyTime -= emitter.frequency;
-	
-}
+//void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count, ParticleType type) {
+//	ParticleGroup& particleG = particleGroups[name];
+//
+//
+//	emitter.transform.translate = position;
+//	emitter.count = count;
+//
+//	//
+//	std::random_device seedGenerator;
+//	std::mt19937 randomEngine(seedGenerator());
+//
+//	particleG.particles = ParticleEmitter::GetInstance()->MakeEmit(emitter, randomEngine, type);
+//	//emitter.frequencyTime -= emitter.frequency;
+//	
+//}

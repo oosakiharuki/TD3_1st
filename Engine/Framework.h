@@ -14,6 +14,8 @@
 #include "ImGuiManager.h"
 #include "D3DResorceLeakChecker.h"
 
+#include "Audio.h"
+#include "FadeManager.h"
 
 class Framework{
 public:
@@ -36,6 +38,8 @@ private:
 	Object3dCommon* object3dCommon = nullptr;
 	ModelCommon* modelCommon = nullptr;
 	ParticleCommon* particleCommon = nullptr;
+
+	Audio* audio_;
 
 	bool isRequst = false;
 };

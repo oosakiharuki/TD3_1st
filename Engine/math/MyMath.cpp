@@ -1,4 +1,7 @@
 #include "MyMath.h"
+#include <iostream>
+#include <cmath>
+#include <numbers>
 
 namespace MyMath {
 
@@ -34,6 +37,30 @@ namespace MyMath {
 		return result;
 	}
 
+	Vector3 operator+(const Vector3& v, const float f) {
+		Vector3 result;
+		result.x = v.x + f;
+		result.y = v.y + f;
+		result.z = v.z + f;
+		return result;
+	}
+
+	Vector3 operator+(const float f, const Vector3& v) {
+		return v + f;
+	}
+
+	Vector3 operator-(const Vector3& v, const float f) {
+		Vector3 result;
+		result.x = v.x - f;
+		result.y = v.y - f;
+		result.z = v.z - f;
+		return result;
+	}
+
+	Vector3 operator-(const float f, const Vector3& v) {
+		return v - f;
+	}
+
 	Vector3 operator*(const Vector3& v, const float f) {
 		Vector3 result;
 		result.x = v.x * f;
@@ -44,6 +71,18 @@ namespace MyMath {
 
 	Vector3 operator*(const float f, const Vector3& v) {
 		return v * f;
+	}
+
+	Vector3 operator/(const Vector3& v, const float f) {
+		Vector3 result;
+		result.x = v.x / f;
+		result.y = v.y / f;
+		result.z = v.z / f;
+		return result;
+	}
+
+	Vector3 operator/(const float f, const Vector3& v) {
+		return v / f;
 	}
 
 	Vector3& operator+=(Vector3& v1, const Vector3& v2) {
@@ -213,8 +252,43 @@ namespace MyMath {
 		return result;
 	}
 
+	// 座標変換
+	//Vector3 TransformNormal(const Vector3& vector, const Matrix4x4& matrix) {
+	//	Vector3 result;
+	//	result.x = matrix.m[0][0] * vector.x + matrix.m[0][1] * vector.y + matrix.m[0][2] * vector.z + matrix.m[0][3];
+	//	result.y = matrix.m[1][0] * vector.x + matrix.m[1][1] * vector.y + matrix.m[1][2] * vector.z + matrix.m[1][3];
+	//	result.z = matrix.m[2][0] * vector.x + matrix.m[2][1] * vector.y + matrix.m[2][2] * vector.z + matrix.m[2][3];
 
+	//	return result;
+	//}
 
+	Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
+		Vector3 result{ v.x * m.m[0][0] + v.y * m.m[1][0] + v.z * m.m[2][0], v.x * m.m[0][1] + v.y * m.m[1][1] + v.z * m.m[2][1], v.x * m.m[0][2] + v.y * m.m[1][2] + v.z * m.m[2][2] };
+		return result;
+	}
+
+	float Length(const Vector3& v) {
+		float result;
+		result = (float)sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+		return result;
+	}
+
+	float LeapShortAngle(float a, float b, float t)
+	{
+		float result;
+
+		float diff = b - a;
+
+		result = (float)std::fmod(diff, 2 * std::numbers::pi_v<float>);
+
+		if (result >= std::numbers::pi_v<float>)
+			result = (float)std::fmod(-2 * std::numbers::pi_v<float>, result);
+
+		if (result <= -std::numbers::pi_v<float>)
+			result = (float)std::fmod(2 * std::numbers::pi_v<float>, result);
+
+		return a + result * t;
+	}
 
 
 

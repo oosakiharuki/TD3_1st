@@ -428,6 +428,12 @@ Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileShader(
 }
 
 Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateBufferResource(size_t sizeInBytes) {
+	// デバイスの有効性チェック
+	if (!device) {
+		OutputDebugStringA("DirectXCommon::CreateBufferResource - Device is null\n");
+		return nullptr;
+	}
+	
 	//VertexResource
 	//頂点シェーダを作る
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
@@ -448,7 +454,22 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateBufferResource(size_
 	//実際に頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = nullptr;
 	HRESULT hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexResource));
-	assert(SUCCEEDED(hr));
+	
+	if (FAILED(hr)) {
+		// エラーの詳細情報を出力
+		char errorMsg[256];
+		sprintf_s(errorMsg, "DirectXCommon::CreateBufferResource - Failed to create buffer resource. HRESULT: 0x%08X, Size: %zu bytes\n", hr, sizeInBytes);
+		OutputDebugStringA(errorMsg);
+		
+		// デバイスロストの可能性をチェック
+		if (hr == DXGI_ERROR_DEVICE_REMOVED) {
+			HRESULT removedReason = device->GetDeviceRemovedReason();
+			sprintf_s(errorMsg, "Device was removed. Reason: 0x%08X\n", removedReason);
+			OutputDebugStringA(errorMsg);
+		}
+		
+		return nullptr;
+	}
 
 	return vertexResource;
 }
@@ -456,11 +477,31 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateBufferResource(size_
 
 
 Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(const DirectX::TexMetadata& metadata) {
+	// デバイスの有効性チェック
+	if (!device) {
+		OutputDebugStringA("DirectXCommon::CreateTextureResource - Device is null\n");
+		return nullptr;
+	}
+
+	// メタデータの検証
+	if (metadata.width == 0 || metadata.height == 0) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "DirectXCommon::CreateTextureResource - Invalid texture dimensions: width=%zu, height=%zu\n", 
+			metadata.width, metadata.height);
+		OutputDebugStringA(errorMsg);
+		return nullptr;
+	}
+	if (metadata.mipLevels == 0) {
+		char errorMsg[256];
+		sprintf_s(errorMsg, "DirectXCommon::CreateTextureResource - Invalid mip levels: %zu\n", metadata.mipLevels);
+		OutputDebugStringA(errorMsg);
+		return nullptr;
+	}
 
 	D3D12_RESOURCE_DESC resourceDesc{};
 	resourceDesc.Width = UINT(metadata.width);//幅
 	resourceDesc.Height = UINT(metadata.height);//高さ
-	resourceDesc.MipLevels = UINT16(metadata.miscFlags);//数
+	resourceDesc.MipLevels = UINT16(metadata.mipLevels);//数
 	resourceDesc.DepthOrArraySize = UINT(metadata.arraySize);//奥行き　Textureの配置数
 	resourceDesc.Format = metadata.format;//format
 	resourceDesc.SampleDesc.Count = 1;//サンプリングカウント(1固定)
@@ -484,7 +525,29 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(cons
 		nullptr,
 		IID_PPV_ARGS(&resource)
 	);
-	assert(SUCCEEDED(hr));
+	
+	if (FAILED(hr)) {
+		// エラーの詳細情報を出力
+		char errorMsg[512];
+		sprintf_s(errorMsg, "DirectXCommon::CreateTextureResource - Failed to create texture resource.\n"
+			"HRESULT: 0x%08X\n"
+			"Width: %u, Height: %u, MipLevels: %u, ArraySize: %u\n"
+			"Format: %d, Dimension: %d\n", 
+			hr, 
+			UINT(metadata.width), UINT(metadata.height), UINT16(metadata.mipLevels), UINT(metadata.arraySize),
+			metadata.format, metadata.dimension);
+		OutputDebugStringA(errorMsg);
+		
+		// デバイスロストの可能性をチェック
+		if (hr == DXGI_ERROR_DEVICE_REMOVED) {
+			HRESULT removedReason = device->GetDeviceRemovedReason();
+			sprintf_s(errorMsg, "Device was removed. Reason: 0x%08X\n", removedReason);
+			OutputDebugStringA(errorMsg);
+		}
+		
+		return nullptr;
+	}
+	
 	return resource;
 
 }

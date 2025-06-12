@@ -72,9 +72,9 @@ bool Input::TriggerKey(BYTE keyNumber) {
 	return false;
 }
 
-bool Input::GetJoyStickState(uint32_t num, XINPUT_STATE& state) {
+bool Input::GetJoystickState(uint32_t num, XINPUT_STATE& state) {
 	DWORD dwResult;
-
+	
 	prevState = state;
 
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
@@ -99,7 +99,7 @@ bool Input::GetJoyStickState(uint32_t num, XINPUT_STATE& state) {
 
 bool Input::GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state) {
 	DWORD dwResult;
-
+	
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 
 	// Simply get the state of the controller from XInput.
@@ -122,4 +122,23 @@ bool Input::GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state) {
 	}
 
 	return false;
+}
+
+//次のシーンにボタン情報を移行する
+void Input::SetStates(XINPUT_STATE state, XINPUT_STATE preState) {
+	copyState_ = state;
+	copyPreState_ = preState;
+}
+
+// 振動機能の実装
+void Input::SetVibration(uint32_t num, float leftMotor, float rightMotor) {
+	XINPUT_VIBRATION vibration;
+	vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * 65535.0f);
+	vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * 65535.0f);
+	XInputSetState(num, &vibration);
+}
+
+void Input::StopVibration(uint32_t num) {
+	XINPUT_VIBRATION vibration = { 0, 0 };
+	XInputSetState(num, &vibration);
 }

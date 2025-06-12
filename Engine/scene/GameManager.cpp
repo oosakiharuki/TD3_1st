@@ -1,10 +1,11 @@
 #include "GameManager.h"
 
 GameManager::GameManager() {
-	sceneArr_[Title] = new TitleScene();
+	// 最初はローディングシーンから開始
+	sceneArr_[Loading] = new LoadingScene();
 
 	prevSceneNo_ = 0;
-	currentSceneNo_ = Title;
+	currentSceneNo_ = Loading;
 }
 
 GameManager::~GameManager() {
@@ -25,8 +26,20 @@ void GameManager::SceneChange(int prev, int current) {
 	case Title:
 		sceneArr_[current] = new TitleScene();
 		break;
+	case Loading:
+		sceneArr_[current] = new LoadingScene(); // 新しいローディングシーン
+		break;
+	case Select:
+		sceneArr_[current] = new StageSelect();
+		break;
 	case Game:
 		sceneArr_[current] = new GameScene();
+		break;
+	case GameClear:
+		sceneArr_[current] = new GameClearScene();
+		break;
+	case GameOver:
+		sceneArr_[current] = new GameOverScene();
 		break;
 	}
 }
@@ -39,8 +52,16 @@ void GameManager::Update() {
 	prevSceneNo_ = currentSceneNo_;
 	currentSceneNo_ = sceneArr_[currentSceneNo_]->GetSceneNo();
 
+	// シーン遷移が発生した場合
 	if (prevSceneNo_ != currentSceneNo_) {
-		SceneChange(prevSceneNo_,currentSceneNo_);
+		// ローディングからの遷移以外ではフェード処理を行う
+		// Loadingシーンからの遷移は、LoadingScene内で独自にフェード処理を行っているため
+		if (prevSceneNo_ != Loading) {
+			 //フェードアウト・インを行う
+			FadeManager::GetInstance()->StartFadeIn(0.03f);
+		}
+
+		SceneChange(prevSceneNo_, currentSceneNo_);
 		sceneArr_[currentSceneNo_]->Initialize();
 	}
 
