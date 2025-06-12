@@ -36,9 +36,6 @@
     <ClCompile Include="GameProgram\Object\Door.cpp">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClCompile>
-    <ClCompile Include="GameProgram\Enemies\Enemy.cpp">
-      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
-    </ClCompile>
     <ClCompile Include="GameProgram\Enemies\CannonEnemy.cpp">
       <Filter>ソース ファイル\GameProgram\Enemies</Filter>
     </ClCompile>
@@ -84,16 +81,13 @@
     <ClCompile Include="GameProgram\Object\SkyDome.cpp">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClCompile>
-    <ClCompile Include="GameProgram\Stage\MapChip.cpp">
-      <Filter>ソース ファイル\GameProgram\Stage</Filter>
-    </ClCompile>
     <ClCompile Include="GameProgram\Stage\MapLoader.cpp">
       <Filter>ソース ファイル\GameProgram\Stage</Filter>
     </ClCompile>
     <ClCompile Include="GameProgram\Stage\StageManager.cpp">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClCompile>
-    <ClCompile Include="MoveTile.cpp">
+    <ClCompile Include="GameProgram\Object\MoveTile.cpp">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClCompile>
     <ClCompile Include="GameProgram\Enemies\SpringEnemy.cpp">
@@ -171,20 +165,26 @@
     <ClCompile Include="GameProgram\UIManager.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClCompile>
-    <ClCompile Include="LoadingScene.cpp">
+    <ClCompile Include="Engine\scene\LoadingScene.cpp">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClCompile>
-    <ClCompile Include="GameOverScene.cpp">
+    <ClCompile Include="Engine\scene\GameOverScene.cpp">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClCompile>
-    <ClCompile Include="GameClearScene.cpp">
+    <ClCompile Include="Engine\scene\GameClearScene.cpp">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClCompile>
-    <ClCompile Include="StageSelect.cpp">
+    <ClCompile Include="Engine\scene\StageSelect.cpp">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClCompile>
-    <ClCompile Include="FadeManager.cpp">
+    <ClCompile Include="Engine\scene\FadeManager.cpp">
       <Filter>ソース ファイル\GameProgram</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\3d\PerformanceMonitor.cpp">
+      <Filter>ソース ファイル\Engine\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\3d\ResourceManager.cpp">
+      <Filter>ソース ファイル\Engine\3d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -211,9 +211,6 @@
     </ClInclude>
     <ClInclude Include="GameProgram\Object\Door.h">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="GameProgram\Enemies\Enemy.h">
-      <Filter>ソース ファイル\GameProgram\Enemies</Filter>
     </ClInclude>
     <ClInclude Include="GameProgram\Stage\EnemyLoader.h">
       <Filter>ソース ファイル\GameProgram\Stage</Filter>
@@ -272,16 +269,13 @@
     <ClInclude Include="GameProgram\Object\SkyDome.h">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClInclude>
-    <ClInclude Include="GameProgram\Stage\MapChip.h">
-      <Filter>ソース ファイル\GameProgram\Stage</Filter>
-    </ClInclude>
     <ClInclude Include="GameProgram\Stage\MapLoader.h">
       <Filter>ソース ファイル\GameProgram\Stage</Filter>
     </ClInclude>
     <ClInclude Include="GameProgram\Stage\StageManager.h">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="MoveTile.h">
+    <ClInclude Include="GameProgram\Object\MoveTile.h">
       <Filter>ソース ファイル\GameProgram\Object</Filter>
     </ClInclude>
     <ClInclude Include="GameProgram\Enemies\SpringEnemy.h">
@@ -356,27 +350,35 @@
     <ClInclude Include="GameProgram\UIManager.h">
       <Filter>ソース ファイル\GameProgram</Filter>
     </ClInclude>
-    <ClInclude Include="LoadingScene.h">
+    <ClInclude Include="Engine\scene\LoadingScene.h">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameOverScene.h">
+    <ClInclude Include="Engine\scene\GameOverScene.h">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameClearScene.h">
+    <ClInclude Include="Engine\scene\GameClearScene.h">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="StageSelect.h">
+    <ClInclude Include="Engine\scene\StageSelect.h">
       <Filter>ソース ファイル\Engine\scene</Filter>
     </ClInclude>
-    <ClInclude Include="GameData.h" />
     <ClInclude Include="Engine\Framework.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\ParticleNumber.h">
       <Filter>ソース ファイル\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="FadeManager.h">
+    <ClInclude Include="Engine\scene\FadeManager.h">
       <Filter>ソース ファイル\GameProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="GameProgram\GameData.h">
+      <Filter>ソース ファイル\GameProgram</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\3d\PerformanceMonitor.h">
+      <Filter>ソース ファイル\Engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\3d\ResourceManager.h">
+      <Filter>ソース ファイル\Engine\3d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
